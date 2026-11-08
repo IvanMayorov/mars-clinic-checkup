@@ -151,6 +151,31 @@ body.intro #flowHead,body.intro .page-foot{display:none}
 .counts b{color:var(--ink);font-weight:700}
 .hl{list-style:none;margin:26px 0 0;padding:22px 0 0;border-top:1px dashed var(--line);display:grid;gap:8px;align-content:start;font-size:15.5px}
 .hl .plus{color:var(--muted);font-size:14px}
+/* вход карточек программ: текст со стаггером, линия рисуется слева направо; только при переходе на шаг (.view) */
+@media (prefers-reduced-motion:no-preference){
+  .view .pcard{--c:0}
+  .view .pcard:nth-child(2){--c:1}
+  .view .pcard:nth-child(3){--c:2}
+  .view .pcard .p-top{--d:0}
+  .view .pcard .price{--d:1}
+  .view .pcard .meter{--d:2}
+  .view .pcard .counts{--d:4}
+  .view .pcard .hl{--d:5}
+  .view .pcard .hl li:nth-child(1){--d:6}
+  .view .pcard .hl li:nth-child(2){--d:7}
+  .view .pcard .hl li:nth-child(3){--d:8}
+  .view .pcard .hl li:nth-child(4){--d:9}
+  .view .pcard .hl li:nth-child(5){--d:10}
+  .view .pcard .hl li:nth-child(6){--d:11}
+  .view .pcard .p-link{--d:12}
+  .view .pcard :is(.p-top,.price,.counts,.hl li,.p-link){animation:cardText .55s var(--ease) backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+  .view .pcard .meter{animation:lineScan .9s cubic-bezier(.65,0,.2,1) backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+  .view .pcard .hl{animation:hlLine .5s linear backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+}
+@media (prefers-reduced-motion:no-preference) and (max-width:860px){ .view .pcard:nth-child(n){--c:0} }
+@keyframes cardText{from{opacity:0;transform:translateY(8px)}}
+@keyframes lineScan{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes hlLine{from{border-top-color:transparent}}
 .p-link{justify-self:start;margin-top:26px;display:inline-flex;align-items:center;gap:10px;border:0;background:none;padding:4px 0;font-size:16px;font-weight:700;color:var(--blue)}
 .p-link svg{width:18px;height:18px;transition:transform .35s var(--spring)}
 .p-link:hover svg{transform:translateX(4px)}
@@ -183,8 +208,8 @@ td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;
 .btn-lg{padding:8px 8px 8px 28px;min-height:64px;font-size:17px;justify-content:space-between}
 .btn-lg svg{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(255,255,255,.2)}
 .btn-ghost{background:transparent;border-color:transparent;color:var(--muted)}
-.btn[disabled],.btn[disabled]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
-.btn-lg[disabled] svg{background:rgba(47,52,72,.07)}
+.btn[disabled],.btn[disabled]:hover,.btn[aria-disabled="true"],.btn[aria-disabled="true"]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-lg[disabled] svg,.btn-lg[aria-disabled="true"] svg{background:rgba(47,52,72,.07)}
 .nav-hint{display:flex;align-items:flex-start;gap:10px;margin:28px 0 -12px;font-size:15px;font-weight:600;line-height:1.35;color:var(--ink)}
 .nav-hint::before{content:"!";flex:none;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:700;line-height:1;display:grid;place-items:center}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap}
@@ -217,8 +242,8 @@ body:not(.s1) .island{min-height:0}
 .isl-actions:empty{display:none}
 .isl-hint:empty{display:none}
 .isl-hint .nav-hint{margin:0 0 18px;color:#fff}
-.isl-actions .btn[disabled],.isl-actions .btn[disabled]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
-.isl-actions .btn[disabled] svg{background:rgba(255,255,255,.1)}
+.isl-actions .btn[disabled],.isl-actions .btn[disabled]:hover,.isl-actions .btn[aria-disabled="true"],.isl-actions .btn[aria-disabled="true"]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
+.isl-actions .btn[disabled] svg,.isl-actions .btn[aria-disabled="true"] svg{background:rgba(255,255,255,.1)}
 .isl-actions .btn{min-height:64px}
 .isl-actions .btn-ghost{grid-column:1;grid-row:1;border:1px solid rgba(255,255,255,.4);color:#fff;padding:0 24px}
 .isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}
@@ -277,6 +302,8 @@ body:not(.s1) .island{min-height:0}
 .resolve.pop{animation:viewIn .45s var(--ease) both}
 .resolve svg{display:none}
 .resolve.bad{background:var(--warn-soft)}
+.resolve.flash{animation:resolveFlash 1.5s var(--ease)}
+@keyframes resolveFlash{0%{box-shadow:0 0 0 0 rgba(255,122,0,0);background:var(--warn-soft)}18%{box-shadow:0 0 0 4px rgba(255,122,0,.6);background:#ffe0c2}55%{box-shadow:0 0 0 4px rgba(255,122,0,.35);background:#ffe9d4}100%{box-shadow:0 0 0 0 rgba(255,122,0,0);background:var(--warn-soft)}}
 .resolve .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .resolve .btn{padding:8px 14px;font-size:15px}
 
@@ -678,6 +705,7 @@ function render(animate){
   bind[S.step] && bind[S.step]();
   dockActions();
   renderSummary();
+  fitAside();
 }
 
 function viewIntro(){
@@ -840,9 +868,9 @@ function viewAddons(){
       <div class="acards">${['cardio','gastro','energy'].map(id => addonCard(id,'theme')).join('')}</div>
       ${res}
     </section>
-    ${tp.invalid ? '<p class="nav-hint">Чтобы продолжить, выберите один из вариантов в оранжевом блоке</p>' : ''}
+    ${tp.invalid ? '<p class="nav-hint">Чтобы продолжить, выберите один из вариантов в оранжевом блоке ' + (deskMQ.matches ? 'ниже' : 'выше') + '</p>' : ''}
     <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
-      <button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'disabled':''}>Дальше ${ico('arrow')}</button>
+      <button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'aria-disabled="true" data-blocked="1"':''}>Дальше ${ico('arrow')}</button>
     </div>`;
 }
 
@@ -977,9 +1005,27 @@ function setLevel(id){
   if (prev && (S.gender || S.themes.size)) toast('Состав и стоимость дополнений обновлены для выбранной программы');
   render(false);
 }
+// «Дальше» при недоступном сочетании: докручиваем до оранжевого блока, насколько позволяет страница, и подсвечиваем его
+function pointToResolve(){
+  const el = document.querySelector('.resolve.bad'); if (!el) return;
+  const pad = 24, r = el.getBoundingClientRect(), mb = document.getElementById('mbar');
+  const bottom = (mb && mb.offsetHeight ? mb.getBoundingClientRect().top : innerHeight) - pad;
+  let d = r.bottom > bottom ? r.bottom - bottom : 0;
+  if (r.top - d < pad) d = r.top - pad;
+  if (d) scrollBy({ top: d, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  el.classList.remove('pop', 'flash'); void el.offsetWidth; el.classList.add('flash');
+  el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true });
+}
+// блок заказа с плашкой бывает выше экрана: липнем так, чтобы до его низа можно было докрутить
+function fitAside(){
+  const a = document.querySelector('.aside-in'); if (!a) return;
+  a.style.top = S.step === 1 ? '' : Math.min(20, innerHeight - a.offsetHeight - 20) + 'px';
+}
+addEventListener('resize', () => fitAside());
 function navBind(){
-  stage.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { if (!b.disabled) go(+b.dataset.go); });
-  document.querySelectorAll('#asideActions [data-go]').forEach(b => b.onclick = () => { if (!b.disabled) go(+b.dataset.go); });
+  const goOr = b => () => { if (b.dataset.blocked) return pointToResolve(); if (!b.disabled) go(+b.dataset.go); };
+  stage.querySelectorAll('[data-go]').forEach(b => b.onclick = goOr(b));
+  document.querySelectorAll('#asideActions [data-go]').forEach(b => b.onclick = goOr(b));
   stage.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => go(1));
 }
 const bind = {
