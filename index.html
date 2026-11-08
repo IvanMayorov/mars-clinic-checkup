@@ -31,6 +31,8 @@ html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+/* обводка только для клавиатуры: после клика мышью или тапа её нет */
+html[data-input="pointer"] :focus-visible{outline:none}
 h1,h2,h3,h4{margin:0;text-wrap:balance}
 .mono{font-variant-numeric:tabular-nums;font-weight:600}
 
@@ -312,7 +314,7 @@ body:not(.s1) .island{min-height:0}
 /* ================= ORDER ================= */
 .order{display:grid;gap:10px}
 .oline{background:var(--card);border-radius:20px}
-.oline summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:12px;padding:18px 24px;align-items:center;font-weight:600}
+.oline summary{border-radius:20px;list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:12px;padding:18px 24px;align-items:center;font-weight:600}
 .oline summary::-webkit-details-marker{display:none}
 .oline summary small{display:block;color:var(--muted);font-size:14px;font-weight:400}
 .oline .mono{white-space:nowrap}
@@ -659,6 +661,33 @@ function renderHead(){
 function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
 // Блок заказа: всё, что появляется и пропадает, остаётся в потоке и раздвигает соседей.
 // Один тайминг на содержимое и высоту блока, поэтому элементы не заезжают друг на друга.
+// способ ввода: от него зависит, показывать ли обводку фокуса
+addEventListener('pointerdown', () => { document.documentElement.dataset.input = 'pointer'; }, true);
+addEventListener('keydown', () => { document.documentElement.dataset.input = 'keyboard'; }, true);
+// плавное раскрытие строк заказа; повторный клик посреди анимации разворачивает её назад
+function bindOrderLines(){
+  stage.querySelectorAll('.oline').forEach(d => {
+    const sum = d.querySelector('summary'), wrap = d.querySelector('.b-wrap');
+    let anim = null, closing = false;
+    sum.onclick = e => {
+      if (!motionOK()) return;
+      e.preventDefault();
+      if (anim){ closing = !closing; anim.reverse(); return; }
+      closing = d.open;
+      if (!closing) d.open = true;
+      const frames = closing ? flowFrames(wrap).reverse() : flowFrames(wrap);
+      wrap.style.overflow = 'hidden';
+      anim = wrap.animate(frames, {duration:FLOW_MS, easing:ISL_EASE, fill:'both'});
+      const run = anim;
+      run.finished.then(() => {
+        if (closing) d.open = false;
+        anim = null;
+        run.cancel();
+        wrap.style.overflow = '';
+      }, () => {});
+    };
+  });
+}
 const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ISL_EASE = 'cubic-bezier(.2,.8,.2,1)', FLOW_MS = 420;
 const FLOW_PROPS = ['height','paddingTop','paddingBottom','marginTop','marginBottom','borderTopWidth','borderBottomWidth'];
@@ -1044,7 +1073,7 @@ function viewAddons(){
 function viewOrder(){
   const ls = lines(), f = S.form, e = S.errors;
   return `<div class="order">${ls.map(l => `<details class="oline"><summary><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг · нажмите, чтобы раскрыть</small></div><span class="mono">${rub(l.price)}</span></summary>
-      <div class="b">${l.items.map(x=>`<div>${esc(x[0])}</div>`).join('')}</div></details>`).join('')}</div>
+      <div class="b-wrap"><div class="b">${l.items.map(x=>`<div>${esc(x[0])}</div>`).join('')}</div></div></details>`).join('')}</div>
     <div class="sum-row"><button class="btn" data-edit="1">Изменить выбор</button><div class="price">Итого ${rub(total())}</div></div>
     <form class="form" id="form" novalidate>
       <label class="fld ${e.name?'err':''}">Имя<input id="f-name" autocomplete="name" value="${esc(f.name)}" placeholder="Анна"><span class="e">${e.name||''}</span></label>
@@ -1234,6 +1263,7 @@ const bind = {
     navBind();
   },
   3(){
+    bindOrderLines();
     const f = S.form;
     const nm = document.getElementById('f-name'), ph = document.getElementById('f-phone'), em = document.getElementById('f-email');
     nm.oninput = () => { f.name = nm.value; window.__slideLabel(); };
