@@ -1,0 +1,1832 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конструктор чекапа · v3</title>
+<link rel="icon" type="image/png" sizes="96x96" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAC2UlEQVR42u2du5HCMBRFKUElkG/iElyCS3AJNLAz7oASXAIlUAIluAQS5bsKxIzXYz6LJd1nc4KbAYZ7bPR09dv5768d0sn6F6yDDkFd0DlqCPq5o2H0ui6+twbAa3JBTdAx6PLA5Hd1iZ/dxGsBIBrRBp0yGP5Mp3ht94kAqqA+6Cowfqpr/C7VJwCo4//zj1GdS7cZGC8GkfsC+5UZPwdiv1YA3YqNn6pbE4AqUxmp1iVHQ53a/NZIZZOzYmqtAug3bPxUvSUAbuUN7ZIG2qkBuI3+3/+nXXAqAJ9ufhIImC+GgPliCO8AOGP2w4Y5K4Aek9OWqP/tZGHwa2pTA6g23sPN0WOuUgKg0X2vUU4CoMPMfCnqK3k+Ri7TfgkASs7MpemzYUQMTKP6HQDc/QWeAu5+8VPA3S9+Cu51ujAsj6pXAJD3FMyJ5qJmIoe8EYV7BIDArXBQNwVwwqAis7JnATjMKSY3B6DBmGJq5gAcMaaYjnMAyPwFYwVjABhTVn8AkP2IsqEbgAOGFNdhDIBhR9FwJemnOB0FgBEAA4YU1zAGgCGiUhQAAAAAAAAAAMwQA6AMFZehdMToCX82AMI4cRhHHC2OoxmQEQ/IUIqKhyQZlDcwKM+0FPG0FCZmiSdmMTVRPDWRybniyblMTzcwPZ0FGuIFGixREi9RYpGegUV6pKPiZapkQwYWavMUiLcq4CkwsFkHT0Hmu9+zYVMRLdqwieHKBMOOnk37tJm/Z9tKSeSQdNtKgroFgZtn62Jt3uPZvNtGyenZvj57o1tk+3ogJDLfc4SJ1nzPIT5a8z3HWC1ucOXHWHGQG0cZFu/hmj3KkMM8Oc5Wl2paBMCBzhxpvsj4TRxpvjYQxYxXARg31L2Riukav0ul8EIFYNyJa0Wzsk/x2k7pgRrAFEYTV49cMpWRx3gNZ+V3WwJwr804xDLwHDU8Wf5/e10X31tb/o3WAWxev/+j9hHUANmfAAAAAElFTkSuQmCC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* v2 — по макету Figma «Mars clinic» (node 2-894): кремовый фон, белые карточки, navy-остров заказа, оранжевый акцент.
+   Всё выровнено по одной сетке: общий левый край у заголовка, карточек и логотипа; общая ось у текста и кнопок на интро. */
+:root{
+  --page:#ffffff; --bg:#f7f3ef; --card:#ffffff; --card-shadow:0 0 24px rgba(0,35,112,.12); --cream:#f6efe8; --cream-2:#efe6dc;
+  --hover-shadow:0 30px 70px -18px rgba(150,96,52,.14),0 8px 24px -12px rgba(150,96,52,.08);
+  --ink:#2f3448; --muted:#6b6f7d; --faint:#9a9daa; --line:#ebe5de;
+  --navy:#203f8c; --navy-2:#18326f; --blue:#2c4fa3;
+  --orange:#ff7a00; --orange-2:#ff9230;
+  --ok:#00a69c; --ok-soft:#e5f6f5; --warn:#b45309; --warn-soft:#fff1e5; --err:#e84355;
+  --f-ui:SiteGilroy,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --gut:15px; --container:1502px; --sh-h:167px; --sh-bar:91px; --sh-bottom:0px;   /* внешнее поле страницы */
+  --pad:clamp(16px,calc(8px + 1.85vw),40px);   /* внутреннее поле карточек */
+  --gap:clamp(12px,calc(8px + .9vw),18px);   /* расстояние между карточками */
+  /* --vu: «вертикальный пиксель». 1px при высоте окна от 900, плавно до .5px при 600 — на него умножены вертикальные отступы */
+  --vu:clamp(.5px,calc(.5px + (100svh - 600px) * .00167),1px);
+  --v-page:clamp(12px,min(2.4vw,calc(32 * var(--vu))),32px);   /* верхнее поле страницы */
+  --v-bottom:120px;                                          /* нижнее поле: под панелью заказа на мобильном */
+  --pad-y:clamp(14px,min(var(--pad),calc(40 * var(--vu))),40px);   /* вертикальное поле карточек */
+  --ctl:max(50px,calc(64 * var(--vu)));                      /* высота крупных кнопок */
+  --ac-px:clamp(16px,calc(10.667px + 1.481vw),24px);
+  --ac-py:clamp(14px,calc(24 * var(--vu)),24px);
+  --b:clamp(.78px,calc(.66px + .0375vw),1px);                /* масштаб кнопок «Для мужчины / женщины» (1px = макет 96px) */
+  --r:16px; --r-lg:24px;
+  --spring:cubic-bezier(.32,1.42,.52,1); --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+/* обводка только для клавиатуры: после клика мышью или тапа её нет */
+html[data-input="pointer"] :focus-visible{outline:none}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+.mono{font-variant-numeric:tabular-nums;font-weight:600}
+
+.wrap{max-width:var(--container);margin:0 auto;padding:calc(var(--sh-h) + var(--v-page)) max(var(--gut),env(safe-area-inset-right,0px)) var(--v-bottom) max(var(--gut),env(safe-area-inset-left,0px))}
+
+@media (max-width:575px){ :root{--gut:16px} }
+@media (min-width:1101px){
+  :root{--v-bottom:clamp(32px,calc(120 * var(--vu)),120px);--b:clamp(.7px,min(calc(.7px + (100svh - 600px) * .001),calc(.7px + (100vw - 1100px) * .0008)),1px)}
+  body.intro{--v-bottom:var(--v-page)}
+}
+
+/* ---------- logo ---------- */
+
+/* ---------- stepper ---------- */
+.stepper{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:10px;height:max(34px,calc(40 * var(--vu)));padding:0 16px;border-radius:12px;font-size:clamp(14px,calc(13.333px + .185vw),15px);color:var(--faint);font-weight:500;white-space:nowrap;transition:background .3s,color .3s}
+.st b{font-weight:500;min-width:10px;text-align:center;display:grid;place-items:center}
+.st b svg{width:13px;height:13px;color:var(--ok)}
+.st.done{color:var(--muted)}
+.st.cur{color:var(--ink);font-weight:700;background:var(--bg)}
+.st.cur b{color:var(--orange);font-weight:600}
+
+/* ---------- page head (шаги 1–4) ---------- */
+.phead{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px 32px;margin-bottom:clamp(14px,min(1.4vw,calc(20 * var(--vu))),20px)}
+.phead h2{font-size:clamp(24px,min(max(2.6vw,calc(21px + 1.1vw)),5svh),42px);line-height:1.1;font-weight:700;letter-spacing:-.03em}
+.phead p{margin:max(4px,calc(10 * var(--vu))) 0 0;color:var(--muted);font-size:clamp(15px,calc(13.667px + .37vw),17px)}
+body.intro #flowHead{display:none}
+@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;position:relative;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:calc(-1 * var(--gut));padding-inline:var(--gut)} .phead .stepper::-webkit-scrollbar{display:none} .phead .st{flex:none} }
+
+/* ---------- layout ---------- */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,24vw,413px);gap:var(--gap);align-items:stretch}
+@media (min-width:1101px){ body:not(.s1) .grid{column-gap:clamp(40px,3.4vw,64px)} }
+.grid.solo{grid-template-columns:minmax(0,1fr)}
+.grid.solo .aside{display:none}
+.stage{min-width:0}
+.view{animation:viewIn .5s var(--ease) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@media (max-width:1100px){ .grid{grid-template-columns:minmax(0,1fr)} .aside{display:none} }
+
+/* ================= INTRO ================= */
+.hero{position:relative;background:linear-gradient(180deg,rgba(246,241,236,.5),rgba(239,228,218,.5));border-radius:var(--r-lg);min-height:clamp(500px,calc(100svh - var(--sh-h) - var(--v-page) - var(--v-bottom) - 23px - max(8px,calc(22 * var(--vu)))),800px);display:grid;grid-template-rows:1fr;isolation:isolate}
+.hero-body{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,46%) 1fr;padding:0 0 0 clamp(24px,5vw,80px)}
+.hero-copy{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:max(10px,calc(22 * var(--vu)));padding:max(16px,calc(48 * var(--vu))) 0 max(20px,calc(64 * var(--vu)))}
+.eyebrow{color:var(--muted);font-size:clamp(15px,calc(13.667px + .37vw),17px);font-weight:500}
+.h1{font-size:clamp(26px,min(3.1vw,5.6svh),54px);line-height:1.04;font-weight:700;letter-spacing:-.02em;text-transform:uppercase}
+.h1 em{font-style:normal;color:var(--orange)}
+.lead{margin:0;color:var(--ink);opacity:.82;font-size:clamp(17px,1.2vw,21px);line-height:1.4;max-width:30em}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:672px;margin-top:max(12px,calc(34 * var(--vu)))}
+.who-btn{position:relative;height:calc(96 * var(--b));border:0;border-radius:20px;background:var(--card);box-shadow:0 23px 30px rgba(66,68,90,.07);display:grid;align-items:center;overflow:visible;isolation:isolate;transition:background .3s var(--ease),transform .45s var(--spring),box-shadow .3s}
+.who-btn .t{display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.who-btn .t b{font-size:max(16px,calc(22 * var(--b)));font-weight:600;letter-spacing:-.025em;line-height:1.14;white-space:nowrap}
+.who-btn .t small{font-size:max(13px,calc(15 * var(--b)));color:var(--muted);margin-top:2px;white-space:nowrap}
+/* иконка одного размера и на одной высоте в обеих кнопках, зеркально по краям */
+.who-btn .icw{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:1}
+.who-btn .ic{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;transition:transform .5s var(--spring)}
+.who-btn .rot{flex:none;display:block}
+.who-btn .crop{display:block;position:relative;overflow:hidden}
+.who-btn .crop img{position:absolute;max-width:none;display:block}
+/* геометрия 1:1 из Figma (кнопка 330×96) */
+.who-m .ic{left:calc(-10 * var(--b));top:calc(9 * var(--b));width:calc(127.47 * var(--b));height:calc(153.63 * var(--b))}
+.who-m .rot{transform:rotate(-11.18deg)}
+.who-m .crop{width:calc(103 * var(--b));height:calc(136.25 * var(--b))}
+.who-m .crop img{left:-44.49%;top:-21.09%;width:185.07%;height:139.91%}
+.who-f .ic{right:calc(8.6 * var(--b));top:calc(-55 * var(--b));width:calc(118.4 * var(--b));height:calc(146.64 * var(--b))}
+.who-f .rot{transform:rotate(-20.31deg)}
+.who-f .crop{width:calc(79.23 * var(--b));height:calc(127.04 * var(--b))}
+.who-f .crop img{inset:0;width:100%;height:100%}
+.who-m{grid-template-columns:calc(110 * var(--b)) 1fr;padding:0 calc(28 * var(--b)) 0 0}
+
+.who-m .t{grid-column:2}
+.who-f{grid-template-columns:1fr calc(110 * var(--b));padding:0 0 0 calc(28 * var(--b))}
+
+.who-f .t{grid-column:1}
+@media (hover:hover){.who-btn:hover{transform:translateY(-2px);box-shadow:0 26px 34px rgba(66,68,90,.14)}}
+@media (hover:hover){.who-m:hover .ic{transform:translateY(-4px) rotate(6deg)}}
+@media (hover:hover){.who-f:hover .ic{transform:translateY(-4px) rotate(-6deg)}}
+.who-btn:active{transform:scale(.98)}
+.skip{margin-top:max(0px,calc(6 * var(--vu)));background:none;border:0;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;padding:4px}
+@media (hover:hover){.skip:hover{color:var(--ink)}}
+/* фото: прижато к правому и нижнему краю карточки, голова выходит за верхний край */
+.hero-ph{position:absolute;z-index:2;right:0;bottom:0;top:calc(-1 * min(16%,var(--v-page)));width:57%;overflow:hidden;border-bottom-right-radius:var(--r-lg);pointer-events:none}
+.hero-ph img{position:absolute;right:0;bottom:-2%;width:100%;max-width:none;aspect-ratio:1;object-fit:cover;object-position:right bottom}
+.hero-facts{margin:max(8px,calc(22 * var(--vu))) 0 0;text-align:center;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px)}
+.hero-facts .pr{color:var(--warn)}
+/* фото вписывается и в ширину, и в высоту блока: на низком окне голова не обрезается */
+@media (min-width:1101px){
+  .hero-ph{container-type:size}
+  .hero-ph img{width:min(100cqw,105cqh)}
+  .hero-body{grid-template-columns:minmax(0,max(46%,520px)) 1fr}
+}
+@media (max-width:1100px){
+  .h1{font-size:clamp(26px,calc(19px + 2.2vw),40px)}
+  .lead{font-size:clamp(15.5px,calc(14.273px + .341vw),17px)}
+  .pick{grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr))}
+  .hero{min-height:0;grid-template-rows:auto auto auto;margin-top:0}
+  .hero-body{grid-template-columns:minmax(0,1fr);padding:0 clamp(16px,4vw,48px)}
+  .hero-copy{padding:36px 0 32px}
+  .hero-ph{position:relative;top:auto;width:100%;height:auto;margin-top:calc(min(100%,640px) * -.085);display:flex;justify-content:center;border-radius:0 0 var(--r-lg) var(--r-lg)}
+  .hero-ph img{position:static;display:block;width:min(100%,640px)}
+}
+@media (max-width:640px){
+  .hero{border-radius:16px}
+  .hero-ph{border-radius:0 0 16px 16px}
+  .pick{margin-top:18px}
+}
+
+/* ================= PROGRAMS ================= */
+/* subgrid: название, цена, шкала, счётчики, список и ссылка стоят на одной линии во всех трёх карточках */
+.cards{container-type:inline-size;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--gap);row-gap:0}
+.pcard{position:relative;grid-row:span 6;display:grid;grid-template-rows:subgrid;background:var(--card);border-radius:var(--r);padding:var(--pad-y) var(--pad);border:1px solid #e8e8e8;cursor:pointer;transition:border-color .25s,box-shadow .3s,transform .4s var(--spring)}
+@media (hover:hover){.pcard:hover{box-shadow:var(--card-shadow)}}
+/* выбранная: рамка 2px без сдвига вёрстки — второй пиксель даёт внутренняя тень */
+.pcard.sel{border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy),0 0 0 0 transparent}
+@media (hover:hover){.pcard.sel:hover{box-shadow:inset 0 0 0 1px var(--navy),var(--card-shadow)}}
+.pcard h3{font-size:clamp(19px,calc(8px + 1.6cqw),24px);font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.pcard .desc{margin:max(3px,calc(6 * var(--vu))) 0 0;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px);line-height:1.5}
+.price{padding-top:max(12px,calc(30 * var(--vu)));font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(24px,calc(14px + 2cqw),36px);letter-spacing:-.02em;line-height:1.1;align-self:end}
+.meter{margin-top:max(10px,calc(18 * var(--vu)));height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--orange);transition:width .8s var(--spring)}
+.counts{margin:max(8px,calc(16 * var(--vu))) 0 0;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px)}
+.counts b{color:var(--ink);font-weight:700}
+.hl{list-style:none;margin:max(12px,calc(26 * var(--vu))) 0 0;padding:max(10px,calc(22 * var(--vu))) 0 0;border-top:1px dashed var(--line);display:grid;gap:max(4px,calc(8 * var(--vu)));align-content:start;font-size:clamp(14px,calc(13px + .278vw),15.5px)}
+.hl .plus{color:var(--muted);font-size:clamp(13px,calc(12.333px + .185vw),14px)}
+/* вход карточек программ: текст со стаггером, линия рисуется слева направо; только при переходе на шаг (.view) */
+@media (prefers-reduced-motion:no-preference){
+  .view .pcard{--c:0}
+  .view .pcard:nth-child(2){--c:1}
+  .view .pcard:nth-child(3){--c:2}
+  .view .pcard .p-top{--d:0}
+  .view .pcard .price{--d:1}
+  .view .pcard .meter{--d:2}
+  .view .pcard .counts{--d:4}
+  .view .pcard .hl{--d:5}
+  .view .pcard .hl li:nth-child(1){--d:6}
+  .view .pcard .hl li:nth-child(2){--d:7}
+  .view .pcard .hl li:nth-child(3){--d:8}
+  .view .pcard .hl li:nth-child(4){--d:9}
+  .view .pcard .hl li:nth-child(5){--d:10}
+  .view .pcard .hl li:nth-child(6){--d:11}
+  .view .pcard .p-link{--d:12}
+  .view .pcard :is(.p-top,.price,.counts,.hl li,.p-link){animation:cardText .55s var(--ease) backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+  .view .pcard .meter{animation:lineScan .9s cubic-bezier(.65,0,.2,1) backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+  .view .pcard .hl{animation:hlLine .5s linear backwards;animation-delay:calc(140ms + var(--c) * 100ms + var(--d) * 55ms)}
+}
+@media (prefers-reduced-motion:no-preference) and (max-width:860px){ .view .pcard:nth-child(n){--c:0} }
+@keyframes cardText{from{opacity:0;transform:translateY(8px)}}
+@keyframes lineScan{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes hlLine{from{border-top-color:transparent}}
+.p-link{justify-self:start;margin-top:max(10px,calc(26 * var(--vu)));display:inline-flex;align-items:center;gap:10px;border:0;background:none;padding:4px 0;font-size:clamp(15px,calc(14.333px + .185vw),16px);font-weight:700;color:var(--blue)}
+.p-link svg{width:18px;height:18px;transition:transform .35s var(--spring)}
+@media (hover:hover){.p-link:hover svg{transform:translateX(4px)}}
+@media (max-width:860px){ .cards{grid-template-columns:minmax(0,1fr);row-gap:var(--gap)} .pcard{grid-row:auto;grid-template-rows:none} .pcard h3{font-size:clamp(20px,calc(17.12px + .8vw),24px)} .price{font-size:clamp(24px,calc(19.68px + 1.2vw),30px)} }
+
+/* ---------- compare (мобильная версия) ---------- */
+.compare{box-shadow:var(--card-shadow);margin-top:var(--gap);background:var(--card);border-radius:var(--r);overflow:hidden}
+.compare summary{list-style:none;cursor:pointer;padding:18px var(--pad);display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.compare summary::-webkit-details-marker{display:none}
+.compare summary svg{width:18px;height:18px;transition:transform .3s var(--ease)}
+.compare[open] summary svg{transform:rotate(180deg)}
+.cmp-tools,.cmp-toggle{padding:0 var(--pad) 12px;display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted)}
+.cmp-toggle{padding:0;margin:14px 0}
+.tbl-wrap{overflow:auto;max-height:min(520px,60svh);border-top:1px solid var(--line)}
+.sheet-tbl{max-height:none;border:0}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left}
+thead th{position:sticky;top:0;background:var(--card);z-index:1;font-weight:700}
+td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.yes{color:var(--ok)}.no{color:var(--line)}.yes svg{width:16px;height:16px}
+@media (min-width:1101px){ #cmp{display:none} }
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:max(8px,calc(12 * var(--vu))) 20px;font-weight:600;font-size:clamp(15px,calc(14.333px + .185vw),16px);transition:transform .3s var(--spring),background .2s,opacity .2s,border-color .2s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:16px;height:16px}
+.btn-dark{background:var(--orange);border-color:var(--orange);color:#fff}
+@media (hover:hover){.btn-dark:hover{background:var(--orange-2);border-color:var(--orange-2)}}
+.btn-lg{padding:8px 8px 8px 28px;min-height:var(--ctl);font-size:clamp(16px,calc(15.333px + .185vw),17px);justify-content:space-between}
+.btn-lg svg{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(255,255,255,.2)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn[disabled],.btn[aria-disabled="true"]{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
+@media (hover:hover){.btn[disabled]:hover,.btn[aria-disabled="true"]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}}
+.btn-lg[disabled] svg,.btn-lg[aria-disabled="true"] svg{background:rgba(47,52,72,.07)}
+.nav-hint{display:flex;align-items:flex-start;gap:10px;margin:max(12px,calc(28 * var(--vu))) 0 -12px;font-size:15px;font-weight:600;line-height:1.35;color:var(--ink)}
+.nav-hint::before{content:"!";flex:none;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:700;line-height:1;display:grid;place-items:center}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:max(14px,calc(28 * var(--vu)));flex-wrap:wrap}
+.nav .hint{color:var(--muted);font-size:15px}
+.nav.docked{display:none}
+
+/* ================= ISLAND (Ваш заказ) ================= */
+.aside{min-width:0}
+.aside-in{transition:top .42s cubic-bezier(.2,.8,.2,1);position:sticky;top:calc(var(--sh-bar) + 20px);display:flex;flex-direction:column;gap:var(--gap)}
+body.s1 .aside-in{height:100%}
+.aside-note:empty{display:none}
+.aside-note .resolve{margin-top:0}
+.island{position:relative;display:flex;flex-direction:column;background:linear-gradient(170deg,#24479a,var(--navy) 55%,var(--navy-2));color:#fff;border-radius:var(--r);padding:var(--pad-y) 0 0;min-height:100%;overflow:hidden}
+body:not(.s1) .island{min-height:0}
+.island > *{padding-inline:var(--pad)}
+.island h4{font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.88);display:flex;justify-content:space-between;margin-bottom:max(8px,calc(16 * var(--vu)))}
+.island h4 span:last-child{color:rgba(255,255,255,.55);letter-spacing:0;text-transform:none;font-weight:500}
+.lines{display:grid;gap:0;position:relative}
+.line{display:flex;justify-content:space-between;gap:12px;padding:max(7px,calc(12 * var(--vu))) 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15.5px}
+.line small{display:block;color:rgba(255,255,255,.6);font-size:13.5px}
+.line .mono{white-space:nowrap}
+@keyframes lineIn{from{opacity:0;transform:translateY(8px) scale(.97);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.empty{background:rgba(255,255,255,.12);border-radius:8px;padding:14px 16px;font-size:15.5px;line-height:1.5}
+.total{display:flex;justify-content:space-between;align-items:center;margin-top:max(12px,calc(26 * var(--vu)))}
+.total>span:first-child{color:rgba(255,255,255,.7);font-size:15px}
+.total .roll{font-size:32px}
+.isl-note{margin-top:max(10px,calc(22 * var(--vu)));font-size:13.5px;color:rgba(255,255,255,.66);line-height:1.5}
+.isl-sp{flex:1;min-height:max(14px,calc(32 * var(--vu)))}
+.isl-actions{display:grid;grid-template-columns:auto 1fr;gap:clamp(10px,1.3vw,20px);padding-bottom:var(--pad-y)}
+.isl-actions:empty{display:none}
+.isl-hint:empty{display:none}
+.isl-hint,.isl-actions{position:relative}
+.isl-hint .nav-hint{margin:0 0 18px;color:#fff}
+.isl-actions .btn[disabled],.isl-actions .btn[aria-disabled="true"]{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
+@media (hover:hover){.isl-actions .btn[disabled]:hover,.isl-actions .btn[aria-disabled="true"]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}}
+.isl-actions .btn[disabled] svg,.isl-actions .btn[aria-disabled="true"] svg{background:rgba(255,255,255,.1)}
+.isl-actions .btn{min-height:var(--ctl)}
+.isl-actions .btn-ghost{grid-column:1;grid-row:1;border:1px solid rgba(255,255,255,.4);color:#fff;padding:0 24px}
+@media (hover:hover){.isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}}
+.isl-actions .btn-dark{grid-column:2;grid-row:1;padding:8px 10px 8px 30px}
+.isl-actions .btn-dark:only-child{grid-column:1 / -1}
+/* узкая колонка заказа на небольших десктопах: обе кнопки в один ряд */
+@media (min-width:1101px) and (max-width:1320px){
+  .island{--pad:18px}
+  .isl-actions{gap:10px}
+  .isl-actions .btn-ghost{padding:0 14px}
+  .isl-actions .btn-dark{padding:8px 8px 8px 16px}
+}
+.isl-foot{border-top:1px solid rgba(255,255,255,.14);padding-block:max(10px,calc(22 * var(--vu))) max(12px,calc(26 * var(--vu)))}
+.isl-foot:empty{display:none}
+.isl-foot button{background:none;border:0;padding:0;color:#fff;font-size:16px;font-weight:500;display:inline-flex;gap:10px;align-items:center}
+.isl-foot svg{width:16px;height:16px;transition:transform .35s var(--spring)}
+@media (hover:hover){.isl-foot button:hover svg{transform:translateX(4px)}}
+
+.roll{display:inline-flex;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:-.02em;line-height:1}
+
+/* ================= ADDONS ================= */
+.levelbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.levelbar .lbl{font-size:clamp(14px,calc(13.333px + .185vw),15px);color:var(--muted)}
+.seg{position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--bg);border-radius:12px;padding:4px;max-width:100%}
+.seg button{border:0;background:none;padding:max(6px,calc(9 * var(--vu))) clamp(10px,calc(4.667px + 1.481vw),18px);border-radius:8px;font-size:clamp(14px,calc(13px + .278vw),15.5px);font-weight:600;color:var(--muted);white-space:nowrap}
+.seg-ink{position:absolute;inset:4px;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--navy);border-radius:8px;pointer-events:none;transition:clip-path .55s var(--spring)}
+.seg-ink span{display:grid;place-items:center;padding:max(6px,calc(9 * var(--vu))) clamp(10px,calc(4.667px + 1.481vw),18px);font-size:clamp(14px,calc(13px + .278vw),15.5px);font-weight:600;color:#fff;white-space:nowrap}
+@media (max-width:360px){ .seg button,.seg-ink span{padding-inline:5px;font-size:13px} }
+.block{margin-top:max(18px,calc(34 * var(--vu)))}
+.block-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:max(8px,calc(14 * var(--vu)));flex-wrap:wrap}
+.block-h h3{font-size:clamp(18px,calc(16.667px + .37vw),20px);font-weight:700}
+.block-h span{font-size:clamp(13.5px,calc(12.5px + .278vw),15px);color:var(--muted)}
+.acards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--gap)}
+.acards.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.acard{position:relative;text-align:left;background:var(--card);border:1px solid #e8e8e8;border-radius:var(--r);padding:var(--ac-py) var(--ac-px);display:flex;flex-direction:column;gap:max(6px,calc(12 * var(--vu)));cursor:pointer;transition:border-color .25s,box-shadow .3s}
+@media (hover:hover){.acard:hover{box-shadow:var(--card-shadow)}}
+.acard.on{border-color:var(--navy)}
+/* второй пиксель рамки выбранной карточки: поверх содержимого, чтобы не прятался под фото */
+.acard::after{content:"";position:absolute;inset:0;border-radius:calc(var(--r) - 1px);box-shadow:inset 0 0 0 1px transparent;pointer-events:none;transition:box-shadow .25s}
+.acard.on::after{box-shadow:inset 0 0 0 1px var(--navy)}
+.acard b{font-size:clamp(16px,calc(14.667px + .37vw),18px);display:block;padding-right:52px}
+.acard p{margin:4px 0 0;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px)}
+.acard .ic{width:44px;height:44px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--orange)}
+.acard .ic svg{width:20px;height:20px}
+.acard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:8px}
+.acard .ap{font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(16px,calc(14.667px + .37vw),18px)}
+.acard .ap.muted{color:var(--muted);font-weight:500;font-size:clamp(13px,calc(12.333px + .185vw),14px)}
+.linkish{background:none;border:0;padding:0;color:var(--blue);font-weight:600;font-size:clamp(14px,calc(13.333px + .185vw),15px)}
+@media (hover:hover){.linkish:hover{text-decoration:underline;text-underline-offset:3px}}
+.sw{position:absolute;top:var(--ac-py);right:var(--ac-px);width:44px;height:26px;border-radius:999px;background:var(--line);transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.on .sw{background:var(--navy)}.on .sw::after{transform:translateX(18px)}
+.radio{position:absolute;top:var(--ac-py);right:var(--ac-px);width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:#fff;transition:all .3s var(--spring)}
+.on .radio{border:7px solid var(--navy)}
+.pcard .radio{top:calc(var(--pad-y) + 2px);right:var(--pad)}
+.pcard.sel .radio{border:7px solid var(--navy)}
+@media (hover:hover){.pcard:hover:not(.sel) .radio{border-color:var(--navy)}}
+.pcard .p-top{padding-right:36px}
+.acard.photo{padding:0;overflow:hidden;flex-direction:row;align-items:stretch;gap:0}
+.acard.photo .ph{flex:none;width:36%;min-height:max(130px,calc(200 * var(--vu)));position:relative;overflow:hidden;background:radial-gradient(80% 80% at 50% 100%,#fbe0c9,var(--cream))}
+.acard.photo .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%;transition:transform .8s var(--ease)}
+.acard.photo.on .ph img{transform:scale(1.05)}
+.acard.photo .bd{position:relative;display:flex;flex-direction:column;gap:max(6px,calc(12 * var(--vu)));padding:var(--ac-py) var(--ac-px);min-width:0;flex:1}
+.more{margin-top:12px}
+.resolve{margin-top:var(--gap);border-radius:12px;padding:max(10px,calc(16 * var(--vu))) 20px;font-size:clamp(14px,calc(13px + .278vw),15.5px);background:var(--bg)}
+.resolve.pop{animation:viewIn .45s var(--ease) both}
+.resolve svg{display:none}
+.resolve.bad{background:var(--warn-soft)}
+.resolve.flash{animation:resolveFlash 1.5s var(--ease)}
+@keyframes resolveFlash{0%{box-shadow:0 0 0 0 rgba(255,122,0,0);background:var(--warn-soft)}18%{box-shadow:0 0 0 4px rgba(255,122,0,.6);background:#ffe0c2}55%{box-shadow:0 0 0 4px rgba(255,122,0,.35);background:#ffe9d4}100%{box-shadow:0 0 0 0 rgba(255,122,0,0);background:var(--warn-soft)}}
+.resolve .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.resolve .btn{padding:8px 14px;font-size:15px}
+
+/* ================= ORDER ================= */
+.order{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.oline{background:var(--bg);border-radius:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"title title" "meta meta" "price link";align-items:baseline;column-gap:16px;padding:max(12px,calc(20 * var(--vu))) var(--ac-px);line-height:1.35}
+.oline .ot{grid-area:title;font-weight:600;font-size:clamp(16px,calc(15.333px + .185vw),17px)}
+.oline small{grid-area:meta}
+.oline .mono{grid-area:price;margin-top:max(8px,calc(16 * var(--vu)));font-size:clamp(16px,calc(13.333px + .741vw),20px);font-weight:700;letter-spacing:-.01em}
+.oline .linkish{grid-area:link;margin-top:max(8px,calc(16 * var(--vu)));justify-self:end}
+/* одна позиция на всю ширину: цена и ссылка справа в один ряд */
+.oline:only-child{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"title price link" "meta price link";align-items:center;column-gap:28px}
+.oline:only-child .mono,.oline:only-child .linkish{margin-top:0}
+.oline small{display:block;margin-top:2px;color:var(--muted);font-size:clamp(13px,calc(12.333px + .185vw),14px);font-weight:400}
+.oline .linkish{font-size:clamp(14px,calc(13.333px + .185vw),15px);font-weight:600}
+.oline .mono{white-space:nowrap}
+.sum-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.sum-row .price{padding:0;align-self:center;font-size:clamp(24px,2.1vw,36px)}
+.edit-link{padding-inline:0;border:0;gap:8px;min-height:0}
+.edit-link svg{flex:none;margin-left:-2px} /* у карандаша внутренний отступ в рисунке */
+@media (hover:hover){.edit-link:hover{color:var(--ink);background:transparent}}
+.form{margin-top:max(10px,calc(20 * var(--vu)));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){ .form{grid-template-columns:minmax(0,1fr)} }
+.fld{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+.fld input{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid transparent;border-radius:8px;padding:max(8px,calc(11 * var(--vu))) 16px;transition:border-color .2s,box-shadow .2s}
+.fld input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 4px rgba(32,63,140,.12)}
+.fld.err input{border-color:var(--err)}
+.fld .e{color:var(--err);font-size:13px}
+.fld .e:empty,.consents .e:empty{display:none}
+.consents{display:flex;flex-wrap:wrap;gap:6px 24px;margin-top:14px;font-size:14px;color:var(--muted)}
+.consents .e{flex-basis:100%}
+.consents label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.consents input{width:16px;height:16px;accent-color:var(--orange);margin:2px 0 0;flex:none}
+.consents a{color:var(--blue)}
+.notice{margin-top:10px;font-size:14px;color:var(--muted)}
+.notice svg{display:none}
+.pay-btn{width:100%;max-width:420px;margin-top:max(10px,calc(16 * var(--vu)));min-height:max(48px,calc(56 * var(--vu)));font-size:16px;font-weight:600}
+.pay-btn .pay-ic{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none;transition:background .3s}
+.pay-btn .pay-ic svg{width:20px;height:20px;padding:0;background:none}
+.pay-btn.locked{opacity:.55}
+.pay-btn.busy{pointer-events:none}
+.pay-btn.done{background:var(--ok);border-color:var(--ok)}
+.spin{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ================= RESULT ================= */
+.res{box-shadow:var(--card-shadow);display:grid;grid-template-columns:minmax(0,1fr) clamp(270px,30vw,320px);gap:clamp(18px,2.6vw,30px);align-items:start;background:var(--card);border-radius:var(--r);padding:var(--pad-y) var(--pad)}
+@media (max-width:760px){ .res{grid-template-columns:minmax(0,1fr)} }
+.res .h2{font-size:clamp(26px,2.2vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.res .lead{font-size:17px;margin-top:10px}
+.demo{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:var(--gap);font-size:14px;color:var(--muted)}
+.status{display:inline-flex;gap:8px;align-items:center;font-size:15px;font-weight:700}
+.status.ok{color:var(--ok)}.status.wait{color:var(--ink)}.status.bad{color:var(--orange)}
+.status svg{width:16px;height:16px}
+.draw path{stroke-dasharray:30;stroke-dashoffset:30;animation:draw .6s .2s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.steps-after{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}
+.steps-after li{display:flex;gap:12px;font-size:clamp(14.5px,calc(13.5px + .278vw),16px)}
+.steps-after li b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--cream);color:var(--orange);display:grid;place-items:center;font-size:13.5px}
+.printer{width:100%;max-width:300px;margin:0 auto;position:relative}
+.housing{position:relative;z-index:2;height:60px;border-radius:12px 12px 8px 8px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:13.5px}
+.housing b{font-family:var(--f-mono);letter-spacing:.2em;font-size:13px}
+.housing span{color:var(--muted);display:flex;gap:6px;align-items:center}
+.housing span i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.housing.busy span i{background:var(--orange);animation:blink .6s infinite}
+@keyframes blink{50%{opacity:.3}}
+.housing::after{content:"";position:absolute;left:26px;right:26px;bottom:8px;height:5px;border-radius:5px;background:var(--navy)}
+.feed{position:relative;z-index:1;margin:-12px auto 0;width:252px;overflow:hidden;padding-bottom:20px}
+.paper{background:#fff;color:var(--ink);font-family:var(--f-mono);font-size:11.5px;line-height:16px;padding:22px 16px 26px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.14));-webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/10px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/10px 100%}
+.paper .c{text-align:center}.paper .m{font-weight:600;letter-spacing:.2em;font-size:12.5px}.paper .dim{color:#7a7a82}
+.paper .r{display:flex;justify-content:space-between;gap:8px}.paper .tot{font-size:13.5px;font-weight:600}
+.paper .bar{display:flex;gap:1px;height:30px;justify-content:center;margin:10px 0 6px}.paper .bar i{background:var(--ink);display:block}
+.reprint{display:block;margin:6px auto 0}
+.loader{width:56px;height:56px;margin:10px 0 18px;position:relative}
+.loader i{position:absolute;inset:0;border-radius:50%;border:3px solid var(--line);border-top-color:var(--orange);animation:sp 1s linear infinite}
+.loader i:nth-child(2){inset:10px;border-top-color:var(--navy);animation-duration:1.6s;animation-direction:reverse}
+
+/* ================= overlays ================= */
+.mbar{position:fixed;left:0;right:0;bottom:var(--sh-bottom);padding:0 max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));z-index:20;display:none;pointer-events:none}
+@media (max-width:1100px){ .mbar.show{display:block} }
+.mbar-in{pointer-events:auto;max-width:560px;margin:0 auto;background:linear-gradient(170deg,#24479a,var(--navy));color:#fff;border-radius:16px;box-shadow:0 20px 50px -20px rgba(14,36,87,.7);overflow:hidden}
+.mbar-head{width:100%;background:none;border:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;color:inherit}
+.mbar-head .lft{display:flex;align-items:center;gap:10px;font-size:clamp(15px,calc(14.333px + .185vw),16px)}
+.badge{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--orange);color:#fff;font-size:13.5px;font-weight:600;display:grid;place-items:center}
+.mbar-head .roll{font-size:clamp(20px,calc(18.667px + .37vw),22px)}
+.mbar-head svg{width:18px;height:18px;transition:transform .35s var(--ease)}
+.mbar.open .mbar-head svg{transform:rotate(180deg)}
+.mbar-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--ease)}
+.mbar.open .mbar-body{grid-template-rows:1fr}
+.mbar-body>div{overflow:hidden auto;max-height:calc(100svh - 96px)}
+.mbar-body .lines{padding:0 20px 14px}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%) translateY(-20px) scale(.9);opacity:0;background:var(--navy);color:#fff;padding:10px 18px 10px 12px;border-radius:12px;font-size:15px;display:flex;gap:10px;align-items:center;z-index:50;transition:all .5s var(--spring);pointer-events:none;max-width:calc(100% - 32px);box-shadow:0 14px 40px -14px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%);opacity:1}
+.toast{width:max-content;max-width:calc(100vw - 32px);line-height:1.35}
+@media (max-width:640px){ .toast{border-radius:14px;padding:12px 18px 12px 14px;font-size:14.5px} }
+.toast i{width:22px;height:22px;border-radius:50%;background:var(--orange);display:grid;place-items:center;flex:none}
+.toast svg{width:13px;height:13px;color:#fff}
+.backdrop{position:fixed;inset:0;background:rgba(20,24,40,.4);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:41;background:var(--card);display:flex;flex-direction:column;transition:transform .5s var(--spring);top:12px;right:12px;bottom:12px;width:min(460px,calc(100% - 24px));border-radius:16px;transform:translateX(110%);box-shadow:0 30px 80px -20px rgba(0,0,0,.4)}
+.sheet.wide{width:min(840px,calc(100% - 24px))}
+.sheet.show{transform:none}
+@media (max-width:640px){ .sheet,.sheet.wide{top:auto;left:0;right:0;bottom:0;width:100%;max-height:86vh;border-radius:16px 16px 0 0;transform:translateY(105%);padding-bottom:env(safe-area-inset-bottom,0px)} .sheet.show{transform:none} }
+.sheet-h{padding:max(14px,calc(24 * var(--vu))) var(--ac-px) max(10px,calc(14 * var(--vu)));display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.sheet-h h3{font-size:clamp(18px,calc(16px + .556vw),21px);font-weight:700}
+.sheet-h p{margin:4px 0 0;color:var(--muted);font-size:clamp(14px,calc(13.333px + .185vw),15px)}
+.x{position:relative;width:36px;height:36px;padding:0;flex:none;border-radius:50%;border:0;background:var(--bg)}
+.x svg{position:absolute;inset:0;margin:auto;width:16px;height:16px} /* iOS Safari смещала крестик при центровке через grid */
+.x svg{width:16px;height:16px}
+.sheet-b{overflow-y:auto;padding:8px var(--ac-px) max(14px,calc(24 * var(--vu)))}
+.grp{margin-top:max(10px,calc(16 * var(--vu)))}
+.grp h5{margin:0 0 6px;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.grp ul{list-style:none;margin:0;padding:0}
+.grp li{padding:max(6px,calc(9 * var(--vu))) 0;border-bottom:1px solid var(--line);font-size:clamp(14px,calc(13px + .278vw),15.5px)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.12s!important}}
+/* телефон: шрифты мельче, «Назад» и «Дальше» в одну строку */
+@media (max-width:640px){
+  .nav{flex-wrap:nowrap}
+  .nav[style]{flex-direction:column;align-items:stretch}
+  .nav[style] .btn,.nav[style] .btn-lg{flex:none;width:100%}
+  .nav .btn{flex:none}
+  .nav .btn-lg{flex:1;min-width:0}
+  .btn-lg{font-size:16px;min-height:56px}
+  .lead{font-size:15.5px}
+  .oline,.oline:only-child{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"title price" "meta link";align-items:center;column-gap:12px;padding:16px 18px}
+  .oline .mono,.oline .linkish,.oline:only-child .mono,.oline:only-child .linkish{margin-top:0}
+  .oline .linkish{justify-self:end}
+  .fld,.notice,.status,.res .lead{font-size:14px}
+  .fld input{font-size:16px} /* меньше 16 — iOS приближает страницу при вводе */
+  .consents{font-size:14px}
+  .pay-btn{font-size:16px}
+  .x{width:44px;height:44px}
+  .x svg{width:20px;height:20px}
+}
+/* переносы: длинный текст — pretty, заголовки и короткие тексты — balance */
+body{text-wrap:pretty}
+h1,h2,h3,h4,h5,h6,.h1,.h2,.eyebrow,.lead,.phead p,.pcard .desc,.counts,.hl li,.who-btn .t,
+.acard b,.acard p,.line > div,.line small,.oline > div,.oline small,.isl-note,.empty,.nav-hint,
+.hero-facts,.notice,.resolve,.toast span,.block-h span,.levelbar .lbl,.sheet-h p,.grp li,
+.consents label span,.consents .e,.fld .e,th,td,.status,.steps-after li span{text-wrap:balance}
+/* цена и ссылка в подвале карточки не разрываются: не хватает места — ссылка уходит на строку ниже целиком */
+.acard .foot{flex-wrap:wrap}
+.acard .foot .ap,.acard .foot .linkish{white-space:nowrap}
+</style>
+<link rel="stylesheet" href="site-shell/site-shell.css">
+</head>
+<body>
+<div class="ss" id="siteHeader">
+<header class="b-header header new-header header-fixed">
+    <div class="header__top">
+        <div class="links-wrapper">
+            <a href="https://mars-clinic.ru/" class="logo-link">
+                <picture>
+                    <source srcset="site-shell/img/27k284hapwhtbrwt4n7y87hvt4jz2ia6.svg" media="(max-width: 480px)">
+                    <img src="site-shell/img/p5gfji40i1maoil1wytpjzhpugyqz1tr.svg" alt="image" class="logo-image">
+                </picture>
+            </a>
+            <a href="https://olimp-medgroup.ru/" rel="noopener noreferrer" target="_blank" aria-label="Олимп Здоровье" class="add-link">
+                <img src="site-shell/img/2mhej9vym1pmah7jskfilnypiqxm07xu.svg" alt="Олимп Здоровье" class="logo-image">
+            </a>
+        </div>
+                <div class="backcall-block">
+            <div class="extra-content">
+                <a href="tel:+74952550903" class="extra-link js-extra-link"><span>Неотложная помощь</span></a>
+                <div class="extra-block">
+                    <a href="tel:+74952550903" class="phone-link">
+                        <svg width="21" height="21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.372 0c.86 0 1.61.585 1.818 1.42l1.107 4.423a1.872 1.872 0 0 1-.695 1.954l-1.293.97-.011.01a.31.31 0 0 0-.112.35 11.289 11.289 0 0 0 6.695 6.69l.084.015a.33.33 0 0 0 .267-.14l.97-1.294.001-.002a1.88 1.88 0 0 1 1.951-.693h.003l4.423 1.107c.833.208 1.42.957 1.42 1.818V18a3 3 0 0 1-3 3h-2.25C7.052 21 0 13.948 0 5.25V3a3 3 0 0 1 3-3h1.372zM3 1.5A1.5 1.5 0 0 0 1.5 3v2.25c0 7.87 6.38 14.25 14.25 14.25H18a1.5 1.5 0 0 0 1.5-1.5v-1.372a.376.376 0 0 0-.284-.363l-4.421-1.107a.382.382 0 0 0-.394.142v-.001l-.97 1.292c-.433.578-1.187.88-1.921.68l-.147-.046a12.79 12.79 0 0 1-7.588-7.588l-.004-.011A1.81 1.81 0 0 1 4.42 7.56l1.282-.962.001-.001a.373.373 0 0 0 .139-.39L4.735 1.784a.375.375 0 0 0-.363-.284H3z" fill="#FF7900" />
+                            <path d="M18.75 1.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V4.06l-4.72 4.72a.75.75 0 1 1-1.06-1.06L16.94 3h-2.69a.75.75 0 0 1 0-1.5h4.5z" fill="#FF7900" />
+                        </svg>
+                        <span>+7 495 255-09-03</span>
+                    </a>
+                </div>
+            </div>
+            <a href="https://lk.olymp.clinic" class="profile-link">Личный кабинет</a>
+        </div>
+    </div>
+    <div class="header__bottom">
+        <div class="header__bottom-line">
+            <div class="header__bottom-line-left">
+                <a href="tel:+74952555003" class="phone-link-mobile">
+                    +7 495 255-50-03                </a>
+            </div>
+            <div class="header__bottom-line-right">
+                    <div class="b-clinic-block clinic-block clinic-block--m-r-14 b-clinic-block--top-menu clinic-block--show-gif">
+                    <a href="javascript:void(0);" class="clinic-link js-clinic-menu"><span>Клиника</span></a>
+            <div class="clinic-list">
+                <ul>
+                                                                        <li>
+                                <a href="https://mars-clinic.ru/clinics/mars/" class="clinic-item active">
+                                    <div class="icon-block">
+                                        <picture>
+                                            <img src="site-shell/img/vctsxdnrp8v0cfouwejfera7b2uhmnbu.svg" alt="Олимп Клиник МАРС" class="clinic-logo">
+                                        </picture>
+                                    </div>
+                                    <div class="descr-block">
+                                        <span class="item-title">Олимп Клиник МАРС</span>
+                                        <span class="item-address">Москва, 1-я улица Ямского Поля, 15</span>
+                                    </div>
+                                </a>
+                            </li>
+                                                                        <li>
+                                <a href="https://mars-clinic.ru/clinics/detskaya-klinika/" class="clinic-item active">
+                                    <div class="icon-block">
+                                        <picture>
+                                            <img src="site-shell/img/8fp4fdrvktsd2bz2rqxdhfu71tbryo88.svg" alt="Детская клиника" class="clinic-logo">
+                                        </picture>
+                                    </div>
+                                    <div class="descr-block">
+                                        <span class="item-title">Детская клиника</span>
+                                        <span class="item-address">1-я улица Ямского Поля, 15к4</span>
+                                    </div>
+                                </a>
+                            </li>
+                                                                        <li class="clinic-list__li-title">Санаторно-курортное лечение</li>
+                            <li>
+                                <!--noindex-->
+                                    <a href="https://www.donresort.ru/?utm_source=main_olymp&utm_medium=button&utm_campaign=clinic_list" rel="nofollow" class="clinic-item active" target="_blank">
+                                        <div class="icon-block">
+                                            <picture>
+                                                <img src="site-shell/img/gr5rpdn9bih8tgyx5tv3xq9e0s75gmeh.svg" alt="Санаторий Дон" class="clinic-logo">
+                                            </picture>
+                                        </div>
+                                        <div class="descr-block">
+                                            <span class="item-title">Санаторий Дон</span>
+                                            <span class="item-address">Воронеж, Кленовая аллея, д.6</span>
+                                        </div>
+                                    </a>
+                                <!--/noindex-->
+                            </li>
+                                    </ul>
+            </div>
+            </div>
+            <a href="https://mars-clinic.ru/clinics/detskaya-klinika/" class="detskaya-klinika-btn-gif">
+            <img src="site-shell/img/child-logo.gif" alt="Детская клиника МАРС">
+        </a>
+<nav id="main-menu" class="b-main-menu main-menu">
+    <div class="b-main-menu__top">
+        <div class="b-main-menu__left">
+        <a href="https://mars-clinic.ru/en/" class="lang-link btn-border-grey b-lang-switch">EN</a>
+            </div>
+        <div class="b-main-menu__right">
+            <button class="b-main-menu__close js-menu-close" type="button"></button>
+        </div>
+        <!-- <a href="https://mars-clinic.ru/" class="b-main-menu__search search-link"><span class="icon icon-search"></span></a> -->
+        <div class="b-main-menu__search-form-wrap">
+            <form action="https://mars-clinic.ru/" class="b-main-menu__search-form">
+                <input id="search_input" type="text" name="q" class="b-main-menu__search-form-input" placeholder="Поиск...">
+                <button type="submit" class="b-main-menu__search-form-submit"><span class="icon icon-search"></span></button>
+            </form>
+            <div class="search-result search-form-results-menu"></div>
+        </div>
+    </div>
+    <ul role="list" class="b-main-menu__list">
+                                    <li class="b-main-menu__submenu-item submenu-item desctop ">
+                    <div class="b-main-menu__label">
+                        <img src="site-shell/img/v2dqwp1g1shv2rzf7yokj5z1jpja92ss.svg" alt="">
+                        <span>Направления</span>
+                    </div>
+                    <div class="b-main-menu__submenu-wrapper submenu-wrapper">
+                        <ul>
+                                                            <li class=" "><a href="https://mars-clinic.ru/areas/">Направления</a></li>
+                                                            <li class=" "><a href="https://mars-clinic.ru/areas/chek-apy-i-kompleksnye-programmy/">Чек-апы и комплексные программы</a></li>
+                                                            <li class=" "><a href="https://mars-clinic.ru/brochures/">Что мы лечим</a></li>
+                                                            <li class=" "><a href="https://mars-clinic.ru/equipment/">Оборудование</a></li>
+                                                    </ul>
+                    </div>
+                </li>
+                                                <li class="single desctop mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/doctors/">
+                        <img src="site-shell/img/2y94g4a85akbua5n2f2o4t18eh5v3qdm.svg" alt="">
+                        <span>Врачи</span>
+                    </a>
+                </li>
+                                                <li class="single  mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/areas/">
+                        <img src="site-shell/img/v2dqwp1g1shv2rzf7yokj5z1jpja92ss.svg" alt="">
+                        <span>Услуги</span>
+                    </a>
+                </li>
+                                                <li class="single  mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/areas/chek-apy-i-kompleksnye-programmy/">
+                        <img src="site-shell/img/a2ovjgq2ldp9x4jmaxq4dwbrbn06tgh8.svg" alt="">
+                        <span>Чек-апы и программы</span>
+                    </a>
+                </li>
+                                                <li class="single desctop mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/prices/">
+                        <img src="site-shell/img/qggn5pj67o3jzcd8krfbt4y9k63fm02x.svg" alt="">
+                        <span>Цены</span>
+                    </a>
+                </li>
+                                                <li class="single  mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/brochures/">
+                        <img src="site-shell/img/r0jv9ld4vkcybz6b52p27j9dxj13dwr4.svg" alt="">
+                        <span>Что мы лечим</span>
+                    </a>
+                </li>
+                                                <li class="single  mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/equipment/">
+                        <img src="site-shell/img/iz4cq6ma6e34l0fbmjveby128rz49of2.svg" alt="">
+                        <span>Оборудование</span>
+                    </a>
+                </li>
+                                                <li class="b-main-menu__submenu-item submenu-item desctop mobile">
+                    <div class="b-main-menu__label">
+                        <img src="site-shell/img/ezdsc5khh1gf68brt5sr0tlp81bo88kx.svg" alt="">
+                        <span>О компании</span>
+                    </div>
+                    <div class="b-main-menu__submenu-wrapper submenu-wrapper">
+                        <ul>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/">О компании</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/publications/">Новости и статьи</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/smi/">СМИ о нас</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/cooperation/">Сотрудничество</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/vacancies/">Вакансии</a></li>
+                                                    </ul>
+                    </div>
+                </li>
+                                                <li class="b-main-menu__submenu-item submenu-item desctop mobile">
+                    <div class="b-main-menu__label">
+                        <img src="site-shell/img/72bd4gw7ztr8w9q2f0sv04nawbo1ojrs.svg" alt="">
+                        <span>Пациентам</span>
+                    </div>
+                    <div class="b-main-menu__submenu-wrapper submenu-wrapper">
+                        <ul>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/for-patients/">Анкеты</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/legal/">Юридическая информация</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/offers/">Акции</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/how-to-reach/">Как нас найти</a></li>
+                                                            <li class="desctop mobile"><a href="https://mars-clinic.ru/faq/">Вопросы и ответы</a></li>
+                                                    </ul>
+                    </div>
+                </li>
+                                                <li class="single desctop mobile">
+                    <a class="b-main-menu__label" href="https://mars-clinic.ru/how-to-reach/">
+                        <img src="site-shell/img/v0tkmyg261tq0enqsqgux33i6o8hd3zn.svg" alt="">
+                        <span>Контакты</span>
+                    </a>
+                </li>
+                        </ul>
+</nav>
+                <div class="btns-block">
+                    <a href="https://mars-clinic.ru/" class="search-link"><span class="icon icon-search"></span></a>
+                    <div class="phone-content">
+                        <a href="javascript:void(0);" class="phone-link js-phone-link"><span class="icon icon-phone"></span></a>
+                        <div class="phones-block">
+            <div class="block-item">
+            <span class="item-title" style="--clinic-color: #ff8516; --clinic-color-bg: #fff2e6;">Олимп Клиник МАРС</span>
+            <a href="tel:+74952555003" class="phone-link">+7 495 255-50-03</a>
+            <a href="https://wa.me/74952555003" rel="noopener noreferrer" class="wa-link" target="_blank"><span class="icon icon-whatsapp"></span></a>
+            <a href="https://t.me/+79686363868/" rel="noopener noreferrer" class="tg-link" target="_blank"><span class="icon icon-social_tg"></span></a>
+            <a href="https://olymp.mobz.click/webmars" rel="noopener noreferrer" class="max-link" target="_blank">
+                <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.6234 0.0169323C4.44969 0.391782 -0.285788 6.01796 0.0134038 13.1126C0.144085 16.218 1.39244 18.8901 1.68819 21.8373C1.76385 22.6007 1.54375 23.543 2.42413 23.8766C3.50741 24.2859 5.16844 23.5981 6.07634 22.9687C6.38584 22.7589 6.6816 22.5148 6.90857 22.2121C7.84741 22.8346 8.73811 23.4364 9.85578 23.7047C14.777 24.8842 20.1693 22.1846 22.5663 17.8481C27.0713 9.70111 20.9809 -0.471404 11.6234 0.0169323ZM8.83784 17.0193C8.44923 17.3219 8.07439 17.7346 7.64451 17.9719C7.02206 18.3055 6.82947 17.9581 6.59562 17.4079C5.85968 15.6574 5.77027 12.6758 6.20014 10.8429C6.77789 8.34959 8.70716 6.15552 11.3586 5.92167C14.041 5.68438 16.5309 7.04622 17.6554 9.50509C20.1452 14.9765 13.7728 20.3792 8.83784 17.0227V17.0193Z" fill="#3356A3"/>
+                </svg>
+            </a>
+            <a href="mailto:mars-info@olymp.clinic" rel="noopener noreferrer" class="email-link"><span class="icon icon-email"></span></a>
+        </div>
+            <div class="block-item">
+            <span class="item-title" style="--clinic-color: #325faa; --clinic-color-bg: #ebeff6;">Детская клиника</span>
+            <a href="tel:+74952555003" class="phone-link">+7 495 255-50-03</a>
+            <a href="https://wa.me/74952555003" rel="noopener noreferrer" class="wa-link" target="_blank"><span class="icon icon-whatsapp"></span></a>
+            <a href="https://t.me/+79686363868/" rel="noopener noreferrer" class="tg-link" target="_blank"><span class="icon icon-social_tg"></span></a>
+            <a href="https://olymp.mobz.click/webmarschild" rel="noopener noreferrer" class="max-link" target="_blank">
+                <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.6234 0.0169323C4.44969 0.391782 -0.285788 6.01796 0.0134038 13.1126C0.144085 16.218 1.39244 18.8901 1.68819 21.8373C1.76385 22.6007 1.54375 23.543 2.42413 23.8766C3.50741 24.2859 5.16844 23.5981 6.07634 22.9687C6.38584 22.7589 6.6816 22.5148 6.90857 22.2121C7.84741 22.8346 8.73811 23.4364 9.85578 23.7047C14.777 24.8842 20.1693 22.1846 22.5663 17.8481C27.0713 9.70111 20.9809 -0.471404 11.6234 0.0169323ZM8.83784 17.0193C8.44923 17.3219 8.07439 17.7346 7.64451 17.9719C7.02206 18.3055 6.82947 17.9581 6.59562 17.4079C5.85968 15.6574 5.77027 12.6758 6.20014 10.8429C6.77789 8.34959 8.70716 6.15552 11.3586 5.92167C14.041 5.68438 16.5309 7.04622 17.6554 9.50509C20.1452 14.9765 13.7728 20.3792 8.83784 17.0227V17.0193Z" fill="#3356A3"/>
+                </svg>
+            </a>
+            <a href="mailto:mars.kids@olymp.clinic" rel="noopener noreferrer" class="email-link"><span class="icon icon-email"></span></a>
+        </div>
+                                <div class="backcall-item">
+                                <span class="item-title">Оставить заявку на обратный звонок</span>
+                                <a href="https://mars-clinic.ru/" data-ancor="backcall-section" class="btn-fill form-btn">Перейти к форме</a>
+                            </div>
+                        </div>
+                    </div>
+        <a href="https://mars-clinic.ru/en/" class="lang-link b-lang-switch">EN</a>
+                        <div class="extra-content">
+                        <a href="tel:+74952550903" class="extra-link js-extra-link"><span>Неотложная помощь</span></a>
+                        <div class="extra-block">
+                            <a href="tel:+74952550903" class="phone-link">
+                                <svg width="21" height="21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.372 0c.86 0 1.61.585 1.818 1.42l1.107 4.423a1.872 1.872 0 0 1-.695 1.954l-1.293.97-.011.01a.31.31 0 0 0-.112.35 11.289 11.289 0 0 0 6.695 6.69l.084.015a.33.33 0 0 0 .267-.14l.97-1.294.001-.002a1.88 1.88 0 0 1 1.951-.693h.003l4.423 1.107c.833.208 1.42.957 1.42 1.818V18a3 3 0 0 1-3 3h-2.25C7.052 21 0 13.948 0 5.25V3a3 3 0 0 1 3-3h1.372zM3 1.5A1.5 1.5 0 0 0 1.5 3v2.25c0 7.87 6.38 14.25 14.25 14.25H18a1.5 1.5 0 0 0 1.5-1.5v-1.372a.376.376 0 0 0-.284-.363l-4.421-1.107a.382.382 0 0 0-.394.142v-.001l-.97 1.292c-.433.578-1.187.88-1.921.68l-.147-.046a12.79 12.79 0 0 1-7.588-7.588l-.004-.011A1.81 1.81 0 0 1 4.42 7.56l1.282-.962.001-.001a.373.373 0 0 0 .139-.39L4.735 1.784a.375.375 0 0 0-.363-.284H3z" fill="#FF7900" />
+                                    <path d="M18.75 1.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V4.06l-4.72 4.72a.75.75 0 1 1-1.06-1.06L16.94 3h-2.69a.75.75 0 0 1 0-1.5h4.5z" fill="#FF7900" />
+                                </svg>
+                                <span>+7 495 255-09-03</span>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- <a href="https://lk.olymp.clinic" class="profile-link"><span>Личный кабинет</span></a> -->
+                        <button class="hamburger-btn js-menu-btn" type="button" data-menu="main-menu">
+                        <span class="hamburger-inner"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="b-header__content"></div>
+    </div>
+    <div class="b-header__nav"></div>
+</header>
+</div>
+<div class="wrap">
+  <header class="phead" id="flowHead"><div id="phead"></div><nav class="stepper" id="stepper" aria-label="Шаги"></nav></header>
+  <div class="grid">
+    <main class="stage" id="stage" aria-live="polite"></main>
+    <aside class="aside"><div class="aside-in"><div class="island" id="island"></div><div class="aside-note" id="asideNote"></div></div></aside>
+  </div>
+</div>
+<div class="ss" id="siteFooter">
+<footer class="footer">
+	<div class="l-blackout"></div>
+	    <div class="b-bottom-menu">
+        <div class="container">
+            <div class="b-bottom-menu__list">
+                                                                                                <div class="b-bottom-menu__item clinic">
+                                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15 21V13C15 12.7348 14.8946 12.4804 14.7071 12.2929C14.5196 12.1054 14.2652 12 14 12H10C9.73478 12 9.48043 12.1054 9.29289 12.2929C9.10536 12.4804 9 12.7348 9 13V21" stroke="#595959" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M3 9.99997C2.99993 9.70904 3.06333 9.42159 3.18579 9.15768C3.30824 8.89378 3.4868 8.65976 3.709 8.47197L10.709 2.47297C11.07 2.16788 11.5274 2.00049 12 2.00049C12.4726 2.00049 12.93 2.16788 13.291 2.47297L20.291 8.47197C20.5132 8.65976 20.6918 8.89378 20.8142 9.15768C20.9367 9.42159 21.0001 9.70904 21 9.99997V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V9.99997Z" stroke="#595959" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <div class="b-bottom-menu__title">Клиника</div>
+                                                                    </div>
+                                                                                                                                                    <a class="b-bottom-menu__item " href="https://mars-clinic.ru/areas/">
+                                    <img class="b-bottom-menu__icon" src="site-shell/img/v2dqwp1g1shv2rzf7yokj5z1jpja92ss.svg">
+                                    <div class="b-bottom-menu__title">Услуги</div>
+                                </a>
+                                                                                                                    <div class="b-bottom-menu__item ss-order">
+                                <div class="b-bottom-menu__ball">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 2.00037V6.00037" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M16 2.00037V6.00037" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M19 4.00012H5C3.89543 4.00012 3 4.89555 3 6.00012V20.0001C3 21.1047 3.89543 22.0001 5 22.0001H19C20.1046 22.0001 21 21.1047 21 20.0001V6.00012C21 4.89555 20.1046 4.00012 19 4.00012Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M3 10.0001H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div class="b-bottom-menu__title">Запись</div>
+                            </div>
+                                                                                                                        <a class="b-bottom-menu__item " href="https://mars-clinic.ru/doctors/">
+                                    <img class="b-bottom-menu__icon" src="site-shell/img/2y94g4a85akbua5n2f2o4t18eh5v3qdm.svg">
+                                    <div class="b-bottom-menu__title">Врачи</div>
+                                </a>
+                                                                                    <a class="b-bottom-menu__item" href="https://mars-clinic.ru/">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.5371 22L15.7629 16.2258M15.7629 16.2258C17.3257 14.663 18.2037 12.5434 18.2037 10.3333C18.2037 8.12316 17.3257 6.00356 15.7629 4.44076C14.2001 2.87797 12.0805 2 9.87039 2C7.66027 2 5.54067 2.87797 3.97787 4.44076C2.41508 6.00356 1.53711 8.12316 1.53711 10.3333C1.53711 12.5434 2.41508 14.663 3.97787 16.2258C5.54067 17.7886 7.66027 18.6666 9.87039 18.6666C12.0805 18.6666 14.2001 17.7886 15.7629 16.2258Z" stroke="#595959" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="b-bottom-menu__title">Поиск</div>
+                </a>
+            </div>
+        </div>
+        <!-- Блок клиник -->
+        <div class="b-clinic-block clinic-block b-clinic-block--bottom-menu">
+            <div class="clinic-list">
+                <ul>
+                                                                                <li>
+                                    <a href="https://mars-clinic.ru/clinics/mars/" class="clinic-item active">
+                                        <div class="icon-block">
+                                            <picture>
+                                                <img src="site-shell/img/vctsxdnrp8v0cfouwejfera7b2uhmnbu.svg" alt="Олимп Клиник МАРС" class="clinic-logo">
+                                            </picture>
+                                        </div>
+                                        <div class="descr-block">
+                                            <span class="item-title">Олимп Клиник МАРС</span>
+                                            <span class="item-address">Москва, 1-я улица Ямского Поля, 15</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                                                                    <li>
+                                    <a href="https://mars-clinic.ru/clinics/detskaya-klinika/" class="clinic-item active">
+                                        <div class="icon-block">
+                                            <picture>
+                                                <img src="site-shell/img/8fp4fdrvktsd2bz2rqxdhfu71tbryo88.svg" alt="Детская клиника" class="clinic-logo">
+                                            </picture>
+                                        </div>
+                                        <div class="descr-block">
+                                            <span class="item-title">Детская клиника</span>
+                                            <span class="item-address">1-я улица Ямского Поля, 15к4</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                                                                    <li class="clinic-list__li-title">Санаторно-курортное лечение</li>
+                                <li>
+                                    <!--noindex-->
+                                        <a href="https://www.donresort.ru/?utm_source=main_olymp&utm_medium=button&utm_campaign=clinic_list" rel="nofollow" class="clinic-item active" target="_blank">
+                                            <div class="icon-block">
+                                                <picture>
+                                                    <img src="site-shell/img/gr5rpdn9bih8tgyx5tv3xq9e0s75gmeh.svg" alt="Санаторий Дон" class="clinic-logo">
+                                                </picture>
+                                            </div>
+                                            <div class="descr-block">
+                                                <span class="item-title">Санаторий Дон</span>
+                                                <span class="item-address">Воронеж, Кленовая аллея, д.6</span>
+                                            </div>
+                                        </a>
+                                    <!--/noindex-->
+                                </li>
+                                                            </ul>
+            </div>
+        </div>
+        <!--  -->
+                <!-- Блок контактов -->
+                            <div class="b-contacts-menu-botttom">
+	<div class="b-contacts-menu-botttom__wrapper">
+		<div class="b-contacts-menu-botttom__top-block tabs-section">
+			<div class="b-contacts-menu-botttom__title">
+									<span>Записаться по телефону</span>
+							</div>
+			<ul class="b-contacts-menu-botttom__tabs tabs-links">
+				<div class="b-contacts-menu-botttom__tabs-container">
+											<li class="b-contacts-menu-botttom__tab">
+							<a href="javascript:void(0);" data-tab="87"
+								class="js-tab-link active"
+								style="--clinic-color: #ff8516; --clinic-color-bg: #fff2e6;"
+							>Олимп Клиник МАРС</a>
+						</li>
+											<li class="b-contacts-menu-botttom__tab">
+							<a href="javascript:void(0);" data-tab="13816"
+								class="js-tab-link "
+								style="--clinic-color: #325faa; --clinic-color-bg: #ebeff6;"
+							>Детская клиника</a>
+						</li>
+									</div>
+			</ul>
+			<div class="b-contacts-menu-botttom__slider">
+									<div data-tab="87"
+						class="b-contacts-menu-botttom__tab-block tab-item active"
+					>
+						<a href="tel:+74952555003" class="b-contacts-menu-botttom__phone phone-link btn-fill">+7 495 255-50-03</a>
+						<div class="b-contacts-menu-botttom__socials">
+							<a href="https://wa.me/74952555003" rel="noopener noreferrer" class="wa-link" target="_blank"><span class="icon icon-whatsapp"></span></a>
+							<a href="https://t.me/+79686363868/" rel="noopener noreferrer" class="tg-link" target="_blank"><span class="icon icon-social_tg"></span></a>
+							<a href="https://olymp.mobz.click/webmars" rel="noopener noreferrer" class="max-link" target="_blank">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M11.6234 0.0169323C4.44969 0.391782 -0.285788 6.01796 0.0134038 13.1126C0.144085 16.218 1.39244 18.8901 1.68819 21.8373C1.76385 22.6007 1.54375 23.543 2.42413 23.8766C3.50741 24.2859 5.16844 23.5981 6.07634 22.9687C6.38584 22.7589 6.6816 22.5148 6.90857 22.2121C7.84741 22.8346 8.73811 23.4364 9.85578 23.7047C14.777 24.8842 20.1693 22.1846 22.5663 17.8481C27.0713 9.70111 20.9809 -0.471404 11.6234 0.0169323ZM8.83784 17.0193C8.44923 17.3219 8.07439 17.7346 7.64451 17.9719C7.02206 18.3055 6.82947 17.9581 6.59562 17.4079C5.85968 15.6574 5.77027 12.6758 6.20014 10.8429C6.77789 8.34959 8.70716 6.15552 11.3586 5.92167C14.041 5.68438 16.5309 7.04622 17.6554 9.50509C20.1452 14.9765 13.7728 20.3792 8.83784 17.0227V17.0193Z" fill="#3356A3"/>
+								</svg>
+							</a>
+							<a href="mailto:mars-info@olymp.clinic" rel="noopener noreferrer" class="email-link"><span class="icon icon-email"></span></a>
+						</div>
+					</div>
+									<div data-tab="13816"
+						class="b-contacts-menu-botttom__tab-block tab-item "
+					>
+						<a href="tel:+74952555003" class="b-contacts-menu-botttom__phone phone-link btn-fill">+7 495 255-50-03</a>
+						<div class="b-contacts-menu-botttom__socials">
+							<a href="https://wa.me/74952555003" rel="noopener noreferrer" class="wa-link" target="_blank"><span class="icon icon-whatsapp"></span></a>
+							<a href="https://t.me/+79686363868/" rel="noopener noreferrer" class="tg-link" target="_blank"><span class="icon icon-social_tg"></span></a>
+							<a href="https://olymp.mobz.click/webmarschild" rel="noopener noreferrer" class="max-link" target="_blank">
+								<svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M11.6234 0.0169323C4.44969 0.391782 -0.285788 6.01796 0.0134038 13.1126C0.144085 16.218 1.39244 18.8901 1.68819 21.8373C1.76385 22.6007 1.54375 23.543 2.42413 23.8766C3.50741 24.2859 5.16844 23.5981 6.07634 22.9687C6.38584 22.7589 6.6816 22.5148 6.90857 22.2121C7.84741 22.8346 8.73811 23.4364 9.85578 23.7047C14.777 24.8842 20.1693 22.1846 22.5663 17.8481C27.0713 9.70111 20.9809 -0.471404 11.6234 0.0169323ZM8.83784 17.0193C8.44923 17.3219 8.07439 17.7346 7.64451 17.9719C7.02206 18.3055 6.82947 17.9581 6.59562 17.4079C5.85968 15.6574 5.77027 12.6758 6.20014 10.8429C6.77789 8.34959 8.70716 6.15552 11.3586 5.92167C14.041 5.68438 16.5309 7.04622 17.6554 9.50509C20.1452 14.9765 13.7728 20.3792 8.83784 17.0227V17.0193Z" fill="#3356A3"/>
+								</svg>
+							</a>
+							<a href="mailto:mars.kids@olymp.clinic" rel="noopener noreferrer" class="email-link"><span class="icon icon-email"></span></a>
+						</div>
+					</div>
+							</div>
+		</div>
+		<div class="b-contacts-menu-botttom__bottom-block">
+							<div class="b-contacts-menu-botttom__title">
+					<span>Записаться к врачу</span>
+				</div>
+				<a class="b-contacts-menu-botttom__order-btn btn-border ondoc" href="https://mars-clinic.ru/doctors/">Выбрать время</a>
+					</div>
+	</div>
+</div>
+                    <!---->
+    </div>	<div class="container">
+					<div class="footer__info b-footer-info">
+    <h5>г. Москва</h5>
+    <div class="info-items">
+                    <div class="info-item">
+                <a href="https://mars-clinic.ru/clinics/mars/" class="item-link">
+                    <picture>
+                        <img src="site-shell/img/u43iqgyqufj7u9dbvyqbkuwn5phmre6l.png" alt="Олимп Клиник МАРС" class="item-logo">
+                    </picture>
+                </a>
+                                    <div class="item-part">
+                        <address class="address">1-я улица Ямского Поля, 15</address>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Режим работы</span>
+                                                <time class="time">Пн-Вс</time>
+                        <time class="time">Круглосуточно</time>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Номер телефона</span>
+                        <a href="tel:+74952555003">+7 495 255-50-03</a>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Адрес электронной почты</span>
+                        <a href="mailto:mars-info@olymp.clinic" rel="noopener noreferrer">mars-info@olymp.clinic</a>
+                    </div>
+                                <a href="https://mars-clinic.ru/upload/litsenzii/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F%20%D0%9C%D0%90%D0%A0%D0%A1.pdf" target="_blank" class="doc-link">Лицензия Л041-01137-77_01307066</a>
+            </div>
+                    <div class="info-item">
+                <a href="https://mars-clinic.ru/clinics/detskaya-klinika/" class="item-link">
+                    <picture>
+                        <img src="site-shell/img/vxvxhrw3utjqd1wbs07z18m69c5jfvx7.webp" alt="Детская клиника" class="item-logo">
+                    </picture>
+                </a>
+                                    <div class="item-part">
+                        <address class="address">1-я улица Ямского Поля, 15к4</address>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Режим работы</span>
+                                                <time class="time">Пн-Вс</time>
+                        <time class="time">Круглосуточно</time>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Номер телефона</span>
+                        <a href="tel:+74952555003">+7 495 255-50-03</a>
+                    </div>
+                                                    <div class="item-part">
+                        <span class="part-title">Адрес электронной почты</span>
+                        <a href="mailto:mars.kids@olymp.clinic" rel="noopener noreferrer">mars.kids@olymp.clinic</a>
+                    </div>
+                                <a href="https://mars-clinic.ru/upload/litsenzii/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F%20%D0%9C%D0%90%D0%A0%D0%A1.pdf" target="_blank" class="doc-link">Лицензия Л041-01137-77_01307066</a>
+            </div>
+            </div>
+		</div>
+		<div class="footer__menu">
+			<div class="left-side">
+				<a href="https://mars-clinic.ru/" class="logo-link">
+					<img src="site-shell/img/p5gfji40i1maoil1wytpjzhpugyqz1tr.svg" alt="олимп" class="logo-image">
+				</a>
+				    <ul class="social-list">
+                    <li><a href="https://www.youtube.com/channel/UCczn3rfyThmlxH9qVYkUU_A" rel="noopener noreferrer" target="_blank"><span class="icon icon-social_yt"></span></a></li>
+                            <li><a href="https://dzen.ru/id/67989119a9f8940e418441cf" rel="noopener noreferrer" target="_blank"><span class="icon icon-social_dzen"></span></a></li>
+                            <li><a href="https://vk.com/olymp.clinic.mars" rel="noopener noreferrer" target="_blank"><span class="icon icon-social_vk"></span></a></li>
+                            <li><a href="https://t.me/olympclinicmars" rel="noopener noreferrer" target="_blank"><span class="icon icon-social_tg"></span></a></li>
+            </ul>
+				<div class="download-block">
+					<p>Скачать приложение для записи к врачу</p>
+												<a href="https://apps.apple.com/us/app/%D0%BE%D0%BB%D0%B8%D0%BC%D0%BF-%D0%BA%D0%BB%D0%B8%D0%BD%D0%B8%D0%BA/id6743495811" target="_blank" class="download-link">
+								<img src="site-shell/img/gaupz2ufvf4x7gb0l1x6itslcvrgbwms.svg" alt="download" class="link-image">
+							</a>
+																	<a href="https://play.google.com/store/apps/details?id=me.ondoc.custom.olympclinic" target="_blank" class="download-link">
+								<img src="site-shell/img/z72is5x3mdmmcbo2jchzhxmlykei3eu6.svg" alt="download" class="link-image">
+							</a>
+																	<a href="https://olymp.clinic/upload/olymp.apk" download target="_blank" class="download-link">
+								<img src="site-shell/img/bon1ldrz4tzhy5klhi1xgum968glxemm.svg" alt="download" class="link-image">
+							</a>
+									</div>
+				<a href="mailto:baranov.vitaliy@olymp.clinic" class="letter-link btn-fill">Написать генеральному директору</a>
+			</div>
+			<div class="right-side">
+<nav class="footer-menu">
+            <div class="footer-column">
+            <span class="column-title">Клиника</span>
+            <ul>
+                                    <li><a href="https://mars-clinic.ru/clinics/mars/">Олимп Клиник МАРС</a></li>
+                                    <li><a href="https://mars-clinic.ru/clinics/detskaya-klinika/">Детская клиника</a></li>
+                            </ul>
+        </div>
+            <div class="footer-column">
+            <span class="column-title">О компании</span>
+            <ul>
+                                    <li><a href="https://mars-clinic.ru/">О компании</a></li>
+                                    <li><a href="https://mars-clinic.ru/for-patients/">Пациентам</a></li>
+                                    <li><a href="https://mars-clinic.ru/smi/">СМИ о нас</a></li>
+                                    <li><a href="https://mars-clinic.ru/for-doctors/">Врачам</a></li>
+                                    <li><a href="https://mars-clinic.ru/prices/">Прейскурант</a></li>
+                                    <li><a href="https://mars-clinic.ru/cooperation/">Сотрудничество</a></li>
+                                    <li><a href="https://mars-clinic.ru/offers/">Спец.предложения</a></li>
+                                    <li><a href="https://mars-clinic.ru/vacancies/">Вакансии</a></li>
+                            </ul>
+        </div>
+            <div class="footer-column">
+            <span class="column-title">Документы</span>
+            <ul>
+                                    <li><a href="https://mars-clinic.ru/legal/">Юридическая информация</a></li>
+                            </ul>
+        </div>
+    </nav>
+				<div class="footer-survey-link">
+					<picture class="minzdrav-image">
+            			<img src="site-shell/img/03gugve7h9bqjcz7okujbenfbu9zquyw.png" alt="Минздрав">
+					</picture>
+					<div class="text-link">
+						Независимая оценка качества оказания услуг медицинскими организациями						<a href="https://anketa.minzdrav.gov.ru/ambulator/30" target="_blank">
+							<span>Участвовать в анкетировании</span>
+							<span class="icon icon-arrow"></span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer__copyright">
+			<!--noindex-->
+				<p>
+	 Подробную информацию о&nbsp;порядке обработки ваших персональных данных вы&nbsp;можете найти в&nbsp;наших документах на сайте: <a target="_blank"  href="https://olymp.clinic/upload/iblock/7f6/s03mdfcck6chl6phyrabrfxwrwfvdbc1.pdf" target="_blank">Политика обработки персональных данных ООО "Олимп Клиник Марс"</a>.
+</p>
+<p>
+	 В&nbsp;соответствии с&nbsp;Федеральным законом от&nbsp;21&nbsp;ноября 2011&nbsp;г. № 323-ФЗ «Об&nbsp;основах охраны здоровья граждан в&nbsp;Российской Федерации» (с&nbsp;изменениями и&nbsp;дополнениями) Потребитель имеет возможность получения медицинской помощи в&nbsp;рамках программы государственных гарантий бесплатного оказания гражданам медицинской помощи и&nbsp;территориальных программ государственных гарантий бесплатного оказания гражданам медицинской помощи.
+</p>
+			<!--/noindex-->
+			<div class="footer_links">
+								<a href="https://mars-clinic.ru/" id="specialButton" class="bvi-open">Версия сайта для слабовидящих</a>
+			</div>
+								<div class="payment-row">
+														<picture>
+									<img src="site-shell/img/o72k18isp4oa53hf7eyqwevwf02mf69l.png">
+								</picture>
+														<picture>
+									<img src="site-shell/img/3ikzyiqw69kjbiyxqfkwqhhsz71d0opp.png">
+								</picture>
+														<picture>
+									<img src="site-shell/img/dvqpz8zx80sm2a59vh96h2n80do35yoc.png">
+								</picture>
+														<picture>
+									<img src="site-shell/img/0c84q0d93nrd2v4twfomikk45cnz30gf.png">
+								</picture>
+														<picture>
+									<img src="site-shell/img/6doztijiepvbe5j1ypoqftpngvm9jib2.png">
+								</picture>
+											</div>
+						<p>Необходима консультация специалиста. Имеются противопоказания. Не является публичной офертой. 18+</p>		</div>
+	</div>
+	</footer>
+</div>
+
+<div class="mbar" id="mbar"><div class="mbar-in">
+  <button class="mbar-head" id="mbarHead" aria-expanded="false"></button>
+  <div class="mbar-body"><div><div class="lines" id="mbarLines"></div></div></div>
+</div></div>
+<div class="toast" id="toast" role="status"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg></i><span></span></div>
+<div class="backdrop" id="backdrop"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-h"><div><h3 id="sheetTitle"></h3><p id="sheetSub"></p></div><button class="x" id="sheetX" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="sheet-b" id="sheetBody"></div>
+</aside>
+
+<script src="site-shell/site-shell.js"></script>
+<script>
+const D = {"programs":{"start":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Ферритин","l"],["Гликированный гемоглобин (HbA1c)","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["Рентгенография ОГК","i"],["УЗИ почек и мочевыводящих путей","i"]],"optimal":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"]],"extended":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Эндокринолог","c"],["Дерматовенеролог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["с-пептид","l"],["Инсулин","l"],["Индекс НОМА","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["Цинк","l"],["Фолиевая кислота","l"],["Витамин В12","l"],["Гомоцистеин","l"],["Общий IgE","l"],["коагулограмма","l"],["ЛЖСС","l"],["Железо","l"],["ЛДГ","l"],["КФК","l"],["Магний в эритроцитах","l"],["Сифилис RPR","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"],["УЗДГ артерий брахицефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["КТ-кальциевый индекс коронарных артерий","i"]]},"addons":{"female":{"start":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"]],"optimal":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]],"extended":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]]},"male":{"start":[["Тестостерон","l"],["ПСА общий","l"],["УЗИ органов малого таза (простата)","i"]],"optimal":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"]],"extended":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ГСПГ","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"],["Урофлоумерия","i"]]},"cardio":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"]]},"gastro":{"start":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["Коагулограмма","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Коагулограмма","l"]],"extended":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"cardio_gastro":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"energy":{"start":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]},"all3":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]}}};
+const LV = [
+  {id:'start', name:'Стартовая', desc:'Базовая проверка основных систем организма за один визит.'},
+  {id:'optimal', name:'Оптимальная', desc:'Сердце, щитовидная железа, инфекции и низкодозная КТ лёгких.'},
+  {id:'extended', name:'Расширенная', desc:'Максимальный охват: обмен веществ, сосуды, кальциевый индекс коронарных артерий.'}
+];
+const LVN = {start:'Стартовой', optimal:'Оптимальной', extended:'Расширенной'};
+// Условные цены для прототипа, ₽
+const PRICE = {
+  base:{start:14900, optimal:29900, extended:54900},
+  female:{start:9900, optimal:21900, extended:21900},
+  male:{start:5900, optimal:11900, extended:15900},
+  cardio:{start:24900, optimal:19900, extended:17900},
+  gastro:{start:39900, optimal:34900, extended:31900},
+  cardio_gastro:{start:59900, optimal:50900, extended:45900},
+  energy:{start:27900, optimal:25900, extended:18900},
+  all3:{start:82900, optimal:71900, extended:59900}
+};
+const AD = {
+  female:{name:'Женский модуль', icon:'venus', short:'Гинеколог, цитология, ВПЧ, УЗИ малого таза и молочных желёз'},
+  male:{name:'Мужской модуль', icon:'mars', short:'Тестостерон, ПСА, УЗИ простаты, уролог'},
+  cardio:{name:'Кардио', icon:'heart', short:'Велоэргометрия, УЗДГ сосудов, NT-proBNP, ApoB, Lp(a)'},
+  gastro:{name:'Гастро', icon:'apple', short:'Гастро- и колоноскопия под наркозом, гастроэнтеролог'},
+  energy:{name:'Энергия и метаболизм', icon:'zap', short:'Гормоны, витамины, микроэлементы, денситометрия всего тела'},
+  cardio_gastro:{name:'Кардио + Гастро', icon:'heart'},
+  all3:{name:'Кардио + Гастро + Энергия', icon:'zap'}
+};
+const GRP = {c:'Консультации', l:'Анализы', i:'Исследования и процедуры'};
+const ICON = {
+  check:'<path d="M5 12l5 5 9-11"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  chev:'<path d="M6 9l6 6 6-6"/>',
+  alert:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.5 12h4l1.5-3 3 6 1.5-3h7"/>',
+  apple:'<path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/>',
+  zap:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  venus:'<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/>',
+  mars:'<circle cx="10" cy="14" r="5.5"/><path d="M14 10l6.5-6.5M15 3.5h5.5V9"/>'
+};
+const IMG = {female:'img/woman-cutout.webp', male:'img/man-cutout.webp', couple:'img/couple-cutout.webp', icoMale:'img/icon-male.webp', icoFemale:'img/icon-female.webp'};
+const ico = (n, sw=2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
+const rub = n => n.toLocaleString('ru-RU').replace(/\s/g,' ') + ' ₽';
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const S = { step:0, who:null, level:null, gender:null, themes:new Set(), showOtherGender:false, diffOnly:false,
+  form:{name:'', phone:'', email:'', c1:false, c2:false}, errors:{}, pay:'paid', orderNo:'MC-' + Math.floor(10000 + Math.random()*89999) };
+
+// ---------- domain ----------
+function themePackage(){
+  const t = ['cardio','gastro','energy'].filter(k => S.themes.has(k));
+  const map = {'':null, 'cardio':'cardio', 'gastro':'gastro', 'energy':'energy', 'cardio+gastro':'cardio_gastro', 'cardio+gastro+energy':'all3'};
+  const key = t.join('+');
+  if (key in map) return {id: map[key], combo: t.length > 1};
+  return {invalid:true, picked:t};
+}
+function lines(){
+  const out = [];
+  if (!S.level) return out;
+  out.push({id:'base', title:'Чекап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], items:D.programs[S.level]});
+  if (S.gender) out.push({id:S.gender, title:AD[S.gender].name, sub:'к ' + LVN[S.level], price:PRICE[S.gender][S.level], items:D.addons[S.gender][S.level]});
+  const tp = themePackage();
+  if (tp.id) out.push({id:tp.id, title:AD[tp.id].name, sub:(tp.combo ? 'Готовый пакет · ' : '') + 'к ' + LVN[S.level], price:PRICE[tp.id][S.level], items:D.addons[tp.id][S.level]});
+  return out;
+}
+const total = () => lines().reduce((s,l) => s + l.price, 0);
+const countBy = items => items.reduce((a,[,g]) => (a[g]=(a[g]||0)+1, a), {});
+const grouped = items => ['c','l','i'].map(g => ({g, list: items.filter(x => x[1]===g).map(x => x[0])})).filter(x => x.list.length);
+
+// ---------- rolling number: NumberFlow (number-flow.barvian.me, MIT), как в «Бегущих цифрах» из First saas ----------
+// Библиотека грузится модулем внизу страницы; до её загрузки сумма показывается текстом.
+const NF_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+function setRoll(el, value){
+  el._val = value;
+  el.setAttribute('aria-label', rub(value));
+  let f = el.querySelector('number-flow');
+  if (!f){
+    if (!window.__NF){ el.textContent = rub(value); return; }
+    el.textContent = '';
+    f = document.createElement('number-flow');
+    f.locales = 'ru-RU';
+    f.format = { style:'currency', currency:'RUB', maximumFractionDigits:0 };
+    const timing = { duration: 900, easing: window.__NF.defaultProps.transformTiming.easing || NF_EASE };
+    f.transformTiming = timing; f.spinTiming = timing;
+    f.style.setProperty('--number-flow-mask-height', '0.12em');
+    el.appendChild(f);
+    f.animated = false; f.update(value); f.animated = true;
+    return;
+  }
+  f.update(value);
+}
+window.addEventListener('nf-ready', () => document.querySelectorAll('.roll').forEach(el => { if (el._val != null) setRoll(el, el._val); }));
+
+// ---------- toast / sheet ----------
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.querySelector('span').textContent = msg;
+  t.classList.add('show'); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3200);
+}
+let lastFocus;
+function openSheet(title, sub, items){
+  lastFocus = document.activeElement;
+  document.getElementById('sheetTitle').textContent = title;
+  document.getElementById('sheetSub').textContent = sub;
+  document.getElementById('sheetBody').innerHTML = typeof items === 'string' ? items : grouped(items).map(g =>
+    `<div class="grp"><h5>${GRP[g.g]} · ${g.list.length}</h5><ul>${g.list.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`).join('');
+  document.getElementById('backdrop').classList.add('show');
+  const sh = document.getElementById('sheet'); sh.classList.toggle('wide', typeof items === 'string'); sh.classList.add('show');
+  document.getElementById('sheetX').focus();
+}
+function closeSheet(){
+  document.getElementById('backdrop').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+  lastFocus && lastFocus.focus && lastFocus.focus();
+}
+document.getElementById('sheetX').onclick = closeSheet;
+document.getElementById('backdrop').onclick = closeSheet;
+addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+// ---------- stepper & summary ----------
+function stepperHTML(){
+  const names = ['Программа','Дополнения','Заказ','Оплата'], cur = S.step || 1;
+  return names.map((n,i) => {
+    const s = i + 1, cls = cur > s ? 'done' : cur === s ? 'cur' : '';
+    return `<div class="st ${cls}" ${cur===s?'aria-current="step"':''}><b>${cur > s ? ico('check',3) : s}</b><span>${n}</span></div>`;
+  }).join('');
+}
+const HEAD = {
+  1:['Выберите основную программу','Программа обязательна: к ней добавляются дополнительные пакеты.'],
+  2:['Хотите дополнить программу?','Состав пакетов зависит от выбранного чекапа: в них только услуги, которых нет в основной программе.'],
+  3:['Оформление заказа','Проверьте состав, оставьте контакты и оплатите онлайн.'],
+  4:['Статус заказа','После оплаты администратор согласует с вами дату визита.']
+};
+function renderHead(){
+  const st = document.getElementById('stepper');
+  st.innerHTML = stepperHTML();
+  const cur = st.querySelector('.cur');
+  if (cur && st.scrollWidth > st.clientWidth) st.scrollLeft = cur.offsetLeft - (st.clientWidth - cur.offsetWidth) / 2;
+  const h = HEAD[S.step];
+  document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
+}
+function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
+// Блок заказа: всё, что появляется и пропадает, остаётся в потоке и раздвигает соседей.
+// Один тайминг на содержимое и высоту блока, поэтому элементы не заезжают друг на друга.
+// способ ввода: от него зависит, показывать ли обводку фокуса
+addEventListener('pointerdown', () => { document.documentElement.dataset.input = 'pointer'; }, true);
+addEventListener('keydown', () => { document.documentElement.dataset.input = 'keyboard'; }, true);
+// состав строки заказа открывается во всплывающей панели
+function bindOrderLines(){
+  stage.querySelectorAll('[data-oline]').forEach(btn => btn.onclick = () => {
+    const l = lines()[+btn.dataset.oline];
+    openSheet(l.title, l.sub + ' · ' + l.items.length + ' услуг · ' + rub(l.price), l.items);
+  });
+}
+const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ISL_EASE = 'cubic-bezier(.2,.8,.2,1)', FLOW_MS = 420;
+const FLOW_PROPS = ['height','paddingTop','paddingBottom','marginTop','marginBottom','borderTopWidth','borderBottomWidth'];
+let islJobs = [], islandAnim = null;
+function flowFrames(el, gap){
+  const cs = getComputedStyle(el), open = {opacity:1}, shut = {opacity:0};
+  FLOW_PROPS.forEach(p => { open[p] = cs[p]; shut[p] = '0px'; });
+  if (gap) shut.marginTop = -gap + 'px'; // вместе с элементом схлопывается и отступ flex-контейнера
+  return [shut, open];
+}
+function flowIn(el, gap){
+  const frames = flowFrames(el, gap);
+  el.style.overflow = 'hidden';
+  el.animate(frames, {duration:FLOW_MS, easing:ISL_EASE});
+  setTimeout(() => { el.style.overflow = ''; }, FLOW_MS + 30);
+}
+function flowOut(el, gap){
+  const frames = flowFrames(el, gap).reverse();
+  el.classList.add('isl-ghost');
+  el.style.overflow = 'hidden'; el.style.pointerEvents = 'none';
+  el.animate(frames, {duration:FLOW_MS, easing:ISL_EASE, fill:'forwards'});
+  setTimeout(() => el.remove(), FLOW_MS + 20);
+}
+function morphLines(box, html){
+  if (!box.offsetParent || !motionOK()){ box.innerHTML = html; return; }
+  const oldEls = [...box.querySelectorAll('[data-lid]')];
+  const old = new Map(oldEls.map(el => [el.dataset.lid, { el, text: el.textContent, h: getComputedStyle(el).height, op: getComputedStyle(el).opacity }]));
+  const leaving = [...box.querySelectorAll('.isl-ghost')];
+  box.innerHTML = html;
+  leaving.forEach(el => box.appendChild(el));
+  const fresh = new Map([...box.querySelectorAll('[data-lid]')].map(el => [el.dataset.lid, el]));
+  fresh.forEach((el, id) => {
+    const was = old.get(id);
+    if (!was) islJobs.push(() => flowIn(el));
+    else islJobs.push(() => {
+      const h = getComputedStyle(el).height;
+      // строка могла поменять высоту или быть пересобрана посреди анимации: продолжаем с текущей высоты
+      if (Math.abs(parseFloat(h) - parseFloat(was.h)) >= 1){
+        el.style.overflow = 'hidden';
+        el.animate([{height:was.h, opacity:+was.op}, {height:h, opacity:1}], {duration:FLOW_MS, easing:ISL_EASE});
+        setTimeout(() => { el.style.overflow = ''; }, FLOW_MS + 30);
+      }
+      if (was.text !== el.textContent) el.animate([{opacity:.3}, {opacity:1}], {duration:FLOW_MS, easing:'ease-out'});
+    });
+  });
+  // ушедшая строка встаёт на прежнее место и схлопывается там
+  oldEls.forEach((el, i) => {
+    const id = el.dataset.lid;
+    if (fresh.has(id)) return;
+    const anchor = oldEls.slice(i + 1).map(n => fresh.get(n.dataset.lid)).find(Boolean) || null;
+    delete el.dataset.lid;
+    islJobs.push(() => { box.insertBefore(el, anchor); flowOut(el); });
+  });
+}
+function finishIsland(from, wasS1){
+  const isl = document.getElementById('island');
+  if (islandAnim){ islandAnim.cancel(); islandAnim = null; }
+  fitAside();
+  const to = isl.offsetHeight, nowS1 = document.body.classList.contains('s1');
+  islJobs.splice(0).forEach(job => job());
+  // вне шага 1 высота следует за содержимым сама; явно ведём только смену растянутого и обычного режима
+  if (from && to && wasS1 !== nowS1 && Math.abs(from - to) >= 1 && motionOK()){
+    islandAnim = isl.animate([{height:from + 'px', minHeight:0}, {height:to + 'px', minHeight:0}], {duration:FLOW_MS, easing:ISL_EASE});
+    islandAnim.onfinish = () => { islandAnim = null; };
+  }
+}
+function renderSummary(){
+  const ls = lines(), isl = document.getElementById('island');
+  if (!isl.dataset.ready){
+    isl.dataset.ready = 1;
+    isl.innerHTML = `<h4><span>Ваш заказ</span><span id="islCount"></span></h4><div class="lines" id="islLines"></div>
+      <div class="total"><span>Итого</span><span class="roll" id="islTotal"></span></div>
+      <div class="isl-note">Оплата не бронирует время. Дату визита администратор согласует с вами после оплаты.</div>
+      <div class="isl-sp"></div><div class="isl-hint" id="islHint"></div><div class="isl-actions" id="asideActions"></div><div class="isl-foot" id="islFoot"></div>`;
+  }
+  const key = ls.map(l => l.id + l.price).join('|');
+  if (isl.dataset.key !== key){
+    isl.dataset.key = key;
+    morphLines(document.getElementById('islLines'), ls.length ? ls.map(lineHTML).join('') : '<div class="empty" data-lid="empty">Выберите основную программу: состав и стоимость появятся здесь.</div>');
+    morphLines(document.getElementById('mbarLines'), ls.map(lineHTML).join(''));
+  }
+  const cnt = document.getElementById('islCount'), cntText = ls.length ? ls.length + ' поз.' : '';
+  if (cnt.textContent !== cntText){ cnt.textContent = cntText; if (cnt.offsetParent && motionOK()) cnt.animate([{opacity:0, transform:'translateY(4px)'}, {opacity:1, transform:'none'}], {duration:320, easing:ISL_EASE}); }
+  setRoll(document.getElementById('islTotal'), total());
+  const mb = document.getElementById('mbar'), head = document.getElementById('mbarHead');
+  mb.classList.toggle('show', S.step >= 1 && S.step <= 3 && ls.length > 0);
+  if (!head.dataset.ready){
+    head.dataset.ready = 1;
+    head.innerHTML = `<span class="lft"><span class="badge" id="mbCount"></span>Ваш заказ</span><span style="display:flex;align-items:center;gap:10px"><span class="roll" id="mbTotal"></span>${ico('chev')}</span>`;
+    head.onclick = () => { const o = mb.classList.toggle('open'); head.setAttribute('aria-expanded', o); };
+  }
+  document.getElementById('mbCount').textContent = ls.length;
+  setRoll(document.getElementById('mbTotal'), total());
+}
+
+// ---------- views ----------
+const stage = document.getElementById('stage');
+// смена шага: старый экран уходит, новый входит по частям
+const STEP_EASE = 'cubic-bezier(.2,.8,.2,1)', STEP_OUT_MS = 240;
+let stepTarget = null;
+function go(step){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (stepTarget !== null){ stepTarget = step; return; }
+  const from = S.step, cur = stage.firstElementChild;
+  let outAnims = [];
+  const swap = () => {
+    const to = stepTarget === null ? step : stepTarget; stepTarget = null;
+    outAnims.forEach(a => a.cancel()); // заголовок и блок заказа живут между шагами: не оставляем их прозрачными
+    S.step = to; S.errors = {};
+    render(true);
+    window.scrollTo({top:0, behavior:'auto'});
+    if (!reduce) animateStepIn(from, to);
+  };
+  if (reduce || !cur) return swap();
+  stepTarget = step;
+  const out = [cur];
+  if (step === 0) out.push(document.getElementById('flowHead'), document.querySelector('.aside-in'));
+  outAnims = out.filter(Boolean).map(el => el.animate([{opacity:1, transform:'none'}, {opacity:0, transform:'translateY(-14px)'}], {duration:STEP_OUT_MS, easing:'cubic-bezier(.4,0,1,1)', fill:'forwards'}));
+  setTimeout(swap, STEP_OUT_MS);
+}
+function animateStepIn(from, to){
+  const up = [{opacity:0, transform:'translateY(12px)'}, {opacity:1, transform:'none'}];
+  const enter = (el, kf, delay, duration) => el && el.animate(kf, {duration, delay, easing:STEP_EASE, fill:'backwards'});
+  const phead = document.getElementById('phead');
+  if (from === 0 && to > 0){
+    enter(phead, up, 0, 520);
+    enter(document.getElementById('stepper'), up, 80, 520);
+    enter(document.querySelector('.aside-in'), [{opacity:0, transform:'translateX(32px)'}, {opacity:1, transform:'none'}], 180, 640);
+  } else if (to > 0) enter(phead, up, 0, 420);
+}
+function render(animate){
+  const islFrom = document.getElementById('island').offsetHeight, wasS1 = document.body.classList.contains('s1');
+  renderHead();
+  document.querySelector('.grid').classList.toggle('solo', S.step === 0);
+  document.body.classList.toggle('intro', S.step === 0);
+  document.body.classList.toggle('s1', S.step === 1);
+  const html = [viewIntro, viewPrograms, viewAddons, viewOrder, viewResult][S.step]();
+  const prev = {};
+  if (!animate) stage.querySelectorAll('[data-k]').forEach(el => prev[el.dataset.k] = el.className);
+  stage.innerHTML = `<div class="${animate ? 'view' : ''}">${html}</div>`;
+  const morph = [];
+  stage.querySelectorAll('[data-k]').forEach(el => { const p = prev[el.dataset.k]; if (p != null && p !== el.className){ morph.push([el, el.className]); el.className = p; } });
+  if (morph.length){ void stage.offsetWidth; morph.forEach(([el,c]) => el.className = c); }
+  bind[S.step] && bind[S.step]();
+  dockActions();
+  renderSummary();
+  finishIsland(islFrom, wasS1);
+}
+
+function viewIntro(){
+  return `<section class="hero">
+    <div class="hero-body">
+      <div class="hero-copy">
+        <div class="eyebrow">Чекап онлайн · 3 шага</div>
+        <h1 class="h1">Соберите свой<br><em>чекап</em> за&nbsp;пару минут</h1>
+        <p class="lead">Выберите программу, дополните её пакетами и&nbsp;оплатите онлайн. Стоимость видна сразу.</p>
+        <div class="pick">
+          <button class="who-btn who-m" data-who="male"><span class="icw"><span class="ic"><span class="rot"><span class="crop"><img src="${IMG.icoMale}" alt=""></span></span></span></span><span class="t"><b>Для мужчины</b><small>Уролог, УЗИ, ПСА</small></span></button>
+          <button class="who-btn who-f" data-who="female"><span class="t"><b>Для женщины</b><small>Гинеколог, УЗИ, анализы</small></span><span class="icw"><span class="ic"><span class="rot"><span class="crop"><img src="${IMG.icoFemale}" alt=""></span></span></span></span></button>
+        </div>
+        <button class="skip" data-who="any">Пропустить вопрос</button>
+      </div>
+    </div>
+    <div class="hero-ph" aria-hidden="true"><img src="${IMG.couple}" alt=""></div>
+  </section>
+  <p class="hero-facts">Оплата картой или СБП · Время визита согласуем по телефону · <span class="pr">Прототип, цены условные</span></p>`;
+}
+
+function highlights(lvId){
+  if (lvId === 'start') return ['Терапевт: первичный и повторный приём','Стоматолог и офтальмолог','ЭКГ, УЗИ брюшной полости и почек','Рентгенография лёгких'].map(t=>`<li>${t}</li>`).join('');
+  const prev = lvId === 'optimal' ? 'start' : 'optimal';
+  const had = new Set(D.programs[prev].map(x=>x[0]));
+  const add = D.programs[lvId].filter(x => !had.has(x[0])).sort((a,b) => 'cil'.indexOf(a[1]) - 'cil'.indexOf(b[1]));
+  return `<li class="plus">Всё из ${LVN[prev]}, плюс:</li>` + add.slice(0,4).map(x => `<li>${esc(x[0])}</li>`).join('') + (add.length > 4 ? `<li class="plus">и ещё ${add.length - 4} услуг</li>` : '');
+}
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? b : c; };
+function viewPrograms(){
+  const maxN = Math.max(...LV.map(x => D.programs[x.id].length));
+  const cards = LV.map(l => {
+    const items = D.programs[l.id], c = countBy(items), sel = S.level === l.id;
+    return `<article class="pcard ${sel?'sel':''}" data-k="p-${l.id}" data-level="${l.id}" role="radio" aria-checked="${sel}" tabindex="0">
+      <span class="radio" aria-hidden="true"></span>
+      <div class="p-top"><h3>${l.name}</h3><p class="desc">${l.desc}</p></div>
+      <div class="price">${rub(PRICE.base[l.id])}</div>
+      <div class="meter" aria-hidden="true"><i style="width:${Math.round(items.length/maxN*100)}%"></i></div>
+      <p class="counts"><b>${items.length}</b> из ${maxN} услуг · ${c.c} ${plural(c.c,'врач','врача','врачей')}, ${c.l} ${plural(c.l,'анализ','анализа','анализов')}, ${c.i} ${plural(c.i,'исследование','исследования','исследований')}</p>
+      <ul class="hl">${highlights(l.id)}</ul>
+      <button class="p-link" data-comp="${l.id}">Весь состав ${ico('arrow')}</button>
+    </article>`;
+  }).join('');
+  return `<div class="cards" role="radiogroup" aria-label="Основная программа">${cards}</div>
+    ${compareTable()}
+    ${S.level ? '' : '<p class="nav-hint">Выберите программу, чтобы продолжить</p>'}
+    <div class="nav"><button class="btn btn-ghost" data-go="0">${ico('back')}Назад</button>
+      <button class="btn btn-dark btn-lg" data-go="2" data-short="Дальше" ${S.level?'':'disabled'}>Дальше ${ico('arrow')}</button></div>`;
+}
+
+function compareRows(diffOnly){
+  const rows = [];
+  ['c','l','i'].forEach(g => {
+    const names = [], seen = new Set();
+    LV.forEach(l => D.programs[l.id].forEach(([n,gg]) => { if (gg===g && !seen.has(n)) { seen.add(n); names.push(n); } }));
+    const body = names.map(n => {
+      const has = LV.map(l => D.programs[l.id].some(x => x[0]===n));
+      if (diffOnly && has.every(Boolean)) return '';
+      return `<tr><td>${esc(n)}</td>${has.map(h => `<td class="${h?'yes':'no'}">${h ? ico('check',2.5) : '—'}</td>`).join('')}</tr>`;
+    }).join('');
+    if (body) rows.push(`<tr><td class="g" colspan="4">${GRP[g]}</td></tr>` + body);
+  });
+  return `<table><thead><tr><th>Услуга</th>${LV.map(l=>`<th>${l.name}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+function compareTable(){
+  return `<details class="compare" id="cmp" ${S.cmpOpen?'open':''}><summary>Сравнить программы ${ico('chev')}</summary>
+    <div class="cmp-tools"><label><input type="checkbox" id="diffOnly" ${S.diffOnly?'checked':''}> Показать только различия</label></div>
+    <div class="tbl-wrap">${compareRows(S.diffOnly)}</div></details>`;
+}
+function openCompare(){
+  const draw = () => `<label class="cmp-toggle"><input type="checkbox" id="cmpDiff" ${S.diffOnly?'checked':''}> Показать только различия</label><div class="tbl-wrap sheet-tbl">${compareRows(S.diffOnly)}</div>`;
+  openSheet('Сравнение программ', 'Что входит в каждую программу, построчно', draw());
+  const rebind = () => { const c = document.getElementById('cmpDiff'); if (c) c.onchange = e => { S.diffOnly = e.target.checked; document.getElementById('sheetBody').innerHTML = draw(); rebind(); }; };
+  rebind();
+}
+
+// навигация уезжает в остров заказа на десктопе: «Назад» слева, «Дальше» справа
+const deskMQ = matchMedia('(min-width: 1101px)');
+// элемент пропадает из блока заказа: его копия гаснет на старом месте, пока блок меняет высоту
+function snapOut(el, host){
+  if (!el || !host || !el.offsetParent || !motionOK()) return () => {};
+  const clone = el.cloneNode(true), r = el.getBoundingClientRect(), h = host.getBoundingClientRect();
+  clone.removeAttribute('id'); clone.classList.add('isl-ghost');
+  ['short','go','blocked'].forEach(k => delete clone.dataset[k]);
+  // grid-area:auto — иначе в сетке координаты считаются от ячейки кнопки, а не от всего ряда
+  clone.style.cssText = `position:absolute;grid-area:auto;margin:0;box-sizing:border-box;top:${r.top - h.top}px;left:${r.left - h.left}px;width:${r.width}px;height:${r.height}px;pointer-events:none`;
+  return () => {
+    host.appendChild(clone);
+    clone.animate([{opacity:1, transform:'none'}, {opacity:0, transform:'translateY(-6px)'}], {duration:200, easing:'ease-in', fill:'forwards'});
+    setTimeout(() => clone.remove(), 220);
+  };
+}
+function dockActions(){
+  const box = document.getElementById('asideActions'), foot = document.getElementById('islFoot');
+  if (!box) return;
+  const inRange = deskMQ.matches && S.step >= 1 && S.step <= 3, isl = document.getElementById('island');
+  const stageBtn = sel => inRange ? stage.querySelector('.nav:last-of-type ' + sel) : null;
+  const pop = [{opacity:0, transform:'scale(.96)'}, {opacity:1, transform:'none'}];
+  const prevBack = box.querySelector('.btn-ghost:not(.isl-ghost)'), hadFoot = !!foot.firstChild;
+  const offOf = b => !!b && (b.disabled || b.dataset.blocked === '1');
+  const prevNext = box.querySelector('[data-short]'), prevOff = prevNext ? offOf(prevNext) : null;
+  const oldHint = document.getElementById('islHint'), prevHintEl = oldHint ? oldHint.querySelector('.nav-hint:not(.isl-ghost)') : null;
+  const prevHint = prevHintEl ? prevHintEl.textContent : '';
+  const newHint = inRange && stage.querySelector('.nav-hint') ? stage.querySelector('.nav-hint').textContent : '';
+  const outs = [];
+  if (prevHintEl && prevHint !== newHint && prevHintEl.offsetParent && motionOK()) islJobs.push(() => { oldHint.prepend(prevHintEl); flowOut(prevHintEl); });
+  if (prevNext && !stageBtn('[data-short]')) outs.push(snapOut(prevNext, box));
+  if (prevBack && !stageBtn('.btn-ghost')) outs.push(snapOut(prevBack, box));
+  if (hadFoot && !(inRange && S.step === 1) && foot.offsetParent && motionOK()){
+    const footGhost = foot.cloneNode(true); footGhost.removeAttribute('id');
+    islJobs.push(() => { isl.insertBefore(footGhost, foot); flowOut(footGhost); });
+  }
+  box.innerHTML = ''; foot.innerHTML = '';
+  if (oldHint) oldHint.innerHTML = '';
+  outs.forEach(run => run());
+  // плашка под блоком заказа: раскрывается и схлопывается в потоке, чтобы блок не подпрыгивал у края колонки
+  const note = document.getElementById('asideNote');
+  const prevRes = note ? note.querySelector('.resolve') : null, prevResText = prevRes ? prevRes.textContent : '';
+  const prevResH = prevRes && note.offsetParent ? getComputedStyle(note).height : null;
+  const noteGap = note && note.parentNode ? parseFloat(getComputedStyle(note.parentNode).rowGap) || 0 : 0;
+  const nextRes = inRange ? stage.querySelector('.resolve') : null;
+  if (prevRes && prevResH && !nextRes && motionOK()){
+    const noteGhost = note.cloneNode(true); noteGhost.removeAttribute('id');
+    islJobs.push(() => { note.parentNode.insertBefore(noteGhost, note); flowOut(noteGhost, noteGap); });
+  }
+  if (note) note.innerHTML = '';
+  if (!deskMQ.matches || S.step < 1 || S.step > 3) return;
+  const res = stage.querySelector('.resolve');
+  if (note && res){
+    res.classList.remove('pop');
+    note.appendChild(res);
+    if (motionOK()){
+      if (!prevRes) islJobs.push(() => flowIn(note, noteGap));
+      else if (prevResText !== res.textContent && prevResH) islJobs.push(() => {
+        note.style.overflow = 'hidden';
+        note.animate([{height:prevResH}, {height:getComputedStyle(note).height}], {duration:FLOW_MS, easing:ISL_EASE});
+        res.animate([{opacity:.3}, {opacity:1}], {duration:FLOW_MS, easing:'ease-out'});
+        setTimeout(() => { note.style.overflow = ''; }, FLOW_MS + 30);
+      });
+    }
+  }
+  const hintBox = document.getElementById('islHint'), hint = stage.querySelector('.nav-hint');
+  if (hintBox && hint){
+    hintBox.appendChild(hint);
+    if (hint.textContent !== prevHint && motionOK()) islJobs.push(() => flowIn(hint));
+  }
+  const nav = stage.querySelector('.nav:last-of-type');
+  if (nav && nav.querySelector('[data-go]')){
+    const all = [...nav.querySelectorAll('[data-go]')];
+    all.filter(x => +x.dataset.go < S.step).forEach(x => box.appendChild(x));
+    all.filter(x => +x.dataset.go > S.step).forEach(x => { if (x.dataset.short) x.innerHTML = x.dataset.short + ' ' + ico('arrow'); box.appendChild(x); });
+    nav.classList.add('docked');
+    const next = box.querySelector('[data-short]');
+    const back = box.querySelector('.btn-ghost:not(.isl-ghost)');
+    if (motionOK()){
+      if (next && !prevNext) next.animate(pop, {duration:380, delay:90, easing:ISL_EASE, fill:'backwards'});
+      if (back && !prevBack) back.animate(pop, {duration:380, delay:40, easing:ISL_EASE, fill:'backwards'});
+    }
+    if (next && prevOff !== null && offOf(next) !== prevOff && motionOK()) next.animate([{opacity:.45, transform:'scale(.97)'}, {opacity:1, transform:'none'}], {duration:340, easing:ISL_EASE});
+  }
+  if (S.step === 1){
+    const b = document.createElement('button');
+    b.innerHTML = 'Сравнить программы ' + ico('arrow');
+    b.onclick = openCompare; foot.appendChild(b);
+    if (!hadFoot && motionOK()) islJobs.push(() => flowIn(foot));
+  }
+}
+deskMQ.addEventListener && deskMQ.addEventListener('change', () => render(false));
+
+function segHTML(){
+  return `<div class="seg" id="seg" role="tablist" aria-label="Уровень программы">
+    ${LV.map(l => `<button role="tab" aria-selected="${S.level===l.id}" data-seg="${l.id}">${l.name}</button>`).join('')}
+    <div class="seg-ink" aria-hidden="true">${LV.map(l=>`<span>${l.name}</span>`).join('')}</div></div>`;
+}
+const lastClip = {};
+function placeInk(seg, b){
+  if (!seg || !b) return;
+  const ink = seg.querySelector('.seg-ink');
+  const L = b.offsetLeft - 4, R = ink.offsetWidth - (L + b.offsetWidth);
+  const clip = `inset(0 ${R}px 0 ${L}px round 8px)`;
+  const was = lastClip[seg.id];
+  if (was && was !== clip && !ink.style.clipPath){ ink.style.transition = 'none'; ink.style.clipPath = was; void ink.offsetWidth; ink.style.transition = ''; }
+  ink.style.clipPath = clip; lastClip[seg.id] = clip;
+}
+function placeSeg(){
+  const seg = document.getElementById('seg'); if (seg) placeInk(seg, seg.querySelector(`[data-seg="${S.level}"]`));
+  const ps = document.getElementById('paySeg'); if (ps) placeInk(ps, ps.querySelector(`[data-pay="${S.pay}"]`));
+}
+function addonCard(id, kind){
+  const on = kind === 'gender' ? S.gender === id : S.themes.has(id);
+  const items = D.addons[id][S.level], tp = themePackage();
+  const inCombo = kind === 'theme' && on && tp.combo;
+  if (kind === 'gender') return `<div class="acard photo ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="gender" role="radio" aria-checked="${on}" tabindex="0">
+    <span class="ph"><img src="${IMG[id]}" alt=""></span>
+    <div class="bd"><span class="radio"></span>
+      <div><b>${AD[id].name}</b><p>${AD[id].short}</p></div>
+      <div class="foot"><span class="ap">+${rub(PRICE[id][S.level])}</span><button class="linkish" data-acomp="${id}">Что входит · ${items.length}</button></div>
+    </div></div>`;
+  return `<div class="acard ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="${kind}" role="switch" aria-checked="${on}" tabindex="0">
+    <span class="sw"></span>
+    <div><b>${AD[id].name}</b><p>${AD[id].short}</p></div>
+    <div class="foot">${inCombo ? `<span class="ap muted">в составе пакета</span>` : `<span class="ap">+${rub(PRICE[id][S.level])}</span>`}
+      <button class="linkish" data-acomp="${id}">Что входит · ${items.length}</button></div>
+  </div>`;
+}
+function viewAddons(){
+  const gIds = S.who === 'female' && !S.showOtherGender ? ['female'] : S.who === 'male' && !S.showOtherGender ? ['male'] : ['female','male'];
+  const tp = themePackage();
+  const rk = tp.invalid ? 'bad'+tp.picked : tp.combo ? tp.id+S.level : '';
+  const pop = rk !== S.resKey ? ' pop' : ''; S.resKey = rk;
+  let res = '';
+  if (tp.invalid){
+    const other = tp.picked.includes('cardio') ? 'gastro' : 'cardio';
+    res = `<div class="resolve bad${pop}"><b>Сочетание «${tp.picked.map(k=>AD[k].name).join(' + ')}» пока не продаётся онлайн.</b><br>Его состав и цену клиника ещё не утвердила. Выберите один пакет или добавьте ${AD[other].name}: получится пакет из всех трёх модулей.
+      <div class="acts"><button class="btn btn-dark" data-fix="add:${other}">Добавить ${AD[other].name}</button><button class="btn" data-fix="only:energy">Оставить только «Энергию»</button><button class="btn" data-fix="drop:energy">Убрать «Энергию»</button></div></div>`;
+  } else if (tp.combo){
+    res = `<div class="resolve${pop}">Будет оформлен готовый пакет <b>«${AD[tp.id].name}»</b> за <b class="mono">${rub(PRICE[tp.id][S.level])}</b>. У него свой состав (${D.addons[tp.id][S.level].length} услуг) без повторов. <button class="linkish" data-acomp="${tp.id}">Посмотреть состав</button></div>`;
+  }
+  return `<div class="levelbar"><span class="lbl">Уровень программы и пакетов:</span>${segHTML()}</div>
+    <section class="block"><div class="block-h"><h3>Женское и мужское здоровье</h3><span>Можно выбрать один модуль</span></div>
+      <div class="acards g2" role="radiogroup">${gIds.map(id => addonCard(id,'gender')).join('')}</div>
+      ${gIds.length === 1 ? `<button class="linkish more" id="otherG">Показать ${gIds[0]==='female'?'мужской':'женский'} модуль</button>` : ''}
+    </section>
+    <section class="block"><div class="block-h"><h3>Тематические пакеты</h3><span>Отметьте направления, готовый пакет подберём сами</span></div>
+      <div class="acards">${['cardio','gastro','energy'].map(id => addonCard(id,'theme')).join('')}</div>
+      ${res}
+    </section>
+    ${tp.invalid ? '<p class="nav-hint">Чтобы продолжить, выберите один из вариантов в оранжевом блоке ' + (deskMQ.matches ? 'ниже' : 'выше') + '</p>' : ''}
+    <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
+      <button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'aria-disabled="true" data-blocked="1"':''}>Дальше ${ico('arrow')}</button>
+    </div>`;
+}
+
+function viewOrder(){
+  const ls = lines(), f = S.form, e = S.errors;
+  return `<div class="order">${ls.map((l, i) => `<div class="oline"><div class="ot">${esc(l.title)}</div><small>${esc(l.sub)} · ${l.items.length} услуг</small><span class="mono">${rub(l.price)}</span><button type="button" class="linkish" data-oline="${i}">Подробнее</button></div>`).join('')}</div>
+    <div class="sum-row"><button class="btn btn-ghost edit-link" data-edit="1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.539 10.12L13.88 6.46"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.251 21.001H3V17.75C3 17.484 3.105 17.23 3.293 17.042L16.627 3.709C17.018 3.316 17.649 3.316 18.042 3.709L20.294 5.956C20.683 6.349 20.683 6.984 20.294 7.373L6.958 20.706C6.771 20.894 6.516 21.001 6.251 21.001V21.001Z"/></svg>Изменить выбор</button><div class="price">Итого ${rub(total())}</div></div>
+    <form class="form" id="form" novalidate>
+      <label class="fld ${e.name?'err':''}">Имя<input id="f-name" autocomplete="name" value="${esc(f.name)}" placeholder="Анна"><span class="e">${e.name||''}</span></label>
+      <label class="fld ${e.phone?'err':''}">Телефон<input id="f-phone" type="tel" autocomplete="tel" inputmode="tel" value="${esc(f.phone)}" placeholder="+7 (900) 000-00-00"><span class="e">${e.phone||''}</span></label>
+      <label class="fld ${e.email?'err':''}">Email<input id="f-email" type="email" autocomplete="email" value="${esc(f.email)}" placeholder="anna@mail.ru"><span class="e">${e.email||''}</span></label>
+    </form>
+    <div class="consents">
+      <label><input type="checkbox" id="f-c1" ${f.c1?'checked':''}> <span>Принимаю <a href="#offer">условия покупки</a> и <a href="#offer">публичную оферту</a></span></label>
+      <label><input type="checkbox" id="f-c2" ${f.c2?'checked':''}> <span>Согласен на обработку персональных данных</span></label>
+      <span class="e" style="color:var(--err);font-size:14px">${e.c||''}</span>
+    </div>
+    <div class="notice">Оплата не бронирует дату и время. После оплаты администратор позвонит, чтобы согласовать визит.</div>
+    <button class="btn btn-dark btn-lg pay-btn" id="payBtn"><span id="payLbl">Оплатить ${rub(total())}</span><span class="pay-ic">${ico('arrow')}</span></button>
+    <div class="nav"><button class="btn btn-ghost" data-go="2">${ico('back')}Назад</button></div>`;
+}
+
+function viewResult(){
+  const ls = lines(), t = total();
+  const tabs = [['paid','Оплачен'],['wait','Проверяем'],['fail','Не прошла']];
+  let body;
+  if (S.pay === 'paid') body = `<span class="status ok"><svg class="draw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>Оплачено</span>
+      <h2 class="h2" style="margin-top:14px">Заказ <span style="white-space:nowrap">№${S.orderNo}</span> оплачен</h2>
+      <p class="lead">Спасибо! Информация о заказе передана администраторам клиники.</p>
+      <ol class="steps-after"><li><b>1</b><span>Администратор позвонит в течение рабочего дня и согласует дату и время обследования.</span></li>
+        <li><b>2</b><span>Накануне пришлём памятку о подготовке: натощак, без кофе, с собой паспорт.</span></li>
+        <li><b>3</b><span>Чек об оплате придёт на ${esc(S.form.email || 'вашу почту')}.</span></li></ol>
+      <div class="nav" style="justify-content:flex-start"><button class="btn" data-go="0">На главную</button></div>`;
+  else if (S.pay === 'wait') body = `<div class="loader"><i></i><i></i></div><span class="status wait">Подтверждение ожидается</span>
+      <h2 class="h2" style="margin-top:14px">Проверяем статус оплаты</h2>
+      <p class="lead">Пожалуйста, не оплачивайте заказ повторно. Страница обновится сама, как только банк подтвердит платёж.</p>`;
+  else body = `<span class="status bad">${ico('alert')}Оплата не завершена</span>
+      <h2 class="h2" style="margin-top:14px">Платёж не прошёл</h2>
+      <p class="lead">Выбранная программа сохранена, вы можете повторить попытку. Деньги не списаны.</p>
+      <div class="nav" style="justify-content:flex-start"><button class="btn btn-dark btn-lg" data-go="3">Повторить оплату ${ico('arrow')}</button><button class="btn" data-go="1">Изменить выбор</button></div>`;
+  return `<div class="demo">Демо статуса:<div class="seg" id="paySeg" role="tablist">${tabs.map(([k,n]) => `<button role="tab" aria-selected="${S.pay===k}" data-pay="${k}">${n}</button>`).join('')}<div class="seg-ink" aria-hidden="true">${tabs.map(([,n])=>`<span>${n}</span>`).join('')}</div></div></div>
+    <div class="res"><div>${body}</div>${S.pay==='paid' ? `<div><div class="printer"><div class="housing" id="housing"><b>ЧЕКАП</b><span><i></i><em id="pStatus" style="font-style:normal">Печать…</em></span></div>
+      <div class="feed" id="feed"><div class="paper" id="paper">${receipt(ls,t)}</div></div></div>
+      <button class="btn btn-ghost reprint" id="reprint">Напечатать ещё раз</button></div>` : ''}</div>`;
+}
+function receipt(ls, t){
+  const d = new Date(), pad = n => String(n).padStart(2,'0');
+  const dt = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const bars = Array.from({length:38}, (_,i) => `<i style="width:${[1,2,1,3,1,2][(i*7)%6]}px"></i>`).join('');
+  return `<div class="c m">ЧЕКАП</div><div class="c dim">заказ ${S.orderNo}</div><div class="c dim">${dt}</div>
+    <div class="dim">--------------------------------</div>
+    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чекап ',''))}</span><span>${l.price.toLocaleString('ru-RU')}</span></div><div class="dim">  ${l.items.length} услуг</div>`).join('')}
+    <div class="dim">--------------------------------</div>
+    <div class="r tot"><span>ИТОГО</span><span>${rub(t)}</span></div>
+    <div class="r dim"><span>Оплата</span><span>онлайн</span></div>
+    <div class="bar">${bars}</div>
+    <div class="c dim">дату визита согласует</div><div class="c dim">администратор</div>`;
+}
+let printRAF;
+function printReceipt(){
+  const paper = document.getElementById('paper'), feed = document.getElementById('feed'), housing = document.getElementById('housing');
+  if (!paper) return;
+  cancelAnimationFrame(printRAF);
+  const H = paper.offsetHeight; feed.style.height = (H + 20) + 'px';
+  let pos = -H, target = -H, wait = 250, last = performance.now();
+  housing.classList.add('busy'); document.getElementById('pStatus').textContent = 'Печать…';
+  function done(){ housing.classList.remove('busy'); housing.style.transform='none'; document.getElementById('pStatus').textContent = 'Готово'; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ paper.style.transform = 'none'; done(); return; }
+  function frame(now){
+    const dt = Math.min(50, now - last); last = now; wait -= dt;
+    if (wait <= 0 && target < 0){ target = Math.min(0, target + 15); wait = 55 + Math.random()*50; }
+    pos += (target - pos) * Math.min(1, dt/1000 * 34);
+    paper.style.transform = `translateY(${pos}px)`;
+    housing.style.transform = target < 0 ? `translateX(${Math.sin(now/18)*0.5}px)` : 'none';
+    if (target >= 0 && Math.abs(pos) < 0.3){ paper.style.transform = 'none'; done(); return; }
+    printRAF = requestAnimationFrame(frame);
+  }
+  paper.style.transform = `translateY(${-H}px)`;
+  printRAF = requestAnimationFrame(frame);
+}
+
+// ---------- slide to pay ----------
+function formValid(){
+  const f = S.form, e = {};
+  if (f.name.trim().length < 2) e.name = 'Укажите имя';
+  if (f.phone.replace(/\D/g,'').length < 11) e.phone = 'Номер из 11 цифр';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email)) e.email = 'Проверьте адрес почты';
+  if (!f.c1 || !f.c2) e.c = 'Отметьте оба согласия, чтобы продолжить';
+  return e;
+}
+function bindSlide(){
+  const b = document.getElementById('payBtn'), lbl = document.getElementById('payLbl'), icn = b.querySelector('.pay-ic');
+  let phase = 'idle';
+  const setLabel = () => {
+    const ok = !Object.keys(formValid()).length;
+    b.classList.toggle('locked', !ok);
+    lbl.textContent = phase === 'confirming' ? 'Переходим к оплате…' : phase === 'done' ? 'Оплачено' : `Оплатить ${rub(total())}`;
+  };
+  window.__slideLabel = setLabel; setLabel();
+  b.onclick = () => {
+    if (phase !== 'idle') return;
+    if (Object.keys(formValid()).length){
+      S.errors = formValid(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); showErrors(); return;
+    }
+    phase = 'confirming'; b.classList.add('busy'); icn.innerHTML = '<span class="spin"></span>'; setLabel();
+    setTimeout(() => { phase = 'done'; b.classList.add('done'); icn.innerHTML = ico('check',3); setLabel();
+      setTimeout(() => { S.pay = 'paid'; go(4); }, 700); }, 1100);
+  };
+}
+function showErrors(){
+  const e = S.errors;
+  [['name','f-name'],['phone','f-phone'],['email','f-email']].forEach(([k,id]) => {
+    const fld = document.getElementById(id).closest('.fld');
+    fld.classList.toggle('err', !!e[k]); fld.querySelector('.e').textContent = e[k] || '';
+  });
+  document.querySelector('.consents .e').textContent = e.c || '';
+  const first = document.querySelector('.fld.err input'); first && first.focus();
+}
+function phoneMask(v){
+  let d = v.replace(/\D/g,''); if (d.startsWith('8')) d = '7' + d.slice(1); if (d && !d.startsWith('7')) d = '7' + d; d = d.slice(0,11);
+  if (!d) return '';
+  const p = [d.slice(1,4), d.slice(4,7), d.slice(7,9), d.slice(9,11)];
+  let s = '+7'; if (p[0]) s += ' (' + p[0]; if (p[0].length === 3) s += ')'; if (p[1]) s += ' ' + p[1]; if (p[2]) s += '-' + p[2]; if (p[3]) s += '-' + p[3];
+  return s;
+}
+
+// ---------- bindings ----------
+function setLevel(id){
+  const prev = S.level; if (prev === id) return;
+  S.level = id;
+  if (prev && (S.gender || S.themes.size)) toast('Состав и стоимость дополнений обновлены для выбранной программы');
+  render(false);
+}
+// «Дальше» при недоступном сочетании: докручиваем до оранжевого блока, насколько позволяет страница, и подсвечиваем его
+function pointToResolve(){
+  const el = document.querySelector('.resolve.bad'); if (!el) return;
+  const pad = 24, r = el.getBoundingClientRect(), mb = document.getElementById('mbar');
+  const bottom = (mb && mb.offsetHeight ? mb.getBoundingClientRect().top : innerHeight) - pad;
+  let d = r.bottom > bottom ? r.bottom - bottom : 0;
+  const topEdge = pad + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sh-bar')) || 0);
+  if (r.top - d < topEdge) d = r.top - topEdge;
+  if (d) scrollBy({ top: d, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  el.classList.remove('pop', 'flash'); void el.offsetWidth; el.classList.add('flash');
+  el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true });
+}
+// блок заказа с плашкой бывает выше экрана: липнем так, чтобы до его низа можно было докрутить
+function fitAside(){
+  const a = document.querySelector('.aside-in'); if (!a) return;
+  const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sh-bar')) || 0;
+  a.style.top = S.step === 1 ? '' : Math.min(bar + 20, innerHeight - a.offsetHeight - 20) + 'px';
+}
+addEventListener('resize', () => fitAside());
+function navBind(){
+  const goOr = b => () => { if (b.dataset.blocked) return pointToResolve(); if (!b.disabled) go(+b.dataset.go); };
+  stage.querySelectorAll('[data-go]').forEach(b => b.onclick = goOr(b));
+  document.querySelectorAll('#asideActions [data-go]').forEach(b => b.onclick = goOr(b));
+  stage.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => go(1));
+}
+const bind = {
+  0(){ stage.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { S.who = b.dataset.who; S.showOtherGender = false; go(1); }); },
+  1(){
+    stage.querySelectorAll('.pcard').forEach(c => {
+      const pick = () => { const id = c.dataset.level; setLevel(id); const n = stage.querySelector(`[data-level="${id}"]`); n && n.focus({preventScroll:true}); };
+      c.onclick = e => { if (!e.target.closest('[data-comp]')) pick(); };
+      c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+    });
+    stage.querySelectorAll('[data-comp]').forEach(b => b.onclick = () => { const l = LV.find(x=>x.id===b.dataset.comp); openSheet('Программа «' + l.name + '»', D.programs[l.id].length + ' услуг · ' + rub(PRICE.base[l.id]), D.programs[l.id]); });
+    const cmp = document.getElementById('cmp'); cmp.ontoggle = () => S.cmpOpen = cmp.open;
+    document.getElementById('diffOnly').onchange = e => { S.diffOnly = e.target.checked; render(false); };
+    navBind();
+  },
+  2(){
+    placeSeg();
+    stage.querySelectorAll('[data-seg]').forEach(b => b.onclick = () => setLevel(b.dataset.seg));
+    stage.querySelectorAll('.acard').forEach(c => {
+      const flip = () => {
+        const id = c.dataset.addon;
+        if (c.dataset.kind === 'gender') S.gender = S.gender === id ? null : id;
+        else S.themes.has(id) ? S.themes.delete(id) : S.themes.add(id);
+        render(false);
+        const again = stage.querySelector(`[data-addon="${id}"]`); again && again.focus({preventScroll:true});
+      };
+      c.onclick = e => { if (!e.target.closest('[data-acomp]')) flip(); };
+      c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+    });
+    stage.querySelectorAll('[data-acomp]').forEach(b => b.onclick = () => { const id = b.dataset.acomp; openSheet(AD[id].name, 'к ' + LVN[S.level] + ' · ' + D.addons[id][S.level].length + ' услуг · ' + rub(PRICE[id][S.level]), D.addons[id][S.level]); });
+    stage.querySelectorAll('[data-fix]').forEach(b => b.onclick = () => {
+      const [act, k] = b.dataset.fix.split(':');
+      if (act === 'add') S.themes.add(k);
+      if (act === 'only') S.themes = new Set([k]);
+      if (act === 'drop') S.themes.delete(k);
+      render(false);
+    });
+    const og = document.getElementById('otherG'); if (og) og.onclick = () => { S.showOtherGender = true; render(false); };
+    navBind();
+  },
+  3(){
+    bindOrderLines();
+    const f = S.form;
+    const nm = document.getElementById('f-name'), ph = document.getElementById('f-phone'), em = document.getElementById('f-email');
+    nm.oninput = () => { f.name = nm.value; window.__slideLabel(); };
+    ph.oninput = () => { ph.value = phoneMask(ph.value); f.phone = ph.value; window.__slideLabel(); };
+    em.oninput = () => { f.email = em.value.trim(); window.__slideLabel(); };
+    document.getElementById('f-c1').onchange = e => { f.c1 = e.target.checked; window.__slideLabel(); };
+    document.getElementById('f-c2').onchange = e => { f.c2 = e.target.checked; window.__slideLabel(); };
+    document.getElementById('form').onsubmit = e => e.preventDefault();
+    bindSlide(); navBind();
+  },
+  4(){
+    placeSeg();
+    document.getElementById('paySeg').querySelectorAll('[data-pay]').forEach(x => x.onclick = () => { S.pay = x.dataset.pay; render(false); });
+    if (S.pay === 'paid'){ requestAnimationFrame(printReceipt); document.getElementById('reprint').onclick = printReceipt; }
+    navBind();
+  }
+};
+// кнопки, перенесённые в остров, получают обработчики после dockActions
+const _dock = dockActions;
+dockActions = function(){ _dock(); navBind(); };
+addEventListener('resize', placeSeg);
+document.fonts && document.fonts.ready.then(placeSeg);
+render(true);
+</script>
+<script type="module">
+import NumberFlow from 'https://esm.sh/number-flow@0.6.2';
+window.__NF = NumberFlow;
+window.dispatchEvent(new Event('nf-ready'));
+</script>
+</body>
+</html>
