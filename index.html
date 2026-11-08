@@ -321,22 +321,27 @@ body:not(.s1) .island{min-height:0}
 .oline .b{padding:0 24px 18px;columns:2 220px;column-gap:24px;font-size:15px;color:var(--muted)}
 .oline .b div{break-inside:avoid;padding:3px 0}
 .sum-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-.sum-row .price{padding:0}
-.form{margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+.sum-row .price{padding:0;align-self:center}
+.edit-link{padding-inline:0;border:0;gap:8px;min-height:0}
+.edit-link svg{flex:none;margin-left:-2px} /* у карандаша внутренний отступ в рисунке */
+.edit-link:hover{color:var(--ink);background:transparent}
+.form{margin-top:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:760px){ .form{grid-template-columns:minmax(0,1fr)} }
-.fld{display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--muted)}
-.fld input{font:inherit;font-size:17px;color:var(--ink);background:var(--card);border:1px solid transparent;border-radius:16px;padding:15px 18px;transition:border-color .2s,box-shadow .2s}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+.fld input{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid transparent;border-radius:14px;padding:11px 16px;transition:border-color .2s,box-shadow .2s}
 .fld input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 4px rgba(32,63,140,.12)}
 .fld.err input{border-color:var(--err)}
-.fld .e{color:var(--err);font-size:13.5px;min-height:16px}
-.consents{display:grid;gap:10px;margin-top:6px;font-size:15.5px;color:var(--muted)}
-.consents label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-.consents input{width:18px;height:18px;accent-color:var(--orange);margin-top:2px;flex:none}
+.fld .e{color:var(--err);font-size:13px}
+.fld .e:empty,.consents .e:empty{display:none}
+.consents{display:flex;flex-wrap:wrap;gap:6px 24px;margin-top:14px;font-size:14px;color:var(--muted)}
+.consents .e{flex-basis:100%}
+.consents label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.consents input{width:16px;height:16px;accent-color:var(--orange);margin:2px 0 0;flex:none}
 .consents a{color:var(--blue)}
-.notice{margin-top:16px;font-size:15px;color:var(--muted)}
+.notice{margin-top:10px;font-size:14px;color:var(--muted)}
 .notice svg{display:none}
-.pay-btn{width:100%;max-width:560px;margin-top:26px;font-size:18px;font-weight:600}
-.pay-btn .pay-ic{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none;transition:background .3s}
+.pay-btn{width:100%;max-width:420px;margin-top:16px;min-height:56px;font-size:16px;font-weight:600}
+.pay-btn .pay-ic{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none;transition:background .3s}
 .pay-btn .pay-ic svg{width:20px;height:20px;padding:0;background:none}
 .pay-btn.locked{opacity:.55}
 .pay-btn.busy{pointer-events:none}
@@ -1074,7 +1079,7 @@ function viewOrder(){
   const ls = lines(), f = S.form, e = S.errors;
   return `<div class="order">${ls.map(l => `<details class="oline"><summary><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг · нажмите, чтобы раскрыть</small></div><span class="mono">${rub(l.price)}</span></summary>
       <div class="b-wrap"><div class="b">${l.items.map(x=>`<div>${esc(x[0])}</div>`).join('')}</div></div></details>`).join('')}</div>
-    <div class="sum-row"><button class="btn" data-edit="1">Изменить выбор</button><div class="price">Итого ${rub(total())}</div></div>
+    <div class="sum-row"><button class="btn btn-ghost edit-link" data-edit="1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.539 10.12L13.88 6.46"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.251 21.001H3V17.75C3 17.484 3.105 17.23 3.293 17.042L16.627 3.709C17.018 3.316 17.649 3.316 18.042 3.709L20.294 5.956C20.683 6.349 20.683 6.984 20.294 7.373L6.958 20.706C6.771 20.894 6.516 21.001 6.251 21.001V21.001Z"/></svg>Изменить выбор</button><div class="price">Итого ${rub(total())}</div></div>
     <form class="form" id="form" novalidate>
       <label class="fld ${e.name?'err':''}">Имя<input id="f-name" autocomplete="name" value="${esc(f.name)}" placeholder="Анна"><span class="e">${e.name||''}</span></label>
       <label class="fld ${e.phone?'err':''}">Телефон<input id="f-phone" type="tel" autocomplete="tel" inputmode="tel" value="${esc(f.phone)}" placeholder="+7 (900) 000-00-00"><span class="e">${e.phone||''}</span></label>
