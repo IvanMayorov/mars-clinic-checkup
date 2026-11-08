@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Конструктор чекапа · v2</title>
+<link rel="icon" type="image/png" sizes="96x96" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAC2UlEQVR42u2du5HCMBRFKUElkG/iElyCS3AJNLAz7oASXAIlUAIluAQS5bsKxIzXYz6LJd1nc4KbAYZ7bPR09dv5768d0sn6F6yDDkFd0DlqCPq5o2H0ui6+twbAa3JBTdAx6PLA5Hd1iZ/dxGsBIBrRBp0yGP5Mp3ht94kAqqA+6Cowfqpr/C7VJwCo4//zj1GdS7cZGC8GkfsC+5UZPwdiv1YA3YqNn6pbE4AqUxmp1iVHQ53a/NZIZZOzYmqtAug3bPxUvSUAbuUN7ZIG2qkBuI3+3/+nXXAqAJ9ufhIImC+GgPliCO8AOGP2w4Y5K4Aek9OWqP/tZGHwa2pTA6g23sPN0WOuUgKg0X2vUU4CoMPMfCnqK3k+Ri7TfgkASs7MpemzYUQMTKP6HQDc/QWeAu5+8VPA3S9+Cu51ujAsj6pXAJD3FMyJ5qJmIoe8EYV7BIDArXBQNwVwwqAis7JnATjMKSY3B6DBmGJq5gAcMaaYjnMAyPwFYwVjABhTVn8AkP2IsqEbgAOGFNdhDIBhR9FwJemnOB0FgBEAA4YU1zAGgCGiUhQAAAAAAAAAAMwQA6AMFZehdMToCX82AMI4cRhHHC2OoxmQEQ/IUIqKhyQZlDcwKM+0FPG0FCZmiSdmMTVRPDWRybniyblMTzcwPZ0FGuIFGixREi9RYpGegUV6pKPiZapkQwYWavMUiLcq4CkwsFkHT0Hmu9+zYVMRLdqwieHKBMOOnk37tJm/Z9tKSeSQdNtKgroFgZtn62Jt3uPZvNtGyenZvj57o1tk+3ogJDLfc4SJ1nzPIT5a8z3HWC1ucOXHWHGQG0cZFu/hmj3KkMM8Oc5Wl2paBMCBzhxpvsj4TRxpvjYQxYxXARg31L2Riukav0ul8EIFYNyJa0Wzsk/x2k7pgRrAFEYTV49cMpWRx3gNZ+V3WwJwr804xDLwHDU8Wf5/e10X31tb/o3WAWxev/+j9hHUANmfAAAAAElFTkSuQmCC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -56,7 +57,7 @@ h1,h2,h3,h4{margin:0;text-wrap:balance}
 .phead p{margin:10px 0 0;color:var(--muted);font-size:17px}
 .page-foot{margin-top:clamp(40px,4vw,72px)}
 body.intro #flowHead,body.intro .page-foot{display:none}
-@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;position:relative;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:calc(-1 * var(--gut));padding-inline:max(0px,calc(var(--gut) - 16px))} .phead .stepper::-webkit-scrollbar{display:none} .phead .st{flex:none} }
+@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;position:relative;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:calc(-1 * var(--gut));padding-inline:var(--gut)} .phead .stepper::-webkit-scrollbar{display:none} .phead .st{flex:none} }
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(330px,24vw,413px);gap:var(--gap);align-items:stretch}
@@ -182,7 +183,10 @@ td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;
 .btn-lg{padding:8px 8px 8px 28px;min-height:64px;font-size:17px;justify-content:space-between}
 .btn-lg svg{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(255,255,255,.2)}
 .btn-ghost{background:transparent;border-color:transparent;color:var(--muted)}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn[disabled],.btn[disabled]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-lg[disabled] svg{background:rgba(47,52,72,.07)}
+.nav-hint{display:flex;align-items:flex-start;gap:10px;margin:28px 0 -12px;font-size:15px;font-weight:600;line-height:1.35;color:var(--ink)}
+.nav-hint::before{content:"!";flex:none;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:700;line-height:1;display:grid;place-items:center}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap}
 .nav .hint{color:var(--muted);font-size:15px}
 .nav.docked{display:none}
@@ -211,6 +215,10 @@ body:not(.s1) .island{min-height:0}
 .isl-sp{flex:1;min-height:32px}
 .isl-actions{display:grid;grid-template-columns:auto 1fr;gap:20px;padding-bottom:var(--pad)}
 .isl-actions:empty{display:none}
+.isl-hint:empty{display:none}
+.isl-hint .nav-hint{margin:0 0 18px;color:#fff}
+.isl-actions .btn[disabled],.isl-actions .btn[disabled]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
+.isl-actions .btn[disabled] svg{background:rgba(255,255,255,.1)}
 .isl-actions .btn{min-height:64px}
 .isl-actions .btn-ghost{grid-column:1;grid-row:1;border:1px solid rgba(255,255,255,.4);color:#fff;padding:0 24px}
 .isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}
@@ -627,7 +635,7 @@ function renderSummary(){
     isl.innerHTML = `<h4><span>Ваш заказ</span><span id="islCount"></span></h4><div class="lines" id="islLines"></div>
       <div class="total"><span>Итого</span><span class="roll" id="islTotal"></span></div>
       <div class="isl-note">Оплата не бронирует время. Дату визита администратор согласует с вами после оплаты.</div>
-      <div class="isl-sp"></div><div class="isl-actions" id="asideActions"></div><div class="isl-foot" id="islFoot"></div>`;
+      <div class="isl-sp"></div><div class="isl-hint" id="islHint"></div><div class="isl-actions" id="asideActions"></div><div class="isl-foot" id="islFoot"></div>`;
   }
   const key = ls.map(l => l.id + l.price).join('|');
   if (isl.dataset.key !== key){
@@ -716,6 +724,7 @@ function viewPrograms(){
   }).join('');
   return `<div class="cards" role="radiogroup" aria-label="Основная программа">${cards}</div>
     ${compareTable()}
+    ${S.level ? '' : '<p class="nav-hint">Выберите программу, чтобы продолжить</p>'}
     <div class="nav"><button class="btn btn-ghost" data-go="0">${ico('back')}Назад</button>
       <button class="btn btn-dark btn-lg" data-go="2" data-short="Дальше" ${S.level?'':'disabled'}>Дальше ${ico('arrow')}</button></div>`;
 }
@@ -752,9 +761,12 @@ function dockActions(){
   const box = document.getElementById('asideActions'), foot = document.getElementById('islFoot');
   if (!box) return;
   box.innerHTML = ''; foot.innerHTML = '';
+  const oldHint = document.getElementById('islHint'); if (oldHint) oldHint.innerHTML = '';
   const note = document.getElementById('asideNote'); if (note) note.innerHTML = '';
   if (!deskMQ.matches || S.step < 1 || S.step > 3) return;
   const res = stage.querySelector('.resolve'); if (note && res) note.appendChild(res);
+  const hintBox = document.getElementById('islHint'), hint = stage.querySelector('.nav-hint');
+  if (hintBox && hint) hintBox.appendChild(hint);
   const nav = stage.querySelector('.nav:last-of-type');
   if (nav && nav.querySelector('[data-go]')){
     const all = [...nav.querySelectorAll('[data-go]')];
@@ -828,6 +840,7 @@ function viewAddons(){
       <div class="acards">${['cardio','gastro','energy'].map(id => addonCard(id,'theme')).join('')}</div>
       ${res}
     </section>
+    ${tp.invalid ? '<p class="nav-hint">Чтобы продолжить, выберите один из вариантов в оранжевом блоке</p>' : ''}
     <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
       <button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'disabled':''}>Дальше ${ico('arrow')}</button>
     </div>`;
