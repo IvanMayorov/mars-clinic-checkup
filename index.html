@@ -61,6 +61,7 @@ body.intro #flowHead,body.intro .page-foot{display:none}
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(330px,24vw,413px);gap:var(--gap);align-items:stretch}
+@media (min-width:1101px){ body:not(.s1) .grid{column-gap:clamp(40px,3.4vw,64px)} }
 .grid.solo{grid-template-columns:minmax(0,1fr)}
 .grid.solo .aside{display:none}
 .stage{min-width:0}
