@@ -110,12 +110,12 @@ body.intro #flowHead,body.intro .page-foot{display:none}
 .who-f{grid-template-columns:1fr 110px;padding:0 0 0 28px}
 
 .who-f .t{grid-column:1}
-.who-btn:hover{background:var(--cream-2);transform:translateY(-2px);box-shadow:var(--hover-shadow)}
-.who-m:hover .ic{transform:translateY(-4px) rotate(6deg)}
-.who-f:hover .ic{transform:translateY(-4px) rotate(-6deg)}
+@media (hover:hover){.who-btn:hover{background:var(--cream-2);transform:translateY(-2px);box-shadow:var(--hover-shadow)}}
+@media (hover:hover){.who-m:hover .ic{transform:translateY(-4px) rotate(6deg)}}
+@media (hover:hover){.who-f:hover .ic{transform:translateY(-4px) rotate(-6deg)}}
 .who-btn:active{transform:scale(.98)}
 .skip{margin-top:6px;background:none;border:0;color:var(--muted);font-size:15px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;padding:4px}
-.skip:hover{color:var(--ink)}
+@media (hover:hover){.skip:hover{color:var(--ink)}}
 /* фото: прижато к правому и нижнему краю карточки, голова выходит за верхний край */
 .hero-ph{position:absolute;z-index:2;right:0;bottom:0;top:-16%;width:57%;overflow:hidden;border-bottom-right-radius:var(--r-lg);pointer-events:none}
 .hero-ph img{position:absolute;right:0;bottom:-2%;width:100%;max-width:none;aspect-ratio:1;object-fit:cover;object-position:right bottom}
@@ -144,7 +144,7 @@ body.intro #flowHead,body.intro .page-foot{display:none}
 /* subgrid: название, цена, шкала, счётчики, список и ссылка стоят на одной линии во всех трёх карточках */
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--gap);row-gap:0}
 .pcard{position:relative;grid-row:span 6;display:grid;grid-template-rows:subgrid;background:var(--card);border-radius:var(--r);padding:var(--pad);border:2px solid transparent;cursor:pointer;transition:border-color .25s,box-shadow .3s,transform .4s var(--spring)}
-.pcard:hover{box-shadow:var(--hover-shadow)}
+@media (hover:hover){.pcard:hover{box-shadow:var(--hover-shadow)}}
 .pcard.sel{border-color:var(--navy)}
 .pcard h3{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
 .pcard .desc{margin:6px 0 0;color:var(--muted);font-size:15px;line-height:1.5}
@@ -182,7 +182,7 @@ body.intro #flowHead,body.intro .page-foot{display:none}
 @keyframes hlLine{from{border-top-color:transparent}}
 .p-link{justify-self:start;margin-top:26px;display:inline-flex;align-items:center;gap:10px;border:0;background:none;padding:4px 0;font-size:16px;font-weight:700;color:var(--blue)}
 .p-link svg{width:18px;height:18px;transition:transform .35s var(--spring)}
-.p-link:hover svg{transform:translateX(4px)}
+@media (hover:hover){.p-link:hover svg{transform:translateX(4px)}}
 @media (max-width:860px){ .cards{grid-template-columns:minmax(0,1fr);row-gap:var(--gap)} .pcard{grid-row:auto;grid-template-rows:none} }
 
 /* ---------- compare (мобильная версия) ---------- */
@@ -208,11 +208,12 @@ td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;
 .btn:active{transform:scale(.97)}
 .btn svg{width:16px;height:16px}
 .btn-dark{background:var(--orange);border-color:var(--orange);color:#fff}
-.btn-dark:hover{background:var(--orange-2);border-color:var(--orange-2)}
+@media (hover:hover){.btn-dark:hover{background:var(--orange-2);border-color:var(--orange-2)}}
 .btn-lg{padding:8px 8px 8px 28px;min-height:64px;font-size:17px;justify-content:space-between}
 .btn-lg svg{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(255,255,255,.2)}
 .btn-ghost{background:transparent;border-color:transparent;color:var(--muted)}
-.btn[disabled],.btn[disabled]:hover,.btn[aria-disabled="true"],.btn[aria-disabled="true"]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
+.btn[disabled],.btn[aria-disabled="true"]{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}
+@media (hover:hover){.btn[disabled]:hover,.btn[aria-disabled="true"]:hover{background:var(--line);border-color:var(--line);color:var(--faint);cursor:not-allowed;transform:none;box-shadow:none}}
 .btn-lg[disabled] svg,.btn-lg[aria-disabled="true"] svg{background:rgba(47,52,72,.07)}
 .nav-hint{display:flex;align-items:flex-start;gap:10px;margin:28px 0 -12px;font-size:15px;font-weight:600;line-height:1.35;color:var(--ink)}
 .nav-hint::before{content:"!";flex:none;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:700;line-height:1;display:grid;place-items:center}
@@ -247,18 +248,19 @@ body:not(.s1) .island{min-height:0}
 .isl-hint:empty{display:none}
 .isl-hint,.isl-actions{position:relative}
 .isl-hint .nav-hint{margin:0 0 18px;color:#fff}
-.isl-actions .btn[disabled],.isl-actions .btn[disabled]:hover,.isl-actions .btn[aria-disabled="true"],.isl-actions .btn[aria-disabled="true"]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
+.isl-actions .btn[disabled],.isl-actions .btn[aria-disabled="true"]{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
+@media (hover:hover){.isl-actions .btn[disabled]:hover,.isl-actions .btn[aria-disabled="true"]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}}
 .isl-actions .btn[disabled] svg,.isl-actions .btn[aria-disabled="true"] svg{background:rgba(255,255,255,.1)}
 .isl-actions .btn{min-height:64px}
 .isl-actions .btn-ghost{grid-column:1;grid-row:1;border:1px solid rgba(255,255,255,.4);color:#fff;padding:0 24px}
-.isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}
+@media (hover:hover){.isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}}
 .isl-actions .btn-dark{grid-column:2;grid-row:1;padding:8px 10px 8px 30px}
 .isl-actions .btn-dark:only-child{grid-column:1 / -1}
 .isl-foot{border-top:1px solid rgba(255,255,255,.14);padding-block:22px 26px}
 .isl-foot:empty{display:none}
 .isl-foot button{background:none;border:0;padding:0;color:#fff;font-size:16px;font-weight:500;display:inline-flex;gap:10px;align-items:center}
 .isl-foot svg{width:16px;height:16px;transition:transform .35s var(--spring)}
-.isl-foot button:hover svg{transform:translateX(4px)}
+@media (hover:hover){.isl-foot button:hover svg{transform:translateX(4px)}}
 
 .roll{display:inline-flex;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:-.02em;line-height:1}
 
@@ -277,7 +279,7 @@ body:not(.s1) .island{min-height:0}
 .acards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--gap)}
 .acards.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
 .acard{position:relative;text-align:left;background:var(--card);border:2px solid transparent;border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:border-color .25s,box-shadow .3s}
-.acard:hover{box-shadow:var(--hover-shadow)}
+@media (hover:hover){.acard:hover{box-shadow:var(--hover-shadow)}}
 .acard.on{border-color:var(--navy)}
 .acard b{font-size:18px;display:block;padding-right:52px}
 .acard p{margin:4px 0 0;color:var(--muted);font-size:15px}
@@ -287,7 +289,7 @@ body:not(.s1) .island{min-height:0}
 .acard .ap{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
 .acard .ap.muted{color:var(--muted);font-weight:500;font-size:14px}
 .linkish{background:none;border:0;padding:0;color:var(--blue);font-weight:600;font-size:15px}
-.linkish:hover{text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){.linkish:hover{text-decoration:underline;text-underline-offset:3px}}
 .sw{position:absolute;top:24px;right:24px;width:44px;height:26px;border-radius:999px;background:var(--line);transition:background .25s}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
 .on .sw{background:var(--navy)}.on .sw::after{transform:translateX(18px)}
@@ -295,7 +297,7 @@ body:not(.s1) .island{min-height:0}
 .on .radio{border:7px solid var(--navy)}
 .pcard .radio{top:calc(var(--pad) + 2px);right:var(--pad)}
 .pcard.sel .radio{border:7px solid var(--navy)}
-.pcard:hover:not(.sel) .radio{border-color:var(--navy)}
+@media (hover:hover){.pcard:hover:not(.sel) .radio{border-color:var(--navy)}}
 .pcard .p-top{padding-right:36px}
 .acard.photo{padding:0;overflow:hidden;flex-direction:row;align-items:stretch;gap:0}
 .acard.photo .ph{flex:none;width:36%;min-height:200px;position:relative;overflow:hidden;background:radial-gradient(80% 80% at 50% 100%,#fbe0c9,var(--cream))}
@@ -322,7 +324,7 @@ body:not(.s1) .island{min-height:0}
 .sum-row .price{padding:0;align-self:center}
 .edit-link{padding-inline:0;border:0;gap:8px;min-height:0}
 .edit-link svg{flex:none;margin-left:-2px} /* у карандаша внутренний отступ в рисунке */
-.edit-link:hover{color:var(--ink);background:transparent}
+@media (hover:hover){.edit-link:hover{color:var(--ink);background:transparent}}
 .form{margin-top:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:760px){ .form{grid-template-columns:minmax(0,1fr)} }
 .fld{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
