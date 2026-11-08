@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конструктор чекапа · v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* v2 — по макету Figma «Mars clinic» (node 2-894): кремовый фон, белые карточки, navy-остров заказа, оранжевый акцент.
+   Всё выровнено по одной сетке: общий левый край у заголовка, карточек и логотипа; общая ось у текста и кнопок на интро. */
+:root{
+  --bg:#f7f3ef; --card:#ffffff; --cream:#f6efe8; --cream-2:#efe6dc;
+  --hover-shadow:0 30px 70px -18px rgba(150,96,52,.14),0 8px 24px -12px rgba(150,96,52,.08);
+  --ink:#2f3448; --muted:#6b6f7d; --faint:#9a9daa; --line:#ebe5de;
+  --navy:#203f8c; --navy-2:#18326f; --blue:#2c4fa3;
+  --orange:#ff7a00; --orange-2:#ff9230;
+  --ok:#00a69c; --ok-soft:#e5f6f5; --warn:#b45309; --warn-soft:#fff1e5; --err:#e84355;
+  --f-ui:Gilroy,"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --gut:clamp(16px,3.4vw,56px);   /* внешнее поле страницы */
+  --pad:clamp(20px,2.4vw,40px);   /* внутреннее поле карточек */
+  --gap:18px;                     /* расстояние между карточками */
+  --r:28px; --r-lg:40px;
+  --spring:cubic-bezier(.32,1.42,.52,1); --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+.mono{font-variant-numeric:tabular-nums;font-weight:600}
+
+.wrap{max-width:calc(1600px + 2 * var(--gut));margin:0 auto;padding:clamp(28px,4vw,72px) max(var(--gut),env(safe-area-inset-right,0px)) 120px max(var(--gut),env(safe-area-inset-left,0px))}
+
+/* ---------- logo ---------- */
+.logo{display:inline-flex;flex-direction:column;gap:6px;width:150px;flex:none}
+.logo-word{width:102px;margin-left:35px;display:block}
+.logo-mars{width:150px;display:block}
+.logo .lw{fill:#595959}.logo .lb{fill:var(--blue)}
+
+/* ---------- stepper ---------- */
+.stepper{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.st{display:flex;align-items:center;gap:10px;height:40px;padding:0 16px;border-radius:999px;font-size:15px;color:var(--faint);font-weight:500;white-space:nowrap;transition:background .3s,color .3s}
+.st b{font-weight:500;min-width:10px;text-align:center;display:grid;place-items:center}
+.st b svg{width:13px;height:13px;color:var(--ok)}
+.st.done{color:var(--muted)}
+.st.cur{color:var(--ink);font-weight:700;background:var(--card)}
+.st.cur b{color:var(--orange);font-weight:600}
+
+/* ---------- page head (шаги 1–4) ---------- */
+.phead{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px 32px;margin-bottom:clamp(28px,3.4vw,64px)}
+.phead h2{font-size:clamp(28px,2.6vw,42px);line-height:1.1;font-weight:700;letter-spacing:-.03em}
+.phead p{margin:10px 0 0;color:var(--muted);font-size:17px}
+.page-foot{margin-top:clamp(40px,4vw,72px)}
+body.intro #flowHead,body.intro .page-foot{display:none}
+@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;margin-left:-16px} }
+
+/* ---------- layout ---------- */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(330px,24vw,413px);gap:var(--gap);align-items:stretch}
+.grid.solo{grid-template-columns:minmax(0,1fr)}
+.grid.solo .aside{display:none}
+.stage{min-width:0}
+.view{animation:viewIn .5s var(--ease) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@media (max-width:1100px){ .grid{grid-template-columns:minmax(0,1fr)} .aside{display:none} }
+
+/* ================= INTRO ================= */
+.hero{position:relative;background:var(--card);border-radius:var(--r-lg);min-height:clamp(620px,calc(100svh - 160px),800px);display:grid;grid-template-rows:auto 1fr;isolation:isolate}
+.hero-head{position:relative;z-index:1;display:flex;align-items:center;gap:clamp(32px,5vw,96px);padding:56px var(--pad-x) 52px;--pad-x:clamp(24px,5vw,80px)}
+.hero-head::after{content:"";position:absolute;left:var(--pad-x);right:0;bottom:0;height:1px;background:var(--line)}
+.hero-head .stepper{gap:4px}
+.hero-head .st{padding:0 12px;height:34px}
+.hero-head .st.cur{background:none}
+.hero-body{position:relative;z-index:3;display:grid;grid-template-columns:minmax(0,46%) 1fr;padding:0 0 0 clamp(24px,5vw,80px)}
+.hero-copy{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px;padding:48px 0 64px}
+.eyebrow{color:var(--muted);font-size:17px;font-weight:500}
+.h1{font-size:clamp(34px,3.1vw,54px);line-height:1.04;font-weight:700;letter-spacing:-.02em;text-transform:uppercase}
+.h1 em{font-style:normal;color:var(--orange)}
+.lead{margin:0;color:var(--ink);opacity:.82;font-size:clamp(17px,1.2vw,21px);line-height:1.4;max-width:30em}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:672px;margin-top:34px}
+.who-btn{position:relative;height:96px;border:0;border-radius:999px;background:var(--cream);display:grid;align-items:center;overflow:visible;isolation:isolate;transition:background .3s var(--ease),transform .45s var(--spring),box-shadow .3s}
+.who-btn .t{display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.who-btn .t b{font-size:22px;font-weight:600;letter-spacing:-.025em;line-height:25px;white-space:nowrap}
+.who-btn .t small{font-size:15px;color:var(--muted);margin-top:2px;white-space:nowrap}
+/* иконка одного размера и на одной высоте в обеих кнопках, зеркально по краям */
+.who-btn .icw{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:1}
+.who-btn .ic{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;transition:transform .5s var(--spring)}
+.who-btn .rot{flex:none;display:block}
+.who-btn .crop{display:block;position:relative;overflow:hidden}
+.who-btn .crop img{position:absolute;max-width:none;display:block}
+/* геометрия 1:1 из Figma (кнопка 330×96) */
+.who-m .ic{left:-10px;top:9px;width:127.47px;height:153.63px}
+.who-m .rot{transform:rotate(-11.18deg)}
+.who-m .crop{width:103px;height:136.25px}
+.who-m .crop img{left:-44.49%;top:-21.09%;width:185.07%;height:139.91%}
+.who-f .ic{right:8.6px;top:-55px;width:118.4px;height:146.64px}
+.who-f .rot{transform:rotate(-20.31deg)}
+.who-f .crop{width:79.23px;height:127.04px}
+.who-f .crop img{inset:0;width:100%;height:100%}
+.who-m{grid-template-columns:110px 1fr;padding:0 28px 0 0}
+
+.who-m .t{grid-column:2}
+.who-f{grid-template-columns:1fr 110px;padding:0 0 0 28px}
+
+.who-f .t{grid-column:1}
+.who-btn:hover{background:var(--cream-2);transform:translateY(-2px);box-shadow:var(--hover-shadow)}
+.who-m:hover .ic{transform:translateY(-4px) rotate(6deg)}
+.who-f:hover .ic{transform:translateY(-4px) rotate(-6deg)}
+.who-btn:active{transform:scale(.98)}
+.skip{margin-top:6px;background:none;border:0;color:var(--muted);font-size:15px;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;padding:4px}
+.skip:hover{color:var(--ink)}
+/* фото: прижато к правому и нижнему краю карточки, голова выходит за верхний край */
+.hero-ph{position:absolute;z-index:2;right:0;bottom:0;top:-16%;width:57%;overflow:hidden;border-bottom-right-radius:var(--r-lg);pointer-events:none}
+.hero-ph img{position:absolute;right:0;bottom:-2%;width:100%;max-width:none;aspect-ratio:1;object-fit:cover;object-position:right bottom}
+.hero-facts{margin:22px 0 0;text-align:center;color:var(--muted);font-size:15px}
+.hero-facts .pr{color:var(--warn)}
+@media (max-width:1100px){
+  .hero{min-height:0;grid-template-rows:auto auto auto;margin-top:0}
+  .hero-head{flex-wrap:wrap;gap:16px 32px;padding-block:32px 28px}
+  .hero-body{grid-template-columns:minmax(0,1fr);padding:0 clamp(16px,4vw,48px)}
+  .hero-copy{padding:36px 0 32px}
+  .hero-ph{position:relative;top:auto;width:100%;height:clamp(300px,52vw,520px);border-radius:0 0 var(--r-lg) var(--r-lg)}
+  .hero-ph img{left:50%;right:auto;translate:-50% 0;width:min(100%,640px);bottom:0}
+}
+@media (max-width:640px){
+  .hero{border-radius:28px}
+  .hero-head .st:not(.cur) span{display:none}
+  .hero-head .st{padding:0 8px}
+  .pick{grid-template-columns:1fr;margin-top:18px}
+  .who-btn{height:80px}
+  .who-m{grid-template-columns:90px 1fr}.who-f{grid-template-columns:1fr 90px}
+}
+
+/* ================= PROGRAMS ================= */
+/* subgrid: название, цена, шкала, счётчики, список и ссылка стоят на одной линии во всех трёх карточках */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--gap);row-gap:0}
+.pcard{position:relative;grid-row:span 6;display:grid;grid-template-rows:subgrid;background:var(--card);border-radius:var(--r);padding:var(--pad);border:2px solid transparent;cursor:pointer;transition:border-color .25s,box-shadow .3s,transform .4s var(--spring)}
+.pcard:hover{box-shadow:var(--hover-shadow)}
+.pcard.sel{border-color:var(--navy)}
+.pcard h3{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.pcard .desc{margin:6px 0 0;color:var(--muted);font-size:15px;line-height:1.5}
+.price{padding-top:30px;font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(28px,2.1vw,36px);letter-spacing:-.02em;line-height:1.1;align-self:end}
+.meter{margin-top:18px;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--orange);transition:width .8s var(--spring)}
+.counts{margin:16px 0 0;color:var(--muted);font-size:15px}
+.counts b{color:var(--ink);font-weight:700}
+.hl{list-style:none;margin:26px 0 0;padding:22px 0 0;border-top:1px dashed var(--line);display:grid;gap:8px;align-content:start;font-size:15.5px}
+.hl .plus{color:var(--muted);font-size:14px}
+.p-link{justify-self:start;margin-top:26px;display:inline-flex;align-items:center;gap:10px;border:0;background:none;padding:4px 0;font-size:16px;font-weight:700;color:var(--blue)}
+.p-link svg{width:18px;height:18px;transition:transform .35s var(--spring)}
+.p-link:hover svg{transform:translateX(4px)}
+@media (max-width:860px){ .cards{grid-template-columns:minmax(0,1fr);row-gap:var(--gap)} .pcard{grid-row:auto;grid-template-rows:none} }
+
+/* ---------- compare (мобильная версия) ---------- */
+.compare{margin-top:var(--gap);background:var(--card);border-radius:var(--r);overflow:hidden}
+.compare summary{list-style:none;cursor:pointer;padding:18px var(--pad);display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.compare summary::-webkit-details-marker{display:none}
+.compare summary svg{width:18px;height:18px;transition:transform .3s var(--ease)}
+.compare[open] summary svg{transform:rotate(180deg)}
+.cmp-tools,.cmp-toggle{padding:0 var(--pad) 12px;display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted)}
+.cmp-toggle{padding:0;margin:14px 0}
+.tbl-wrap{overflow:auto;max-height:520px;border-top:1px solid var(--line)}
+.sheet-tbl{max-height:none;border:0}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:520px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left}
+thead th{position:sticky;top:0;background:var(--card);z-index:1;font-weight:700}
+td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.yes{color:var(--ok)}.no{color:var(--line)}.yes svg{width:16px;height:16px}
+@media (min-width:1101px){ #cmp{display:none} }
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px 20px;font-weight:600;font-size:16px;transition:transform .3s var(--spring),background .2s,opacity .2s,border-color .2s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:16px;height:16px}
+.btn-dark{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn-dark:hover{background:var(--orange-2);border-color:var(--orange-2)}
+.btn-lg{padding:8px 8px 8px 28px;min-height:64px;font-size:17px;justify-content:space-between}
+.btn-lg svg{width:34px;height:34px;padding:9px;border-radius:50%;background:rgba(255,255,255,.2)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap}
+.nav .hint{color:var(--muted);font-size:15px}
+.nav.docked{display:none}
+
+/* ================= ISLAND (Ваш заказ) ================= */
+.aside{min-width:0}
+.aside-in{position:sticky;top:20px;display:flex;flex-direction:column;gap:var(--gap)}
+body.s1 .aside-in{height:100%}
+.aside-note:empty{display:none}
+.aside-note .resolve{margin-top:0}
+.island{display:flex;flex-direction:column;background:linear-gradient(170deg,#24479a,var(--navy) 55%,var(--navy-2));color:#fff;border-radius:var(--r);padding:var(--pad) 0 0;min-height:100%;overflow:hidden}
+body:not(.s1) .island{min-height:0}
+.island > *{padding-inline:var(--pad)}
+.island h4{font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.88);display:flex;justify-content:space-between;margin-bottom:16px}
+.island h4 span:last-child{color:rgba(255,255,255,.55);letter-spacing:0;text-transform:none;font-weight:500}
+.lines{display:grid;gap:0}
+.line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15.5px;animation:lineIn .5s var(--spring) both}
+.line small{display:block;color:rgba(255,255,255,.6);font-size:13.5px}
+.line .mono{white-space:nowrap}
+@keyframes lineIn{from{opacity:0;transform:translateY(8px) scale(.97);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.empty{background:rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;font-size:15.5px;line-height:1.5}
+.total{display:flex;justify-content:space-between;align-items:center;margin-top:26px}
+.total>span:first-child{color:rgba(255,255,255,.7);font-size:15px}
+.total .roll{font-size:32px}
+.isl-note{margin-top:22px;font-size:13.5px;color:rgba(255,255,255,.66);line-height:1.5}
+.isl-sp{flex:1;min-height:32px}
+.isl-actions{display:grid;grid-template-columns:auto 1fr;gap:20px;padding-bottom:var(--pad)}
+.isl-actions:empty{display:none}
+.isl-actions .btn{min-height:64px}
+.isl-actions .btn-ghost{grid-column:1;grid-row:1;border:1px solid rgba(255,255,255,.4);color:#fff;padding:0 24px}
+.isl-actions .btn-ghost:hover{background:rgba(255,255,255,.08)}
+.isl-actions .btn-dark{grid-column:2;grid-row:1;padding:8px 10px 8px 30px}
+.isl-actions .btn-dark:only-child{grid-column:1 / -1}
+.isl-foot{border-top:1px solid rgba(255,255,255,.14);padding-block:22px 26px}
+.isl-foot:empty{display:none}
+.isl-foot button{background:none;border:0;padding:0;color:#fff;font-size:16px;font-weight:500;display:inline-flex;gap:10px;align-items:center}
+.isl-foot svg{width:16px;height:16px;transition:transform .35s var(--spring)}
+.isl-foot button:hover svg{transform:translateX(4px)}
+
+.roll{display:inline-flex;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:-.02em;line-height:1}
+
+/* ================= ADDONS ================= */
+.levelbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.levelbar .lbl{font-size:15px;color:var(--muted)}
+.seg{position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--card);border-radius:999px;padding:4px;max-width:100%}
+.seg button{border:0;background:none;padding:9px 18px;border-radius:999px;font-size:15.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg-ink{position:absolute;inset:4px;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--navy);border-radius:999px;pointer-events:none;transition:clip-path .55s var(--spring)}
+.seg-ink span{display:grid;place-items:center;padding:9px 18px;font-size:15.5px;font-weight:600;color:#fff;white-space:nowrap}
+@media (max-width:440px){ .seg button,.seg-ink span{padding:8px 10px;font-size:14.5px} }
+.block{margin-top:34px}
+.block-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.block-h h3{font-size:20px;font-weight:700}
+.block-h span{font-size:15px;color:var(--muted)}
+.acards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--gap)}
+.acards.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.acard{position:relative;text-align:left;background:var(--card);border:2px solid transparent;border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:border-color .25s,box-shadow .3s}
+.acard:hover{box-shadow:var(--hover-shadow)}
+.acard.on{border-color:var(--navy)}
+.acard b{font-size:18px;display:block;padding-right:52px}
+.acard p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.acard .ic{width:44px;height:44px;border-radius:50%;background:var(--cream);display:grid;place-items:center;color:var(--orange)}
+.acard .ic svg{width:20px;height:20px}
+.acard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:8px}
+.acard .ap{font-variant-numeric:tabular-nums;font-weight:700;font-size:18px}
+.acard .ap.muted{color:var(--muted);font-weight:500;font-size:14px}
+.linkish{background:none;border:0;padding:0;color:var(--blue);font-weight:600;font-size:15px}
+.linkish:hover{text-decoration:underline;text-underline-offset:3px}
+.sw{position:absolute;top:24px;right:24px;width:44px;height:26px;border-radius:999px;background:var(--line);transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .45s var(--spring)}
+.on .sw{background:var(--navy)}.on .sw::after{transform:translateX(18px)}
+.radio{position:absolute;top:24px;right:24px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);background:#fff;transition:all .3s var(--spring)}
+.on .radio{border:7px solid var(--navy)}
+.pcard .radio{top:calc(var(--pad) + 2px);right:var(--pad)}
+.pcard.sel .radio{border:7px solid var(--navy)}
+.pcard:hover:not(.sel) .radio{border-color:var(--navy)}
+.pcard .p-top{padding-right:36px}
+.acard.photo{padding:0;overflow:hidden;flex-direction:row;align-items:stretch;gap:0}
+.acard.photo .ph{flex:none;width:36%;min-height:200px;position:relative;overflow:hidden;background:radial-gradient(80% 80% at 50% 100%,#fbe0c9,var(--cream))}
+.acard.photo .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%;transition:transform .8s var(--ease)}
+.acard.photo.on .ph img{transform:scale(1.05)}
+.acard.photo .bd{position:relative;display:flex;flex-direction:column;gap:12px;padding:24px;min-width:0;flex:1}
+.more{margin-top:12px}
+.resolve{margin-top:var(--gap);border-radius:20px;padding:16px 20px;font-size:15.5px;background:var(--card)}
+.resolve.pop{animation:viewIn .45s var(--ease) both}
+.resolve svg{display:none}
+.resolve.bad{background:var(--warn-soft)}
+.resolve .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.resolve .btn{padding:8px 14px;font-size:15px}
+
+/* ================= ORDER ================= */
+.order{display:grid;gap:10px}
+.oline{background:var(--card);border-radius:20px}
+.oline summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:12px;padding:18px 24px;align-items:center;font-weight:600}
+.oline summary::-webkit-details-marker{display:none}
+.oline summary small{display:block;color:var(--muted);font-size:14px;font-weight:400}
+.oline .mono{white-space:nowrap}
+.oline .b{padding:0 24px 18px;columns:2 220px;column-gap:24px;font-size:15px;color:var(--muted)}
+.oline .b div{break-inside:avoid;padding:3px 0}
+.sum-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.sum-row .price{padding:0}
+.form{margin-top:30px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+@media (max-width:760px){ .form{grid-template-columns:minmax(0,1fr)} }
+.fld{display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--muted)}
+.fld input{font:inherit;font-size:17px;color:var(--ink);background:var(--card);border:1px solid transparent;border-radius:16px;padding:15px 18px;transition:border-color .2s,box-shadow .2s}
+.fld input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 4px rgba(32,63,140,.12)}
+.fld.err input{border-color:var(--err)}
+.fld .e{color:var(--err);font-size:13.5px;min-height:16px}
+.consents{display:grid;gap:10px;margin-top:6px;font-size:15.5px;color:var(--muted)}
+.consents label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.consents input{width:18px;height:18px;accent-color:var(--orange);margin-top:2px;flex:none}
+.consents a{color:var(--blue)}
+.notice{margin-top:16px;font-size:15px;color:var(--muted)}
+.notice svg{display:none}
+.pay-btn{width:100%;max-width:560px;margin-top:26px;font-size:18px;font-weight:600}
+.pay-btn .pay-ic{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none;transition:background .3s}
+.pay-btn .pay-ic svg{width:20px;height:20px;padding:0;background:none}
+.pay-btn.locked{opacity:.55}
+.pay-btn.busy{pointer-events:none}
+.pay-btn.done{background:var(--ok);border-color:var(--ok)}
+.spin{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* ================= RESULT ================= */
+.res{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:30px;align-items:start;background:var(--card);border-radius:var(--r);padding:var(--pad)}
+@media (max-width:760px){ .res{grid-template-columns:minmax(0,1fr)} }
+.res .h2{font-size:clamp(26px,2.2vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.res .lead{font-size:17px;margin-top:10px}
+.demo{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:var(--gap);font-size:14px;color:var(--muted)}
+.status{display:inline-flex;gap:8px;align-items:center;font-size:15px;font-weight:700}
+.status.ok{color:var(--ok)}.status.wait{color:var(--ink)}.status.bad{color:var(--orange)}
+.status svg{width:16px;height:16px}
+.draw path{stroke-dasharray:30;stroke-dashoffset:30;animation:draw .6s .2s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.steps-after{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:12px}
+.steps-after li{display:flex;gap:12px;font-size:16px}
+.steps-after li b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--cream);color:var(--orange);display:grid;place-items:center;font-size:13.5px}
+.printer{width:100%;max-width:300px;margin:0 auto;position:relative}
+.housing{position:relative;z-index:2;height:60px;border-radius:20px 20px 14px 14px;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:13.5px}
+.housing b{font-family:var(--f-mono);letter-spacing:.2em;font-size:13px}
+.housing span{color:var(--muted);display:flex;gap:6px;align-items:center}
+.housing span i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.housing.busy span i{background:var(--orange);animation:blink .6s infinite}
+@keyframes blink{50%{opacity:.3}}
+.housing::after{content:"";position:absolute;left:26px;right:26px;bottom:8px;height:5px;border-radius:5px;background:var(--navy)}
+.feed{position:relative;z-index:1;margin:-12px auto 0;width:252px;overflow:hidden;padding-bottom:20px}
+.paper{background:#fff;color:var(--ink);font-family:var(--f-mono);font-size:11.5px;line-height:16px;padding:22px 16px 26px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.14));-webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/10px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/10px 100%}
+.paper .c{text-align:center}.paper .m{font-weight:600;letter-spacing:.2em;font-size:12.5px}.paper .dim{color:#7a7a82}
+.paper .r{display:flex;justify-content:space-between;gap:8px}.paper .tot{font-size:13.5px;font-weight:600}
+.paper .bar{display:flex;gap:1px;height:30px;justify-content:center;margin:10px 0 6px}.paper .bar i{background:var(--ink);display:block}
+.reprint{display:block;margin:6px auto 0}
+.loader{width:56px;height:56px;margin:10px 0 18px;position:relative}
+.loader i{position:absolute;inset:0;border-radius:50%;border:3px solid var(--line);border-top-color:var(--orange);animation:sp 1s linear infinite}
+.loader i:nth-child(2){inset:10px;border-top-color:var(--navy);animation-duration:1.6s;animation-direction:reverse}
+
+/* ================= overlays ================= */
+.mbar{position:fixed;left:0;right:0;bottom:0;padding:0 max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));z-index:20;display:none;pointer-events:none}
+@media (max-width:1100px){ .mbar.show{display:block} }
+.mbar-in{pointer-events:auto;max-width:560px;margin:0 auto;background:linear-gradient(170deg,#24479a,var(--navy));color:#fff;border-radius:24px;box-shadow:0 20px 50px -20px rgba(14,36,87,.7);overflow:hidden}
+.mbar-head{width:100%;background:none;border:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;color:inherit}
+.mbar-head .lft{display:flex;align-items:center;gap:10px;font-size:16px}
+.badge{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--orange);color:#fff;font-size:13.5px;font-weight:600;display:grid;place-items:center}
+.mbar-head .roll{font-size:22px}
+.mbar-head svg{width:18px;height:18px;transition:transform .35s var(--ease)}
+.mbar.open .mbar-head svg{transform:rotate(180deg)}
+.mbar-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--ease)}
+.mbar.open .mbar-body{grid-template-rows:1fr}
+.mbar-body>div{overflow:hidden}
+.mbar-body .lines{padding:0 20px 14px}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%) translateY(-20px) scale(.9);opacity:0;background:var(--navy);color:#fff;padding:10px 18px 10px 12px;border-radius:999px;font-size:15px;display:flex;gap:10px;align-items:center;z-index:50;transition:all .5s var(--spring);pointer-events:none;max-width:calc(100% - 32px);box-shadow:0 14px 40px -14px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%);opacity:1}
+.toast i{width:22px;height:22px;border-radius:50%;background:var(--orange);display:grid;place-items:center;flex:none}
+.toast svg{width:13px;height:13px;color:#fff}
+.backdrop{position:fixed;inset:0;background:rgba(20,24,40,.4);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:41;background:var(--card);display:flex;flex-direction:column;transition:transform .5s var(--spring);top:12px;right:12px;bottom:12px;width:min(460px,calc(100% - 24px));border-radius:28px;transform:translateX(110%);box-shadow:0 30px 80px -20px rgba(0,0,0,.4)}
+.sheet.wide{width:min(840px,calc(100% - 24px))}
+.sheet.show{transform:none}
+@media (max-width:640px){ .sheet,.sheet.wide{top:auto;left:0;right:0;bottom:0;width:100%;max-height:86vh;border-radius:24px 24px 0 0;transform:translateY(105%);padding-bottom:env(safe-area-inset-bottom,0px)} .sheet.show{transform:none} }
+.sheet-h{padding:24px 24px 14px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.sheet-h h3{font-size:21px;font-weight:700}
+.sheet-h p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.x{width:36px;height:36px;flex:none;border-radius:50%;border:0;background:var(--bg);display:grid;place-items:center}
+.x svg{width:16px;height:16px}
+.sheet-b{overflow-y:auto;padding:8px 24px 24px}
+.grp{margin-top:16px}
+.grp h5{margin:0 0 6px;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.grp ul{list-style:none;margin:0;padding:0}
+.grp li{padding:9px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.12s!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="phead" id="flowHead"><div id="phead"></div><nav class="stepper" id="stepper" aria-label="Шаги"></nav></header>
+  <div class="grid">
+    <main class="stage" id="stage" aria-live="polite"></main>
+    <aside class="aside"><div class="aside-in"><div class="island" id="island"></div><div class="aside-note" id="asideNote"></div></div></aside>
+  </div>
+  <footer class="page-foot"><span class="logo" role="img" aria-label="Олимп Клиник МАРС"><svg class="logo-word" viewBox="0 0 180 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M33.5441 0.427485H32.5V12.4454L41.3088 2.70962V12.0176H42.3526V0L33.5441 9.73578V0.427485Z" class="lw"/><path d="M49.0938 0V12.0176H50.1375V2.70962L54.8078 7.87137L59.4784 2.70962V12.0176H60.5222V0L54.8078 6.31547L49.0938 0Z" class="lw"/><path d="M6.13615 0.0439453C4.92253 0.0439432 3.73617 0.403821 2.72708 1.07807C1.71799 1.75232 0.931508 2.71067 0.467079 3.83191C0.00265106 4.95315 -0.118858 6.18693 0.117915 7.37723C0.354688 8.56753 0.93911 9.66088 1.79728 10.519C2.65544 11.3772 3.74881 11.9616 4.93911 12.1983C6.12942 12.4351 7.36319 12.3136 8.48443 11.8491C9.60566 11.3847 10.564 10.5982 11.2382 9.58906C11.9125 8.57996 12.2723 7.39359 12.2723 6.17997C12.2704 4.55316 11.6233 2.99353 10.4729 1.84321C9.32261 0.692892 7.76296 0.0458223 6.13615 0.0439453ZM6.13615 11.2723C5.129 11.2723 4.14447 10.9737 3.30706 10.4141C2.46964 9.85461 1.81695 9.05931 1.43152 8.12882C1.0461 7.19834 0.945251 6.17447 1.14173 5.18667C1.3382 4.19887 1.82318 3.29151 2.53533 2.57934C3.24749 1.86717 4.15483 1.38216 5.14263 1.18566C6.13042 0.989164 7.15431 1.09 8.0848 1.4754C9.01529 1.86081 9.8106 2.51347 10.3702 3.35087C10.9297 4.18827 11.2284 5.17281 11.2284 6.17996C11.2269 7.53006 10.6899 8.82442 9.73526 9.7791C8.78061 10.7338 7.48625 11.2708 6.13615 11.2724V11.2723Z" class="lw"/><path d="M25.7792 1.42439V0.379883H25.7209H21.1621L15.5801 12.0184H16.7378L21.8192 1.42366L25.7792 1.42439Z" class="lw"/><path d="M25.7802 2.46777H24.7363V12.0182H25.7802V2.46777Z" class="lw"/><path d="M67.2422 0.379883V1.42799H74.9497V12.0184H75.9935V0.379883H67.2422Z" class="lw"/><path d="M68.2861 2.4707H67.2422V12.0173H68.2861V2.4707Z" class="lw"/><path d="M91.7255 0.427734H90.6816V12.018H91.7255V0.427734Z" class="lw"/><path d="M138.167 0.427734H137.123V12.018H138.167V0.427734Z" class="lw"/><path d="M146.471 5.70124H139.338V6.74501H146.471V12.0182H147.515V0.427734H146.471V5.70124Z" class="lw"/><path d="M121.708 0.427496H120.664V12.4454L129.473 2.70963V12.0179H130.516V0L121.708 9.73616V0.427496Z" class="lw"/><path d="M155.464 0.427496H154.42V12.4454L163.228 2.70963V12.0179H164.272V0L155.464 9.73616V0.427496Z" class="lw"/><path d="M113.944 2.52344H112.9V12.0175H113.944V2.52344Z" class="lw"/><path d="M113.885 0.379883H109.327L103.744 12.0188H104.902L109.984 1.42366H113.885V0.379883Z" class="lw"/><path d="M99.2109 0.427734H97.8584L93.3496 5.89916V6.22282L98.562 12.0179H99.9732C98.4947 10.3928 95.5182 7.12111 94.5617 6.06939L99.2109 0.427734Z" class="lw"/><path d="M179.24 0.427734H177.888L173.379 5.89916V6.22282L178.591 12.0179H180.002C178.524 10.3928 175.548 7.12111 174.591 6.06939L179.24 0.427734Z" class="lw"/><path d="M171.753 0.427734H170.709V12.018H171.753V0.427734Z" class="lw"/></svg><svg class="logo-mars" viewBox="0 0 85 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<g clip-path="url(#mlogo)">
+<path d="M32.006 2.29204H36.2673L36.239 16.7607H33.8889L33.903 3.57282L28.8348 16.7607H25.4937L20.4679 3.6432V16.7607H18.1178V2.29204H22.3791L27.2067 15.4236L32.006 2.29204Z" class="lb"/>
+<path d="M48.0435 2.29204H44.3768L38.4308 16.7607H40.88L46.1606 3.4743L49.3035 11.3279H44.221L43.4849 13.1857H50.0538L51.4695 16.7607H53.9895L48.0435 2.29204Z" class="lb"/>
+<path d="M67.4008 3.418C66.424 2.67205 65.1781 2.29204 63.635 2.29204H56.1317V4.29062H63.4227C64.3429 4.29062 65.0649 4.50174 65.5887 4.92398C66.1125 5.34621 66.3815 5.96549 66.3957 6.79589C66.3957 7.62629 66.1267 8.24557 65.5887 8.6678C65.0507 9.09004 64.3287 9.30116 63.4227 9.30116H58.5809V5.47289H56.1317V16.7607H58.5809V11.1871H63.6775C65.2489 11.1871 66.4948 10.8353 67.4433 10.1175C68.3918 9.41375 68.859 8.30187 68.859 6.79589C68.859 5.28992 68.3777 4.16395 67.4008 3.418Z" class="lb"/>
+<path d="M70.5456 9.52651C70.5456 7.27458 71.1968 5.47304 72.4851 4.09374C73.7734 2.71443 75.5997 2.03885 77.9356 2.03885C79.8327 2.03885 81.3899 2.47516 82.6075 3.34779C83.7967 4.17818 84.5895 5.45896 84.8018 6.89457L82.4517 7.06346C82.2677 6.14862 81.7156 5.36044 80.9369 4.86784C80.1016 4.30485 79.1107 4.02336 77.9498 4.02336C76.35 4.02336 75.1325 4.54412 74.2831 5.59971C73.4336 6.64123 73.0089 7.95016 73.0089 9.52651C73.0089 11.1169 73.4619 12.4399 74.3538 13.4674C75.2599 14.4948 76.5199 15.0156 78.1338 15.0156C79.3938 15.0156 80.4131 14.7059 81.2059 14.0867C81.9704 13.5096 82.48 12.6651 82.6499 11.7362L85 11.877C84.7735 13.4533 84.0798 14.6919 82.9048 15.6208C81.7297 16.5497 80.1441 17.0001 78.1338 17.0001C75.7271 17.0001 73.8583 16.3245 72.5276 14.9593C71.211 13.6081 70.5456 11.7925 70.5456 9.52651Z" class="lb"/>
+<path d="M5.95458 16.7609C9.24321 16.7609 11.9092 14.1105 11.9092 10.8411C11.9092 7.57162 9.24321 4.92122 5.95458 4.92122C2.66596 4.92122 0 7.57162 0 10.8411C0 14.1105 2.66596 16.7609 5.95458 16.7609Z" fill="#F47D2B"/>
+<path d="M10.8151 5.35781C11.7208 5.35781 12.455 4.60614 12.455 3.6789C12.455 2.75167 11.7208 2 10.8151 2C9.90936 2 9.17513 2.75167 9.17513 3.6789C9.17513 4.60614 9.90936 5.35781 10.8151 5.35781Z" fill="#F47D2B"/>
+</g>
+<defs>
+<clipPath id="mlogo">
+<rect width="85" height="20" fill="white"/>
+</clipPath>
+</defs>
+</svg></span></footer>
+</div>
+
+<div class="mbar" id="mbar"><div class="mbar-in">
+  <button class="mbar-head" id="mbarHead" aria-expanded="false"></button>
+  <div class="mbar-body"><div><div class="lines" id="mbarLines"></div></div></div>
+</div></div>
+<div class="toast" id="toast" role="status"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg></i><span></span></div>
+<div class="backdrop" id="backdrop"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-h"><div><h3 id="sheetTitle"></h3><p id="sheetSub"></p></div><button class="x" id="sheetX" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="sheet-b" id="sheetBody"></div>
+</aside>
+
+<script>
+const D = {"programs":{"start":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Ферритин","l"],["Гликированный гемоглобин (HbA1c)","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["Рентгенография ОГК","i"],["УЗИ почек и мочевыводящих путей","i"]],"optimal":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"]],"extended":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Эндокринолог","c"],["Дерматовенеролог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["с-пептид","l"],["Инсулин","l"],["Индекс НОМА","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["Цинк","l"],["Фолиевая кислота","l"],["Витамин В12","l"],["Гомоцистеин","l"],["Общий IgE","l"],["коагулограмма","l"],["ЛЖСС","l"],["Железо","l"],["ЛДГ","l"],["КФК","l"],["Магний в эритроцитах","l"],["Сифилис RPR","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"],["УЗДГ артерий брахицефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["КТ-кальциевый индекс коронарных артерий","i"]]},"addons":{"female":{"start":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"]],"optimal":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]],"extended":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]]},"male":{"start":[["Тестостерон","l"],["ПСА общий","l"],["УЗИ органов малого таза (простата)","i"]],"optimal":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"]],"extended":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ГСПГ","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"],["Урофлоумерия","i"]]},"cardio":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"]]},"gastro":{"start":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["Коагулограмма","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Коагулограмма","l"]],"extended":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"cardio_gastro":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"energy":{"start":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]},"all3":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]}}};
+const LOGO = `<span class="logo" role="img" aria-label="Олимп Клиник МАРС"><svg class="logo-word" viewBox="0 0 180 13" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M33.5441 0.427485H32.5V12.4454L41.3088 2.70962V12.0176H42.3526V0L33.5441 9.73578V0.427485Z" class="lw"/><path d="M49.0938 0V12.0176H50.1375V2.70962L54.8078 7.87137L59.4784 2.70962V12.0176H60.5222V0L54.8078 6.31547L49.0938 0Z" class="lw"/><path d="M6.13615 0.0439453C4.92253 0.0439432 3.73617 0.403821 2.72708 1.07807C1.71799 1.75232 0.931508 2.71067 0.467079 3.83191C0.00265106 4.95315 -0.118858 6.18693 0.117915 7.37723C0.354688 8.56753 0.93911 9.66088 1.79728 10.519C2.65544 11.3772 3.74881 11.9616 4.93911 12.1983C6.12942 12.4351 7.36319 12.3136 8.48443 11.8491C9.60566 11.3847 10.564 10.5982 11.2382 9.58906C11.9125 8.57996 12.2723 7.39359 12.2723 6.17997C12.2704 4.55316 11.6233 2.99353 10.4729 1.84321C9.32261 0.692892 7.76296 0.0458223 6.13615 0.0439453ZM6.13615 11.2723C5.129 11.2723 4.14447 10.9737 3.30706 10.4141C2.46964 9.85461 1.81695 9.05931 1.43152 8.12882C1.0461 7.19834 0.945251 6.17447 1.14173 5.18667C1.3382 4.19887 1.82318 3.29151 2.53533 2.57934C3.24749 1.86717 4.15483 1.38216 5.14263 1.18566C6.13042 0.989164 7.15431 1.09 8.0848 1.4754C9.01529 1.86081 9.8106 2.51347 10.3702 3.35087C10.9297 4.18827 11.2284 5.17281 11.2284 6.17996C11.2269 7.53006 10.6899 8.82442 9.73526 9.7791C8.78061 10.7338 7.48625 11.2708 6.13615 11.2724V11.2723Z" class="lw"/><path d="M25.7792 1.42439V0.379883H25.7209H21.1621L15.5801 12.0184H16.7378L21.8192 1.42366L25.7792 1.42439Z" class="lw"/><path d="M25.7802 2.46777H24.7363V12.0182H25.7802V2.46777Z" class="lw"/><path d="M67.2422 0.379883V1.42799H74.9497V12.0184H75.9935V0.379883H67.2422Z" class="lw"/><path d="M68.2861 2.4707H67.2422V12.0173H68.2861V2.4707Z" class="lw"/><path d="M91.7255 0.427734H90.6816V12.018H91.7255V0.427734Z" class="lw"/><path d="M138.167 0.427734H137.123V12.018H138.167V0.427734Z" class="lw"/><path d="M146.471 5.70124H139.338V6.74501H146.471V12.0182H147.515V0.427734H146.471V5.70124Z" class="lw"/><path d="M121.708 0.427496H120.664V12.4454L129.473 2.70963V12.0179H130.516V0L121.708 9.73616V0.427496Z" class="lw"/><path d="M155.464 0.427496H154.42V12.4454L163.228 2.70963V12.0179H164.272V0L155.464 9.73616V0.427496Z" class="lw"/><path d="M113.944 2.52344H112.9V12.0175H113.944V2.52344Z" class="lw"/><path d="M113.885 0.379883H109.327L103.744 12.0188H104.902L109.984 1.42366H113.885V0.379883Z" class="lw"/><path d="M99.2109 0.427734H97.8584L93.3496 5.89916V6.22282L98.562 12.0179H99.9732C98.4947 10.3928 95.5182 7.12111 94.5617 6.06939L99.2109 0.427734Z" class="lw"/><path d="M179.24 0.427734H177.888L173.379 5.89916V6.22282L178.591 12.0179H180.002C178.524 10.3928 175.548 7.12111 174.591 6.06939L179.24 0.427734Z" class="lw"/><path d="M171.753 0.427734H170.709V12.018H171.753V0.427734Z" class="lw"/></svg><svg class="logo-mars" viewBox="0 0 85 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<g clip-path="url(#mlogo)">
+<path d="M32.006 2.29204H36.2673L36.239 16.7607H33.8889L33.903 3.57282L28.8348 16.7607H25.4937L20.4679 3.6432V16.7607H18.1178V2.29204H22.3791L27.2067 15.4236L32.006 2.29204Z" class="lb"/>
+<path d="M48.0435 2.29204H44.3768L38.4308 16.7607H40.88L46.1606 3.4743L49.3035 11.3279H44.221L43.4849 13.1857H50.0538L51.4695 16.7607H53.9895L48.0435 2.29204Z" class="lb"/>
+<path d="M67.4008 3.418C66.424 2.67205 65.1781 2.29204 63.635 2.29204H56.1317V4.29062H63.4227C64.3429 4.29062 65.0649 4.50174 65.5887 4.92398C66.1125 5.34621 66.3815 5.96549 66.3957 6.79589C66.3957 7.62629 66.1267 8.24557 65.5887 8.6678C65.0507 9.09004 64.3287 9.30116 63.4227 9.30116H58.5809V5.47289H56.1317V16.7607H58.5809V11.1871H63.6775C65.2489 11.1871 66.4948 10.8353 67.4433 10.1175C68.3918 9.41375 68.859 8.30187 68.859 6.79589C68.859 5.28992 68.3777 4.16395 67.4008 3.418Z" class="lb"/>
+<path d="M70.5456 9.52651C70.5456 7.27458 71.1968 5.47304 72.4851 4.09374C73.7734 2.71443 75.5997 2.03885 77.9356 2.03885C79.8327 2.03885 81.3899 2.47516 82.6075 3.34779C83.7967 4.17818 84.5895 5.45896 84.8018 6.89457L82.4517 7.06346C82.2677 6.14862 81.7156 5.36044 80.9369 4.86784C80.1016 4.30485 79.1107 4.02336 77.9498 4.02336C76.35 4.02336 75.1325 4.54412 74.2831 5.59971C73.4336 6.64123 73.0089 7.95016 73.0089 9.52651C73.0089 11.1169 73.4619 12.4399 74.3538 13.4674C75.2599 14.4948 76.5199 15.0156 78.1338 15.0156C79.3938 15.0156 80.4131 14.7059 81.2059 14.0867C81.9704 13.5096 82.48 12.6651 82.6499 11.7362L85 11.877C84.7735 13.4533 84.0798 14.6919 82.9048 15.6208C81.7297 16.5497 80.1441 17.0001 78.1338 17.0001C75.7271 17.0001 73.8583 16.3245 72.5276 14.9593C71.211 13.6081 70.5456 11.7925 70.5456 9.52651Z" class="lb"/>
+<path d="M5.95458 16.7609C9.24321 16.7609 11.9092 14.1105 11.9092 10.8411C11.9092 7.57162 9.24321 4.92122 5.95458 4.92122C2.66596 4.92122 0 7.57162 0 10.8411C0 14.1105 2.66596 16.7609 5.95458 16.7609Z" fill="#F47D2B"/>
+<path d="M10.8151 5.35781C11.7208 5.35781 12.455 4.60614 12.455 3.6789C12.455 2.75167 11.7208 2 10.8151 2C9.90936 2 9.17513 2.75167 9.17513 3.6789C9.17513 4.60614 9.90936 5.35781 10.8151 5.35781Z" fill="#F47D2B"/>
+</g>
+<defs>
+<clipPath id="mlogo">
+<rect width="85" height="20" fill="white"/>
+</clipPath>
+</defs>
+</svg></span>`;
+const LV = [
+  {id:'start', name:'Стартовая', desc:'Базовая проверка основных систем организма за один визит.'},
+  {id:'optimal', name:'Оптимальная', desc:'Сердце, щитовидная железа, инфекции и низкодозная КТ лёгких.'},
+  {id:'extended', name:'Расширенная', desc:'Максимальный охват: обмен веществ, сосуды, кальциевый индекс коронарных артерий.'}
+];
+const LVN = {start:'Стартовой', optimal:'Оптимальной', extended:'Расширенной'};
+// Условные цены для прототипа, ₽
+const PRICE = {
+  base:{start:14900, optimal:29900, extended:54900},
+  female:{start:9900, optimal:21900, extended:21900},
+  male:{start:5900, optimal:11900, extended:15900},
+  cardio:{start:24900, optimal:19900, extended:17900},
+  gastro:{start:39900, optimal:34900, extended:31900},
+  cardio_gastro:{start:59900, optimal:50900, extended:45900},
+  energy:{start:27900, optimal:25900, extended:18900},
+  all3:{start:82900, optimal:71900, extended:59900}
+};
+const AD = {
+  female:{name:'Женский модуль', icon:'venus', short:'Гинеколог, цитология, ВПЧ, УЗИ малого таза и молочных желёз'},
+  male:{name:'Мужской модуль', icon:'mars', short:'Тестостерон, ПСА, УЗИ простаты, уролог'},
+  cardio:{name:'Кардио', icon:'heart', short:'Велоэргометрия, УЗДГ сосудов, NT-proBNP, ApoB, Lp(a)'},
+  gastro:{name:'Гастро', icon:'apple', short:'Гастро- и колоноскопия под наркозом, гастроэнтеролог'},
+  energy:{name:'Энергия и метаболизм', icon:'zap', short:'Гормоны, витамины, микроэлементы, денситометрия всего тела'},
+  cardio_gastro:{name:'Кардио + Гастро', icon:'heart'},
+  all3:{name:'Кардио + Гастро + Энергия', icon:'zap'}
+};
+const GRP = {c:'Консультации', l:'Анализы', i:'Исследования и процедуры'};
+const ICON = {
+  check:'<path d="M5 12l5 5 9-11"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  chev:'<path d="M6 9l6 6 6-6"/>',
+  alert:'<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.5 12h4l1.5-3 3 6 1.5-3h7"/>',
+  apple:'<path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/>',
+  zap:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  venus:'<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/>',
+  mars:'<circle cx="10" cy="14" r="5.5"/><path d="M14 10l6.5-6.5M15 3.5h5.5V9"/>'
+};
+const IMG = {female:'img/woman-cutout.png', male:'img/man-cutout.png', couple:'img/couple-cutout.png', icoMale:'img/icon-male.png', icoFemale:'img/icon-female.png'};
+const ico = (n, sw=2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
+const rub = n => n.toLocaleString('ru-RU').replace(/\s/g,' ') + ' ₽';
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const S = { step:0, who:null, level:null, gender:null, themes:new Set(), showOtherGender:false, diffOnly:false,
+  form:{name:'', phone:'', email:'', c1:false, c2:false}, errors:{}, pay:'paid', orderNo:'MC-' + Math.floor(10000 + Math.random()*89999) };
+
+// ---------- domain ----------
+function themePackage(){
+  const t = ['cardio','gastro','energy'].filter(k => S.themes.has(k));
+  const map = {'':null, 'cardio':'cardio', 'gastro':'gastro', 'energy':'energy', 'cardio+gastro':'cardio_gastro', 'cardio+gastro+energy':'all3'};
+  const key = t.join('+');
+  if (key in map) return {id: map[key], combo: t.length > 1};
+  return {invalid:true, picked:t};
+}
+function lines(){
+  const out = [];
+  if (!S.level) return out;
+  out.push({id:'base', title:'Чекап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], items:D.programs[S.level]});
+  if (S.gender) out.push({id:S.gender, title:AD[S.gender].name, sub:'к ' + LVN[S.level], price:PRICE[S.gender][S.level], items:D.addons[S.gender][S.level]});
+  const tp = themePackage();
+  if (tp.id) out.push({id:tp.id, title:AD[tp.id].name, sub:(tp.combo ? 'Готовый пакет · ' : '') + 'к ' + LVN[S.level], price:PRICE[tp.id][S.level], items:D.addons[tp.id][S.level]});
+  return out;
+}
+const total = () => lines().reduce((s,l) => s + l.price, 0);
+const countBy = items => items.reduce((a,[,g]) => (a[g]=(a[g]||0)+1, a), {});
+const grouped = items => ['c','l','i'].map(g => ({g, list: items.filter(x => x[1]===g).map(x => x[0])})).filter(x => x.list.length);
+
+// ---------- rolling number: NumberFlow (number-flow.barvian.me, MIT), как в «Бегущих цифрах» из First saas ----------
+// Библиотека грузится модулем внизу страницы; до её загрузки сумма показывается текстом.
+const NF_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+function setRoll(el, value){
+  el._val = value;
+  el.setAttribute('aria-label', rub(value));
+  let f = el.querySelector('number-flow');
+  if (!f){
+    if (!window.__NF){ el.textContent = rub(value); return; }
+    el.textContent = '';
+    f = document.createElement('number-flow');
+    f.locales = 'ru-RU';
+    f.format = { style:'currency', currency:'RUB', maximumFractionDigits:0 };
+    const timing = { duration: 900, easing: window.__NF.defaultProps.transformTiming.easing || NF_EASE };
+    f.transformTiming = timing; f.spinTiming = timing;
+    f.style.setProperty('--number-flow-mask-height', '0.12em');
+    el.appendChild(f);
+    f.animated = false; f.update(value); f.animated = true;
+    return;
+  }
+  f.update(value);
+}
+window.addEventListener('nf-ready', () => document.querySelectorAll('.roll').forEach(el => { if (el._val != null) setRoll(el, el._val); }));
+
+// ---------- toast / sheet ----------
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.querySelector('span').textContent = msg;
+  t.classList.add('show'); clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3200);
+}
+let lastFocus;
+function openSheet(title, sub, items){
+  lastFocus = document.activeElement;
+  document.getElementById('sheetTitle').textContent = title;
+  document.getElementById('sheetSub').textContent = sub;
+  document.getElementById('sheetBody').innerHTML = typeof items === 'string' ? items : grouped(items).map(g =>
+    `<div class="grp"><h5>${GRP[g.g]} · ${g.list.length}</h5><ul>${g.list.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`).join('');
+  document.getElementById('backdrop').classList.add('show');
+  const sh = document.getElementById('sheet'); sh.classList.toggle('wide', typeof items === 'string'); sh.classList.add('show');
+  document.getElementById('sheetX').focus();
+}
+function closeSheet(){
+  document.getElementById('backdrop').classList.remove('show');
+  document.getElementById('sheet').classList.remove('show');
+  lastFocus && lastFocus.focus && lastFocus.focus();
+}
+document.getElementById('sheetX').onclick = closeSheet;
+document.getElementById('backdrop').onclick = closeSheet;
+addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+// ---------- stepper & summary ----------
+function stepperHTML(){
+  const names = ['Программа','Дополнения','Заказ','Оплата'], cur = S.step || 1;
+  return names.map((n,i) => {
+    const s = i + 1, cls = cur > s ? 'done' : cur === s ? 'cur' : '';
+    return `<div class="st ${cls}" ${cur===s?'aria-current="step"':''}><b>${cur > s ? ico('check',3) : s}</b><span>${n}</span></div>`;
+  }).join('');
+}
+const HEAD = {
+  1:['Выберите основную программу','Программа обязательна: к ней добавляются дополнительные пакеты.'],
+  2:['Хотите дополнить программу?','Состав пакетов зависит от выбранного чекапа: в них только услуги, которых нет в основной программе.'],
+  3:['Оформление заказа','Проверьте состав, оставьте контакты и оплатите онлайн.'],
+  4:['Статус заказа','После оплаты администратор согласует с вами дату визита.']
+};
+function renderHead(){
+  document.getElementById('stepper').innerHTML = stepperHTML();
+  const h = HEAD[S.step];
+  document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
+}
+function lineHTML(l){ return `<div class="line"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
+function renderSummary(){
+  const ls = lines(), isl = document.getElementById('island');
+  if (!isl.dataset.ready){
+    isl.dataset.ready = 1;
+    isl.innerHTML = `<h4><span>Ваш заказ</span><span id="islCount"></span></h4><div class="lines" id="islLines"></div>
+      <div class="total"><span>Итого</span><span class="roll" id="islTotal"></span></div>
+      <div class="isl-note">Оплата не бронирует время. Дату визита администратор согласует с вами после оплаты.</div>
+      <div class="isl-sp"></div><div class="isl-actions" id="asideActions"></div><div class="isl-foot" id="islFoot"></div>`;
+  }
+  const key = ls.map(l => l.id + l.price).join('|');
+  if (isl.dataset.key !== key){
+    isl.dataset.key = key;
+    document.getElementById('islLines').innerHTML = ls.length ? ls.map(lineHTML).join('') : '<div class="empty">Выберите основную программу: состав и стоимость появятся здесь.</div>';
+    document.getElementById('mbarLines').innerHTML = ls.map(lineHTML).join('');
+  }
+  document.getElementById('islCount').textContent = ls.length ? ls.length + ' поз.' : '';
+  setRoll(document.getElementById('islTotal'), total());
+  const mb = document.getElementById('mbar'), head = document.getElementById('mbarHead');
+  mb.classList.toggle('show', S.step >= 1 && S.step <= 3 && ls.length > 0);
+  if (!head.dataset.ready){
+    head.dataset.ready = 1;
+    head.innerHTML = `<span class="lft"><span class="badge" id="mbCount"></span>Ваш заказ</span><span style="display:flex;align-items:center;gap:10px"><span class="roll" id="mbTotal"></span>${ico('chev')}</span>`;
+    head.onclick = () => { const o = mb.classList.toggle('open'); head.setAttribute('aria-expanded', o); };
+  }
+  document.getElementById('mbCount').textContent = ls.length;
+  setRoll(document.getElementById('mbTotal'), total());
+}
+
+// ---------- views ----------
+const stage = document.getElementById('stage');
+function go(step){
+  S.step = step; S.errors = {};
+  render(true);
+  window.scrollTo({top:0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+}
+function render(animate){
+  renderHead();
+  document.querySelector('.grid').classList.toggle('solo', S.step === 0);
+  document.body.classList.toggle('intro', S.step === 0);
+  document.body.classList.toggle('s1', S.step === 1);
+  const html = [viewIntro, viewPrograms, viewAddons, viewOrder, viewResult][S.step]();
+  const prev = {};
+  if (!animate) stage.querySelectorAll('[data-k]').forEach(el => prev[el.dataset.k] = el.className);
+  stage.innerHTML = `<div class="${animate ? 'view' : ''}">${html}</div>`;
+  const morph = [];
+  stage.querySelectorAll('[data-k]').forEach(el => { const p = prev[el.dataset.k]; if (p != null && p !== el.className){ morph.push([el, el.className]); el.className = p; } });
+  if (morph.length){ void stage.offsetWidth; morph.forEach(([el,c]) => el.className = c); }
+  bind[S.step] && bind[S.step]();
+  dockActions();
+  renderSummary();
+}
+
+function viewIntro(){
+  return `<section class="hero">
+    <header class="hero-head">${LOGO}<nav class="stepper" aria-label="Шаги">${stepperHTML()}</nav></header>
+    <div class="hero-body">
+      <div class="hero-copy">
+        <div class="eyebrow">Чекап онлайн · 3 шага</div>
+        <h1 class="h1">Соберите свой<br><em>чекап</em> за&nbsp;пару минут</h1>
+        <p class="lead">Выберите программу, дополните её пакетами и&nbsp;оплатите онлайн. Стоимость видна сразу.</p>
+        <div class="pick">
+          <button class="who-btn who-m" data-who="male"><span class="icw"><span class="ic"><span class="rot"><span class="crop"><img src="${IMG.icoMale}" alt=""></span></span></span></span><span class="t"><b>Для мужчины</b><small>Уролог, УЗИ, ПСА</small></span></button>
+          <button class="who-btn who-f" data-who="female"><span class="t"><b>Для женщины</b><small>Гинеколог, УЗИ, анализы</small></span><span class="icw"><span class="ic"><span class="rot"><span class="crop"><img src="${IMG.icoFemale}" alt=""></span></span></span></span></button>
+        </div>
+        <button class="skip" data-who="any">Пропустить вопрос</button>
+      </div>
+    </div>
+    <div class="hero-ph" aria-hidden="true"><img src="${IMG.couple}" alt=""></div>
+  </section>
+  <p class="hero-facts">Оплата картой или СБП · Время визита согласуем по телефону · <span class="pr">Прототип, цены условные</span></p>`;
+}
+
+function highlights(lvId){
+  if (lvId === 'start') return ['Терапевт: первичный и повторный приём','Стоматолог и офтальмолог','ЭКГ, УЗИ брюшной полости и почек','Рентгенография лёгких'].map(t=>`<li>${t}</li>`).join('');
+  const prev = lvId === 'optimal' ? 'start' : 'optimal';
+  const had = new Set(D.programs[prev].map(x=>x[0]));
+  const add = D.programs[lvId].filter(x => !had.has(x[0])).sort((a,b) => 'cil'.indexOf(a[1]) - 'cil'.indexOf(b[1]));
+  return `<li class="plus">Всё из ${LVN[prev]}, плюс:</li>` + add.slice(0,4).map(x => `<li>${esc(x[0])}</li>`).join('') + (add.length > 4 ? `<li class="plus">и ещё ${add.length - 4} услуг</li>` : '');
+}
+const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? b : c; };
+function viewPrograms(){
+  const maxN = Math.max(...LV.map(x => D.programs[x.id].length));
+  const cards = LV.map(l => {
+    const items = D.programs[l.id], c = countBy(items), sel = S.level === l.id;
+    return `<article class="pcard ${sel?'sel':''}" data-k="p-${l.id}" data-level="${l.id}" role="radio" aria-checked="${sel}" tabindex="0">
+      <span class="radio" aria-hidden="true"></span>
+      <div class="p-top"><h3>${l.name}</h3><p class="desc">${l.desc}</p></div>
+      <div class="price">${rub(PRICE.base[l.id])}</div>
+      <div class="meter" aria-hidden="true"><i style="width:${Math.round(items.length/maxN*100)}%"></i></div>
+      <p class="counts"><b>${items.length}</b> из ${maxN} услуг · ${c.c} ${plural(c.c,'врач','врача','врачей')}, ${c.l} ${plural(c.l,'анализ','анализа','анализов')}, ${c.i} ${plural(c.i,'исследование','исследования','исследований')}</p>
+      <ul class="hl">${highlights(l.id)}</ul>
+      <button class="p-link" data-comp="${l.id}">Весь состав ${ico('arrow')}</button>
+    </article>`;
+  }).join('');
+  return `<div class="cards" role="radiogroup" aria-label="Основная программа">${cards}</div>
+    ${compareTable()}
+    <div class="nav"><button class="btn btn-ghost" data-go="0">${ico('back')}Назад</button>
+      <button class="btn btn-dark btn-lg" data-go="2" data-short="Дальше" ${S.level?'':'disabled'}>Дальше: дополнения ${ico('arrow')}</button></div>`;
+}
+
+function compareRows(diffOnly){
+  const rows = [];
+  ['c','l','i'].forEach(g => {
+    const names = [], seen = new Set();
+    LV.forEach(l => D.programs[l.id].forEach(([n,gg]) => { if (gg===g && !seen.has(n)) { seen.add(n); names.push(n); } }));
+    const body = names.map(n => {
+      const has = LV.map(l => D.programs[l.id].some(x => x[0]===n));
+      if (diffOnly && has.every(Boolean)) return '';
+      return `<tr><td>${esc(n)}</td>${has.map(h => `<td class="${h?'yes':'no'}">${h ? ico('check',2.5) : '—'}</td>`).join('')}</tr>`;
+    }).join('');
+    if (body) rows.push(`<tr><td class="g" colspan="4">${GRP[g]}</td></tr>` + body);
+  });
+  return `<table><thead><tr><th>Услуга</th>${LV.map(l=>`<th>${l.name}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+function compareTable(){
+  return `<details class="compare" id="cmp" ${S.cmpOpen?'open':''}><summary>Сравнить программы ${ico('chev')}</summary>
+    <div class="cmp-tools"><label><input type="checkbox" id="diffOnly" ${S.diffOnly?'checked':''}> Показать только различия</label></div>
+    <div class="tbl-wrap">${compareRows(S.diffOnly)}</div></details>`;
+}
+function openCompare(){
+  const draw = () => `<label class="cmp-toggle"><input type="checkbox" id="cmpDiff" ${S.diffOnly?'checked':''}> Показать только различия</label><div class="tbl-wrap sheet-tbl">${compareRows(S.diffOnly)}</div>`;
+  openSheet('Сравнение программ', 'Что входит в каждую программу, построчно', draw());
+  const rebind = () => { const c = document.getElementById('cmpDiff'); if (c) c.onchange = e => { S.diffOnly = e.target.checked; document.getElementById('sheetBody').innerHTML = draw(); rebind(); }; };
+  rebind();
+}
+
+// навигация уезжает в остров заказа на десктопе: «Назад» слева, «Дальше» справа
+const deskMQ = matchMedia('(min-width: 1101px)');
+function dockActions(){
+  const box = document.getElementById('asideActions'), foot = document.getElementById('islFoot');
+  if (!box) return;
+  box.innerHTML = ''; foot.innerHTML = '';
+  const note = document.getElementById('asideNote'); if (note) note.innerHTML = '';
+  if (!deskMQ.matches || S.step < 1 || S.step > 3) return;
+  const res = stage.querySelector('.resolve'); if (note && res) note.appendChild(res);
+  const nav = stage.querySelector('.nav:last-of-type');
+  if (nav && nav.querySelector('[data-go]')){
+    const all = [...nav.querySelectorAll('[data-go]')];
+    all.filter(x => +x.dataset.go < S.step).forEach(x => box.appendChild(x));
+    all.filter(x => +x.dataset.go > S.step).forEach(x => { if (x.dataset.short) x.innerHTML = x.dataset.short + ' ' + ico('arrow'); box.appendChild(x); });
+    nav.classList.add('docked');
+  }
+  if (S.step === 1){
+    const b = document.createElement('button');
+    b.innerHTML = 'Сравнить программы ' + ico('arrow');
+    b.onclick = openCompare; foot.appendChild(b);
+  }
+}
+deskMQ.addEventListener && deskMQ.addEventListener('change', () => render(false));
+
+function segHTML(){
+  return `<div class="seg" id="seg" role="tablist" aria-label="Уровень программы">
+    ${LV.map(l => `<button role="tab" aria-selected="${S.level===l.id}" data-seg="${l.id}">${l.name}</button>`).join('')}
+    <div class="seg-ink" aria-hidden="true">${LV.map(l=>`<span>${l.name}</span>`).join('')}</div></div>`;
+}
+const lastClip = {};
+function placeInk(seg, b){
+  if (!seg || !b) return;
+  const ink = seg.querySelector('.seg-ink');
+  const L = b.offsetLeft - 4, R = ink.offsetWidth - (L + b.offsetWidth);
+  const clip = `inset(0 ${R}px 0 ${L}px round 999px)`;
+  const was = lastClip[seg.id];
+  if (was && was !== clip && !ink.style.clipPath){ ink.style.transition = 'none'; ink.style.clipPath = was; void ink.offsetWidth; ink.style.transition = ''; }
+  ink.style.clipPath = clip; lastClip[seg.id] = clip;
+}
+function placeSeg(){
+  const seg = document.getElementById('seg'); if (seg) placeInk(seg, seg.querySelector(`[data-seg="${S.level}"]`));
+  const ps = document.getElementById('paySeg'); if (ps) placeInk(ps, ps.querySelector(`[data-pay="${S.pay}"]`));
+}
+function addonCard(id, kind){
+  const on = kind === 'gender' ? S.gender === id : S.themes.has(id);
+  const items = D.addons[id][S.level], tp = themePackage();
+  const inCombo = kind === 'theme' && on && tp.combo;
+  if (kind === 'gender') return `<div class="acard photo ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="gender" role="radio" aria-checked="${on}" tabindex="0">
+    <span class="ph"><img src="${IMG[id]}" alt=""></span>
+    <div class="bd"><span class="radio"></span>
+      <div><b>${AD[id].name}</b><p>${AD[id].short}</p></div>
+      <div class="foot"><span class="ap">+${rub(PRICE[id][S.level])}</span><button class="linkish" data-acomp="${id}">Что входит · ${items.length}</button></div>
+    </div></div>`;
+  return `<div class="acard ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="${kind}" role="switch" aria-checked="${on}" tabindex="0">
+    <span class="sw"></span>
+    <div><b>${AD[id].name}</b><p>${AD[id].short}</p></div>
+    <div class="foot">${inCombo ? `<span class="ap muted">в составе пакета</span>` : `<span class="ap">+${rub(PRICE[id][S.level])}</span>`}
+      <button class="linkish" data-acomp="${id}">Что входит · ${items.length}</button></div>
+  </div>`;
+}
+function viewAddons(){
+  const gIds = S.who === 'female' && !S.showOtherGender ? ['female'] : S.who === 'male' && !S.showOtherGender ? ['male'] : ['female','male'];
+  const tp = themePackage();
+  const rk = tp.invalid ? 'bad'+tp.picked : tp.combo ? tp.id+S.level : '';
+  const pop = rk !== S.resKey ? ' pop' : ''; S.resKey = rk;
+  let res = '';
+  if (tp.invalid){
+    const other = tp.picked.includes('cardio') ? 'gastro' : 'cardio';
+    res = `<div class="resolve bad${pop}"><b>Сочетание «${tp.picked.map(k=>AD[k].name).join(' + ')}» пока не продаётся онлайн.</b><br>Его состав и цену клиника ещё не утвердила. Выберите один пакет или добавьте ${AD[other].name}: получится пакет из всех трёх модулей.
+      <div class="acts"><button class="btn btn-dark" data-fix="add:${other}">Добавить ${AD[other].name}</button><button class="btn" data-fix="only:energy">Оставить только «Энергию»</button><button class="btn" data-fix="drop:energy">Убрать «Энергию»</button></div></div>`;
+  } else if (tp.combo){
+    res = `<div class="resolve${pop}">Будет оформлен готовый пакет <b>«${AD[tp.id].name}»</b> за <b class="mono">${rub(PRICE[tp.id][S.level])}</b>. У него свой состав (${D.addons[tp.id][S.level].length} услуг) без повторов. <button class="linkish" data-acomp="${tp.id}">Посмотреть состав</button></div>`;
+  }
+  return `<div class="levelbar"><span class="lbl">Уровень программы и пакетов:</span>${segHTML()}</div>
+    <section class="block"><div class="block-h"><h3>Женское и мужское здоровье</h3><span>Можно выбрать один модуль</span></div>
+      <div class="acards g2" role="radiogroup">${gIds.map(id => addonCard(id,'gender')).join('')}</div>
+      ${gIds.length === 1 ? `<button class="linkish more" id="otherG">Показать ${gIds[0]==='female'?'мужской':'женский'} модуль</button>` : ''}
+    </section>
+    <section class="block"><div class="block-h"><h3>Тематические пакеты</h3><span>Отметьте направления, готовый пакет подберём сами</span></div>
+      <div class="acards">${['cardio','gastro','energy'].map(id => addonCard(id,'theme')).join('')}</div>
+      ${res}
+    </section>
+    <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
+      ${!S.gender && !S.themes.size ? `<button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше">Продолжить без дополнений ${ico('arrow')}</button>`
+        : `<button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'disabled':''}>Дальше: заказ ${ico('arrow')}</button>`}
+    </div>`;
+}
+
+function viewOrder(){
+  const ls = lines(), f = S.form, e = S.errors;
+  return `<div class="order">${ls.map(l => `<details class="oline"><summary><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг · нажмите, чтобы раскрыть</small></div><span class="mono">${rub(l.price)}</span></summary>
+      <div class="b">${l.items.map(x=>`<div>${esc(x[0])}</div>`).join('')}</div></details>`).join('')}</div>
+    <div class="sum-row"><button class="btn" data-edit="1">Изменить выбор</button><div class="price">Итого ${rub(total())}</div></div>
+    <form class="form" id="form" novalidate>
+      <label class="fld ${e.name?'err':''}">Имя<input id="f-name" autocomplete="name" value="${esc(f.name)}" placeholder="Анна"><span class="e">${e.name||''}</span></label>
+      <label class="fld ${e.phone?'err':''}">Телефон<input id="f-phone" type="tel" autocomplete="tel" inputmode="tel" value="${esc(f.phone)}" placeholder="+7 (900) 000-00-00"><span class="e">${e.phone||''}</span></label>
+      <label class="fld ${e.email?'err':''}">Email<input id="f-email" type="email" autocomplete="email" value="${esc(f.email)}" placeholder="anna@mail.ru"><span class="e">${e.email||''}</span></label>
+    </form>
+    <div class="consents">
+      <label><input type="checkbox" id="f-c1" ${f.c1?'checked':''}> <span>Принимаю <a href="#offer">условия покупки</a> и <a href="#offer">публичную оферту</a></span></label>
+      <label><input type="checkbox" id="f-c2" ${f.c2?'checked':''}> <span>Согласен на обработку персональных данных</span></label>
+      <span class="e" style="color:var(--err);font-size:14px">${e.c||''}</span>
+    </div>
+    <div class="notice">Оплата не бронирует дату и время. После оплаты администратор позвонит, чтобы согласовать визит.</div>
+    <button class="btn btn-dark btn-lg pay-btn" id="payBtn"><span id="payLbl">Оплатить ${rub(total())}</span><span class="pay-ic">${ico('arrow')}</span></button>
+    <div class="nav"><button class="btn btn-ghost" data-go="2">${ico('back')}Назад</button></div>`;
+}
+
+function viewResult(){
+  const ls = lines(), t = total();
+  const tabs = [['paid','Оплачен'],['wait','Проверяем'],['fail','Не прошла']];
+  let body;
+  if (S.pay === 'paid') body = `<span class="status ok"><svg class="draw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>Оплачено</span>
+      <h2 class="h2" style="margin-top:14px">Заказ <span style="white-space:nowrap">№${S.orderNo}</span> оплачен</h2>
+      <p class="lead">Спасибо! Информация о заказе передана администраторам клиники.</p>
+      <ol class="steps-after"><li><b>1</b><span>Администратор позвонит в течение рабочего дня и согласует дату и время обследования.</span></li>
+        <li><b>2</b><span>Накануне пришлём памятку о подготовке: натощак, без кофе, с собой паспорт.</span></li>
+        <li><b>3</b><span>Чек об оплате придёт на ${esc(S.form.email || 'вашу почту')}.</span></li></ol>
+      <div class="nav" style="justify-content:flex-start"><button class="btn" data-go="0">На главную</button></div>`;
+  else if (S.pay === 'wait') body = `<div class="loader"><i></i><i></i></div><span class="status wait">Подтверждение ожидается</span>
+      <h2 class="h2" style="margin-top:14px">Проверяем статус оплаты</h2>
+      <p class="lead">Пожалуйста, не оплачивайте заказ повторно. Страница обновится сама, как только банк подтвердит платёж.</p>`;
+  else body = `<span class="status bad">${ico('alert')}Оплата не завершена</span>
+      <h2 class="h2" style="margin-top:14px">Платёж не прошёл</h2>
+      <p class="lead">Выбранная программа сохранена, вы можете повторить попытку. Деньги не списаны.</p>
+      <div class="nav" style="justify-content:flex-start"><button class="btn btn-dark btn-lg" data-go="3">Повторить оплату ${ico('arrow')}</button><button class="btn" data-go="1">Изменить выбор</button></div>`;
+  return `<div class="demo">Демо статуса:<div class="seg" id="paySeg" role="tablist">${tabs.map(([k,n]) => `<button role="tab" aria-selected="${S.pay===k}" data-pay="${k}">${n}</button>`).join('')}<div class="seg-ink" aria-hidden="true">${tabs.map(([,n])=>`<span>${n}</span>`).join('')}</div></div></div>
+    <div class="res"><div>${body}</div>${S.pay==='paid' ? `<div><div class="printer"><div class="housing" id="housing"><b>ЧЕКАП</b><span><i></i><em id="pStatus" style="font-style:normal">Печать…</em></span></div>
+      <div class="feed" id="feed"><div class="paper" id="paper">${receipt(ls,t)}</div></div></div>
+      <button class="btn btn-ghost reprint" id="reprint">Напечатать ещё раз</button></div>` : ''}</div>`;
+}
+function receipt(ls, t){
+  const d = new Date(), pad = n => String(n).padStart(2,'0');
+  const dt = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const bars = Array.from({length:38}, (_,i) => `<i style="width:${[1,2,1,3,1,2][(i*7)%6]}px"></i>`).join('');
+  return `<div class="c m">ЧЕКАП</div><div class="c dim">заказ ${S.orderNo}</div><div class="c dim">${dt}</div>
+    <div class="dim">--------------------------------</div>
+    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чекап ',''))}</span><span>${l.price.toLocaleString('ru-RU')}</span></div><div class="dim">  ${l.items.length} услуг</div>`).join('')}
+    <div class="dim">--------------------------------</div>
+    <div class="r tot"><span>ИТОГО</span><span>${rub(t)}</span></div>
+    <div class="r dim"><span>Оплата</span><span>онлайн</span></div>
+    <div class="bar">${bars}</div>
+    <div class="c dim">дату визита согласует</div><div class="c dim">администратор</div>`;
+}
+let printRAF;
+function printReceipt(){
+  const paper = document.getElementById('paper'), feed = document.getElementById('feed'), housing = document.getElementById('housing');
+  if (!paper) return;
+  cancelAnimationFrame(printRAF);
+  const H = paper.offsetHeight; feed.style.height = (H + 20) + 'px';
+  let pos = -H, target = -H, wait = 250, last = performance.now();
+  housing.classList.add('busy'); document.getElementById('pStatus').textContent = 'Печать…';
+  function done(){ housing.classList.remove('busy'); housing.style.transform='none'; document.getElementById('pStatus').textContent = 'Готово'; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ paper.style.transform = 'none'; done(); return; }
+  function frame(now){
+    const dt = Math.min(50, now - last); last = now; wait -= dt;
+    if (wait <= 0 && target < 0){ target = Math.min(0, target + 15); wait = 55 + Math.random()*50; }
+    pos += (target - pos) * Math.min(1, dt/1000 * 34);
+    paper.style.transform = `translateY(${pos}px)`;
+    housing.style.transform = target < 0 ? `translateX(${Math.sin(now/18)*0.5}px)` : 'none';
+    if (target >= 0 && Math.abs(pos) < 0.3){ paper.style.transform = 'none'; done(); return; }
+    printRAF = requestAnimationFrame(frame);
+  }
+  paper.style.transform = `translateY(${-H}px)`;
+  printRAF = requestAnimationFrame(frame);
+}
+
+// ---------- slide to pay ----------
+function formValid(){
+  const f = S.form, e = {};
+  if (f.name.trim().length < 2) e.name = 'Укажите имя';
+  if (f.phone.replace(/\D/g,'').length < 11) e.phone = 'Номер из 11 цифр';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email)) e.email = 'Проверьте адрес почты';
+  if (!f.c1 || !f.c2) e.c = 'Отметьте оба согласия, чтобы продолжить';
+  return e;
+}
+function bindSlide(){
+  const b = document.getElementById('payBtn'), lbl = document.getElementById('payLbl'), icn = b.querySelector('.pay-ic');
+  let phase = 'idle';
+  const setLabel = () => {
+    const ok = !Object.keys(formValid()).length;
+    b.classList.toggle('locked', !ok);
+    lbl.textContent = phase === 'confirming' ? 'Переходим к оплате…' : phase === 'done' ? 'Оплачено' : `Оплатить ${rub(total())}`;
+  };
+  window.__slideLabel = setLabel; setLabel();
+  b.onclick = () => {
+    if (phase !== 'idle') return;
+    if (Object.keys(formValid()).length){
+      S.errors = formValid(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); showErrors(); return;
+    }
+    phase = 'confirming'; b.classList.add('busy'); icn.innerHTML = '<span class="spin"></span>'; setLabel();
+    setTimeout(() => { phase = 'done'; b.classList.add('done'); icn.innerHTML = ico('check',3); setLabel();
+      setTimeout(() => { S.pay = 'paid'; go(4); }, 700); }, 1100);
+  };
+}
+function showErrors(){
+  const e = S.errors;
+  [['name','f-name'],['phone','f-phone'],['email','f-email']].forEach(([k,id]) => {
+    const fld = document.getElementById(id).closest('.fld');
+    fld.classList.toggle('err', !!e[k]); fld.querySelector('.e').textContent = e[k] || '';
+  });
+  document.querySelector('.consents .e').textContent = e.c || '';
+  const first = document.querySelector('.fld.err input'); first && first.focus();
+}
+function phoneMask(v){
+  let d = v.replace(/\D/g,''); if (d.startsWith('8')) d = '7' + d.slice(1); if (d && !d.startsWith('7')) d = '7' + d; d = d.slice(0,11);
+  if (!d) return '';
+  const p = [d.slice(1,4), d.slice(4,7), d.slice(7,9), d.slice(9,11)];
+  let s = '+7'; if (p[0]) s += ' (' + p[0]; if (p[0].length === 3) s += ')'; if (p[1]) s += ' ' + p[1]; if (p[2]) s += '-' + p[2]; if (p[3]) s += '-' + p[3];
+  return s;
+}
+
+// ---------- bindings ----------
+function setLevel(id){
+  const prev = S.level; if (prev === id) return;
+  S.level = id;
+  if (prev && (S.gender || S.themes.size)) toast('Состав и стоимость дополнений обновлены для выбранной программы');
+  render(false);
+}
+function navBind(){
+  stage.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { if (!b.disabled) go(+b.dataset.go); });
+  document.querySelectorAll('#asideActions [data-go]').forEach(b => b.onclick = () => { if (!b.disabled) go(+b.dataset.go); });
+  stage.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => go(1));
+}
+const bind = {
+  0(){ stage.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { S.who = b.dataset.who; S.showOtherGender = false; go(1); }); },
+  1(){
+    stage.querySelectorAll('.pcard').forEach(c => {
+      const pick = () => { const id = c.dataset.level; setLevel(id); const n = stage.querySelector(`[data-level="${id}"]`); n && n.focus({preventScroll:true}); };
+      c.onclick = e => { if (!e.target.closest('[data-comp]')) pick(); };
+      c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
+    });
+    stage.querySelectorAll('[data-comp]').forEach(b => b.onclick = () => { const l = LV.find(x=>x.id===b.dataset.comp); openSheet('Программа «' + l.name + '»', D.programs[l.id].length + ' услуг · ' + rub(PRICE.base[l.id]), D.programs[l.id]); });
+    const cmp = document.getElementById('cmp'); cmp.ontoggle = () => S.cmpOpen = cmp.open;
+    document.getElementById('diffOnly').onchange = e => { S.diffOnly = e.target.checked; render(false); };
+    navBind();
+  },
+  2(){
+    placeSeg();
+    stage.querySelectorAll('[data-seg]').forEach(b => b.onclick = () => setLevel(b.dataset.seg));
+    stage.querySelectorAll('.acard').forEach(c => {
+      const flip = () => {
+        const id = c.dataset.addon;
+        if (c.dataset.kind === 'gender') S.gender = S.gender === id ? null : id;
+        else S.themes.has(id) ? S.themes.delete(id) : S.themes.add(id);
+        render(false);
+        const again = stage.querySelector(`[data-addon="${id}"]`); again && again.focus({preventScroll:true});
+      };
+      c.onclick = e => { if (!e.target.closest('[data-acomp]')) flip(); };
+      c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+    });
+    stage.querySelectorAll('[data-acomp]').forEach(b => b.onclick = () => { const id = b.dataset.acomp; openSheet(AD[id].name, 'к ' + LVN[S.level] + ' · ' + D.addons[id][S.level].length + ' услуг · ' + rub(PRICE[id][S.level]), D.addons[id][S.level]); });
+    stage.querySelectorAll('[data-fix]').forEach(b => b.onclick = () => {
+      const [act, k] = b.dataset.fix.split(':');
+      if (act === 'add') S.themes.add(k);
+      if (act === 'only') S.themes = new Set([k]);
+      if (act === 'drop') S.themes.delete(k);
+      render(false);
+    });
+    const og = document.getElementById('otherG'); if (og) og.onclick = () => { S.showOtherGender = true; render(false); };
+    navBind();
+  },
+  3(){
+    const f = S.form;
+    const nm = document.getElementById('f-name'), ph = document.getElementById('f-phone'), em = document.getElementById('f-email');
+    nm.oninput = () => { f.name = nm.value; window.__slideLabel(); };
+    ph.oninput = () => { ph.value = phoneMask(ph.value); f.phone = ph.value; window.__slideLabel(); };
+    em.oninput = () => { f.email = em.value.trim(); window.__slideLabel(); };
+    document.getElementById('f-c1').onchange = e => { f.c1 = e.target.checked; window.__slideLabel(); };
+    document.getElementById('f-c2').onchange = e => { f.c2 = e.target.checked; window.__slideLabel(); };
+    document.getElementById('form').onsubmit = e => e.preventDefault();
+    bindSlide(); navBind();
+  },
+  4(){
+    placeSeg();
+    document.getElementById('paySeg').querySelectorAll('[data-pay]').forEach(x => x.onclick = () => { S.pay = x.dataset.pay; render(false); });
+    if (S.pay === 'paid'){ requestAnimationFrame(printReceipt); document.getElementById('reprint').onclick = printReceipt; }
+    navBind();
+  }
+};
+// кнопки, перенесённые в остров, получают обработчики после dockActions
+const _dock = dockActions;
+dockActions = function(){ _dock(); navBind(); };
+addEventListener('resize', placeSeg);
+document.fonts && document.fonts.ready.then(placeSeg);
+render(true);
+</script>
+<script type="module">
+import NumberFlow from 'https://esm.sh/number-flow@0.6.2';
+window.__NF = NumberFlow;
+window.dispatchEvent(new Event('nf-ready'));
+</script>
+</body>
+</html>
