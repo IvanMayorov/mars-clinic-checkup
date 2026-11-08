@@ -218,17 +218,17 @@ td.g{background:var(--bg);font-weight:700;font-size:12.5px;letter-spacing:.08em;
 
 /* ================= ISLAND (Ваш заказ) ================= */
 .aside{min-width:0}
-.aside-in{position:sticky;top:20px;display:flex;flex-direction:column;gap:var(--gap)}
+.aside-in{transition:top .42s cubic-bezier(.2,.8,.2,1);position:sticky;top:20px;display:flex;flex-direction:column;gap:var(--gap)}
 body.s1 .aside-in{height:100%}
 .aside-note:empty{display:none}
 .aside-note .resolve{margin-top:0}
-.island{display:flex;flex-direction:column;background:linear-gradient(170deg,#24479a,var(--navy) 55%,var(--navy-2));color:#fff;border-radius:var(--r);padding:var(--pad) 0 0;min-height:100%;overflow:hidden}
+.island{position:relative;display:flex;flex-direction:column;background:linear-gradient(170deg,#24479a,var(--navy) 55%,var(--navy-2));color:#fff;border-radius:var(--r);padding:var(--pad) 0 0;min-height:100%;overflow:hidden}
 body:not(.s1) .island{min-height:0}
 .island > *{padding-inline:var(--pad)}
 .island h4{font-size:14px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:rgba(255,255,255,.88);display:flex;justify-content:space-between;margin-bottom:16px}
 .island h4 span:last-child{color:rgba(255,255,255,.55);letter-spacing:0;text-transform:none;font-weight:500}
-.lines{display:grid;gap:0}
-.line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15.5px;animation:lineIn .5s var(--spring) both}
+.lines{display:grid;gap:0;position:relative}
+.line{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:15.5px}
 .line small{display:block;color:rgba(255,255,255,.6);font-size:13.5px}
 .line .mono{white-space:nowrap}
 @keyframes lineIn{from{opacity:0;transform:translateY(8px) scale(.97);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
@@ -241,6 +241,7 @@ body:not(.s1) .island{min-height:0}
 .isl-actions{display:grid;grid-template-columns:auto 1fr;gap:20px;padding-bottom:var(--pad)}
 .isl-actions:empty{display:none}
 .isl-hint:empty{display:none}
+.isl-hint,.isl-actions{position:relative}
 .isl-hint .nav-hint{margin:0 0 18px;color:#fff}
 .isl-actions .btn[disabled],.isl-actions .btn[disabled]:hover,.isl-actions .btn[aria-disabled="true"],.isl-actions .btn[aria-disabled="true"]:hover{background:rgba(255,255,255,.12);border-color:transparent;color:rgba(255,255,255,.55)}
 .isl-actions .btn[disabled] svg,.isl-actions .btn[aria-disabled="true"] svg{background:rgba(255,255,255,.1)}
@@ -654,7 +655,75 @@ function renderHead(){
   const h = HEAD[S.step];
   document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
 }
-function lineHTML(l){ return `<div class="line"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
+function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
+// Блок заказа: всё, что появляется и пропадает, остаётся в потоке и раздвигает соседей.
+// Один тайминг на содержимое и высоту блока, поэтому элементы не заезжают друг на друга.
+const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ISL_EASE = 'cubic-bezier(.2,.8,.2,1)', FLOW_MS = 420;
+const FLOW_PROPS = ['height','paddingTop','paddingBottom','marginTop','marginBottom','borderTopWidth','borderBottomWidth'];
+let islJobs = [], islandAnim = null;
+function flowFrames(el, gap){
+  const cs = getComputedStyle(el), open = {opacity:1}, shut = {opacity:0};
+  FLOW_PROPS.forEach(p => { open[p] = cs[p]; shut[p] = '0px'; });
+  if (gap) shut.marginTop = -gap + 'px'; // вместе с элементом схлопывается и отступ flex-контейнера
+  return [shut, open];
+}
+function flowIn(el, gap){
+  const frames = flowFrames(el, gap);
+  el.style.overflow = 'hidden';
+  el.animate(frames, {duration:FLOW_MS, easing:ISL_EASE});
+  setTimeout(() => { el.style.overflow = ''; }, FLOW_MS + 30);
+}
+function flowOut(el, gap){
+  const frames = flowFrames(el, gap).reverse();
+  el.classList.add('isl-ghost');
+  el.style.overflow = 'hidden'; el.style.pointerEvents = 'none';
+  el.animate(frames, {duration:FLOW_MS, easing:ISL_EASE, fill:'forwards'});
+  setTimeout(() => el.remove(), FLOW_MS + 20);
+}
+function morphLines(box, html){
+  if (!box.offsetParent || !motionOK()){ box.innerHTML = html; return; }
+  const oldEls = [...box.querySelectorAll('[data-lid]')];
+  const old = new Map(oldEls.map(el => [el.dataset.lid, { el, text: el.textContent, h: getComputedStyle(el).height, op: getComputedStyle(el).opacity }]));
+  const leaving = [...box.querySelectorAll('.isl-ghost')];
+  box.innerHTML = html;
+  leaving.forEach(el => box.appendChild(el));
+  const fresh = new Map([...box.querySelectorAll('[data-lid]')].map(el => [el.dataset.lid, el]));
+  fresh.forEach((el, id) => {
+    const was = old.get(id);
+    if (!was) islJobs.push(() => flowIn(el));
+    else islJobs.push(() => {
+      const h = getComputedStyle(el).height;
+      // строка могла поменять высоту или быть пересобрана посреди анимации: продолжаем с текущей высоты
+      if (Math.abs(parseFloat(h) - parseFloat(was.h)) >= 1){
+        el.style.overflow = 'hidden';
+        el.animate([{height:was.h, opacity:+was.op}, {height:h, opacity:1}], {duration:FLOW_MS, easing:ISL_EASE});
+        setTimeout(() => { el.style.overflow = ''; }, FLOW_MS + 30);
+      }
+      if (was.text !== el.textContent) el.animate([{opacity:.3}, {opacity:1}], {duration:FLOW_MS, easing:'ease-out'});
+    });
+  });
+  // ушедшая строка встаёт на прежнее место и схлопывается там
+  oldEls.forEach((el, i) => {
+    const id = el.dataset.lid;
+    if (fresh.has(id)) return;
+    const anchor = oldEls.slice(i + 1).map(n => fresh.get(n.dataset.lid)).find(Boolean) || null;
+    delete el.dataset.lid;
+    islJobs.push(() => { box.insertBefore(el, anchor); flowOut(el); });
+  });
+}
+function finishIsland(from, wasS1){
+  const isl = document.getElementById('island');
+  if (islandAnim){ islandAnim.cancel(); islandAnim = null; }
+  fitAside();
+  const to = isl.offsetHeight, nowS1 = document.body.classList.contains('s1');
+  islJobs.splice(0).forEach(job => job());
+  // вне шага 1 высота следует за содержимым сама; явно ведём только смену растянутого и обычного режима
+  if (from && to && wasS1 !== nowS1 && Math.abs(from - to) >= 1 && motionOK()){
+    islandAnim = isl.animate([{height:from + 'px', minHeight:0}, {height:to + 'px', minHeight:0}], {duration:FLOW_MS, easing:ISL_EASE});
+    islandAnim.onfinish = () => { islandAnim = null; };
+  }
+}
 function renderSummary(){
   const ls = lines(), isl = document.getElementById('island');
   if (!isl.dataset.ready){
@@ -667,10 +736,11 @@ function renderSummary(){
   const key = ls.map(l => l.id + l.price).join('|');
   if (isl.dataset.key !== key){
     isl.dataset.key = key;
-    document.getElementById('islLines').innerHTML = ls.length ? ls.map(lineHTML).join('') : '<div class="empty">Выберите основную программу: состав и стоимость появятся здесь.</div>';
-    document.getElementById('mbarLines').innerHTML = ls.map(lineHTML).join('');
+    morphLines(document.getElementById('islLines'), ls.length ? ls.map(lineHTML).join('') : '<div class="empty" data-lid="empty">Выберите основную программу: состав и стоимость появятся здесь.</div>');
+    morphLines(document.getElementById('mbarLines'), ls.map(lineHTML).join(''));
   }
-  document.getElementById('islCount').textContent = ls.length ? ls.length + ' поз.' : '';
+  const cnt = document.getElementById('islCount'), cntText = ls.length ? ls.length + ' поз.' : '';
+  if (cnt.textContent !== cntText){ cnt.textContent = cntText; if (cnt.offsetParent && motionOK()) cnt.animate([{opacity:0, transform:'translateY(4px)'}, {opacity:1, transform:'none'}], {duration:320, easing:ISL_EASE}); }
   setRoll(document.getElementById('islTotal'), total());
   const mb = document.getElementById('mbar'), head = document.getElementById('mbarHead');
   mb.classList.toggle('show', S.step >= 1 && S.step <= 3 && ls.length > 0);
@@ -685,12 +755,42 @@ function renderSummary(){
 
 // ---------- views ----------
 const stage = document.getElementById('stage');
+// смена шага: старый экран уходит, новый входит по частям
+const STEP_EASE = 'cubic-bezier(.2,.8,.2,1)', STEP_OUT_MS = 240;
+let stepTarget = null;
 function go(step){
-  S.step = step; S.errors = {};
-  render(true);
-  window.scrollTo({top:0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (stepTarget !== null){ stepTarget = step; return; }
+  const from = S.step, cur = stage.firstElementChild;
+  let outAnims = [];
+  const swap = () => {
+    const to = stepTarget === null ? step : stepTarget; stepTarget = null;
+    outAnims.forEach(a => a.cancel()); // заголовок и блок заказа живут между шагами: не оставляем их прозрачными
+    S.step = to; S.errors = {};
+    render(true);
+    window.scrollTo({top:0, behavior:'auto'});
+    if (!reduce) animateStepIn(from, to);
+  };
+  if (reduce || !cur) return swap();
+  stepTarget = step;
+  const out = [cur];
+  if (step === 0) out.push(document.getElementById('flowHead'), document.querySelector('.aside-in'));
+  outAnims = out.filter(Boolean).map(el => el.animate([{opacity:1, transform:'none'}, {opacity:0, transform:'translateY(-14px)'}], {duration:STEP_OUT_MS, easing:'cubic-bezier(.4,0,1,1)', fill:'forwards'}));
+  setTimeout(swap, STEP_OUT_MS);
+}
+function animateStepIn(from, to){
+  const up = [{opacity:0, transform:'translateY(12px)'}, {opacity:1, transform:'none'}];
+  const enter = (el, kf, delay, duration) => el && el.animate(kf, {duration, delay, easing:STEP_EASE, fill:'backwards'});
+  const phead = document.getElementById('phead');
+  if (from === 0 && to > 0){
+    enter(phead, up, 0, 520);
+    enter(document.getElementById('stepper'), up, 80, 520);
+    enter(document.querySelector('.aside-in'), [{opacity:0, transform:'translateX(32px)'}, {opacity:1, transform:'none'}], 180, 640);
+    enter(document.querySelector('.page-foot'), [{opacity:0}, {opacity:1}], 500, 500);
+  } else if (to > 0) enter(phead, up, 0, 420);
 }
 function render(animate){
+  const islFrom = document.getElementById('island').offsetHeight, wasS1 = document.body.classList.contains('s1');
   renderHead();
   document.querySelector('.grid').classList.toggle('solo', S.step === 0);
   document.body.classList.toggle('intro', S.step === 0);
@@ -705,7 +805,7 @@ function render(animate){
   bind[S.step] && bind[S.step]();
   dockActions();
   renderSummary();
-  fitAside();
+  finishIsland(islFrom, wasS1);
 }
 
 function viewIntro(){
@@ -785,27 +885,93 @@ function openCompare(){
 
 // навигация уезжает в остров заказа на десктопе: «Назад» слева, «Дальше» справа
 const deskMQ = matchMedia('(min-width: 1101px)');
+// элемент пропадает из блока заказа: его копия гаснет на старом месте, пока блок меняет высоту
+function snapOut(el, host){
+  if (!el || !host || !el.offsetParent || !motionOK()) return () => {};
+  const clone = el.cloneNode(true), r = el.getBoundingClientRect(), h = host.getBoundingClientRect();
+  clone.removeAttribute('id'); clone.classList.add('isl-ghost');
+  ['short','go','blocked'].forEach(k => delete clone.dataset[k]);
+  // grid-area:auto — иначе в сетке координаты считаются от ячейки кнопки, а не от всего ряда
+  clone.style.cssText = `position:absolute;grid-area:auto;margin:0;box-sizing:border-box;top:${r.top - h.top}px;left:${r.left - h.left}px;width:${r.width}px;height:${r.height}px;pointer-events:none`;
+  return () => {
+    host.appendChild(clone);
+    clone.animate([{opacity:1, transform:'none'}, {opacity:0, transform:'translateY(-6px)'}], {duration:200, easing:'ease-in', fill:'forwards'});
+    setTimeout(() => clone.remove(), 220);
+  };
+}
 function dockActions(){
   const box = document.getElementById('asideActions'), foot = document.getElementById('islFoot');
   if (!box) return;
+  const inRange = deskMQ.matches && S.step >= 1 && S.step <= 3, isl = document.getElementById('island');
+  const stageBtn = sel => inRange ? stage.querySelector('.nav:last-of-type ' + sel) : null;
+  const pop = [{opacity:0, transform:'scale(.96)'}, {opacity:1, transform:'none'}];
+  const prevBack = box.querySelector('.btn-ghost:not(.isl-ghost)'), hadFoot = !!foot.firstChild;
+  const offOf = b => !!b && (b.disabled || b.dataset.blocked === '1');
+  const prevNext = box.querySelector('[data-short]'), prevOff = prevNext ? offOf(prevNext) : null;
+  const oldHint = document.getElementById('islHint'), prevHintEl = oldHint ? oldHint.querySelector('.nav-hint:not(.isl-ghost)') : null;
+  const prevHint = prevHintEl ? prevHintEl.textContent : '';
+  const newHint = inRange && stage.querySelector('.nav-hint') ? stage.querySelector('.nav-hint').textContent : '';
+  const outs = [];
+  if (prevHintEl && prevHint !== newHint && prevHintEl.offsetParent && motionOK()) islJobs.push(() => { oldHint.prepend(prevHintEl); flowOut(prevHintEl); });
+  if (prevNext && !stageBtn('[data-short]')) outs.push(snapOut(prevNext, box));
+  if (prevBack && !stageBtn('.btn-ghost')) outs.push(snapOut(prevBack, box));
+  if (hadFoot && !(inRange && S.step === 1) && foot.offsetParent && motionOK()){
+    const footGhost = foot.cloneNode(true); footGhost.removeAttribute('id');
+    islJobs.push(() => { isl.insertBefore(footGhost, foot); flowOut(footGhost); });
+  }
   box.innerHTML = ''; foot.innerHTML = '';
-  const oldHint = document.getElementById('islHint'); if (oldHint) oldHint.innerHTML = '';
-  const note = document.getElementById('asideNote'); if (note) note.innerHTML = '';
+  if (oldHint) oldHint.innerHTML = '';
+  outs.forEach(run => run());
+  // плашка под блоком заказа: раскрывается и схлопывается в потоке, чтобы блок не подпрыгивал у края колонки
+  const note = document.getElementById('asideNote');
+  const prevRes = note ? note.querySelector('.resolve') : null, prevResText = prevRes ? prevRes.textContent : '';
+  const prevResH = prevRes && note.offsetParent ? getComputedStyle(note).height : null;
+  const noteGap = note && note.parentNode ? parseFloat(getComputedStyle(note.parentNode).rowGap) || 0 : 0;
+  const nextRes = inRange ? stage.querySelector('.resolve') : null;
+  if (prevRes && prevResH && !nextRes && motionOK()){
+    const noteGhost = note.cloneNode(true); noteGhost.removeAttribute('id');
+    islJobs.push(() => { note.parentNode.insertBefore(noteGhost, note); flowOut(noteGhost, noteGap); });
+  }
+  if (note) note.innerHTML = '';
   if (!deskMQ.matches || S.step < 1 || S.step > 3) return;
-  const res = stage.querySelector('.resolve'); if (note && res) note.appendChild(res);
+  const res = stage.querySelector('.resolve');
+  if (note && res){
+    res.classList.remove('pop');
+    note.appendChild(res);
+    if (motionOK()){
+      if (!prevRes) islJobs.push(() => flowIn(note, noteGap));
+      else if (prevResText !== res.textContent && prevResH) islJobs.push(() => {
+        note.style.overflow = 'hidden';
+        note.animate([{height:prevResH}, {height:getComputedStyle(note).height}], {duration:FLOW_MS, easing:ISL_EASE});
+        res.animate([{opacity:.3}, {opacity:1}], {duration:FLOW_MS, easing:'ease-out'});
+        setTimeout(() => { note.style.overflow = ''; }, FLOW_MS + 30);
+      });
+    }
+  }
   const hintBox = document.getElementById('islHint'), hint = stage.querySelector('.nav-hint');
-  if (hintBox && hint) hintBox.appendChild(hint);
+  if (hintBox && hint){
+    hintBox.appendChild(hint);
+    if (hint.textContent !== prevHint && motionOK()) islJobs.push(() => flowIn(hint));
+  }
   const nav = stage.querySelector('.nav:last-of-type');
   if (nav && nav.querySelector('[data-go]')){
     const all = [...nav.querySelectorAll('[data-go]')];
     all.filter(x => +x.dataset.go < S.step).forEach(x => box.appendChild(x));
     all.filter(x => +x.dataset.go > S.step).forEach(x => { if (x.dataset.short) x.innerHTML = x.dataset.short + ' ' + ico('arrow'); box.appendChild(x); });
     nav.classList.add('docked');
+    const next = box.querySelector('[data-short]');
+    const back = box.querySelector('.btn-ghost:not(.isl-ghost)');
+    if (motionOK()){
+      if (next && !prevNext) next.animate(pop, {duration:380, delay:90, easing:ISL_EASE, fill:'backwards'});
+      if (back && !prevBack) back.animate(pop, {duration:380, delay:40, easing:ISL_EASE, fill:'backwards'});
+    }
+    if (next && prevOff !== null && offOf(next) !== prevOff && motionOK()) next.animate([{opacity:.45, transform:'scale(.97)'}, {opacity:1, transform:'none'}], {duration:340, easing:ISL_EASE});
   }
   if (S.step === 1){
     const b = document.createElement('button');
     b.innerHTML = 'Сравнить программы ' + ico('arrow');
     b.onclick = openCompare; foot.appendChild(b);
+    if (!hadFoot && motionOK()) islJobs.push(() => flowIn(foot));
   }
 }
 deskMQ.addEventListener && deskMQ.addEventListener('change', () => render(false));
