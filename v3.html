@@ -362,7 +362,8 @@ body:not(.s1) .island{min-height:0}
 .form{margin-top:max(10px,calc(20 * var(--vu)));display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:760px){ .form{grid-template-columns:minmax(0,1fr)} }
 .fld{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
-.fld input{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid transparent;border-radius:8px;padding:max(8px,calc(11 * var(--vu))) 16px;transition:border-color .2s,box-shadow .2s}
+.fld input{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid #d9dbe1;border-radius:8px;padding:max(8px,calc(11 * var(--vu))) 16px;transition:border-color .2s,box-shadow .2s}
+@media (hover:hover){.fld input:hover{border-color:#b4b9c6}}
 .fld input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 4px rgba(32,63,140,.12)}
 .fld.err input{border-color:var(--err)}
 .fld .e{color:var(--err);font-size:13px}
