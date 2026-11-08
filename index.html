@@ -56,7 +56,7 @@ h1,h2,h3,h4{margin:0;text-wrap:balance}
 .phead p{margin:10px 0 0;color:var(--muted);font-size:17px}
 .page-foot{margin-top:clamp(40px,4vw,72px)}
 body.intro #flowHead,body.intro .page-foot{display:none}
-@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;margin-left:-16px} }
+@media (max-width:860px){ .phead{grid-template-columns:minmax(0,1fr)} .phead .stepper{order:-1;position:relative;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:calc(-1 * var(--gut));padding-inline:max(0px,calc(var(--gut) - 16px))} .phead .stepper::-webkit-scrollbar{display:none} .phead .st{flex:none} }
 
 /* ---------- layout ---------- */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) clamp(330px,24vw,413px);gap:var(--gap);align-items:stretch}
@@ -377,6 +377,50 @@ body:not(.s1) .island{min-height:0}
 .grp li{padding:9px 0;border-bottom:1px solid var(--line);font-size:15.5px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.12s!important}}
+/* телефон: шрифты мельче, «Назад» и «Дальше» в одну строку */
+@media (max-width:640px){
+  .nav{flex-wrap:nowrap}
+  .nav[style]{flex-wrap:wrap}
+  .nav .btn{flex:none}
+  .nav .btn-lg{flex:1;min-width:0}
+  .btn{font-size:15px}
+  .btn-lg{font-size:16px;min-height:56px}
+  .h1{font-size:28px}
+  .eyebrow{font-size:15px}
+  .lead{font-size:15.5px}
+  .who-btn .t b{font-size:18px;line-height:22px}
+  .who-btn .t small{font-size:13.5px}
+  .skip,.hero-facts{font-size:14px}
+  .st{font-size:14px;height:36px}
+  .phead h2{font-size:24px}
+  .phead p{font-size:15px}
+  .pcard h3{font-size:20px}
+  .pcard .desc,.counts,.hl{font-size:14px}
+  .hl .plus{font-size:13px}
+  .p-link{font-size:15px}
+  .price{font-size:24px;padding-top:20px}
+  .levelbar .lbl{font-size:14px}
+  .seg button,.seg-ink span{font-size:14px}
+  .block-h h3{font-size:18px}
+  .block-h span{font-size:13.5px}
+  .acard b{font-size:16px}
+  .acard p{font-size:14px}
+  .acard .ap{font-size:16px}
+  .acard .ap.muted{font-size:13px}
+  .linkish{font-size:14px}
+  .resolve{font-size:14px}
+  .oline summary small{font-size:13px}
+  .oline .b,.fld,.notice,.status,.res .lead{font-size:14px}
+  .fld input{font-size:16px} /* меньше 16 — iOS приближает страницу при вводе */
+  .consents{font-size:14px}
+  .pay-btn{font-size:16px}
+  .steps-after li{font-size:14.5px}
+  .mbar-head .lft{font-size:15px}
+  .mbar-head .roll{font-size:20px}
+  .sheet-h h3{font-size:18px}
+  .sheet-h p{font-size:14px}
+  .grp li{font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -568,7 +612,10 @@ const HEAD = {
   4:['Статус заказа','После оплаты администратор согласует с вами дату визита.']
 };
 function renderHead(){
-  document.getElementById('stepper').innerHTML = stepperHTML();
+  const st = document.getElementById('stepper');
+  st.innerHTML = stepperHTML();
+  const cur = st.querySelector('.cur');
+  if (cur && st.scrollWidth > st.clientWidth) st.scrollLeft = cur.offsetLeft - (st.clientWidth - cur.offsetWidth) / 2;
   const h = HEAD[S.step];
   document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
 }
@@ -670,7 +717,7 @@ function viewPrograms(){
   return `<div class="cards" role="radiogroup" aria-label="Основная программа">${cards}</div>
     ${compareTable()}
     <div class="nav"><button class="btn btn-ghost" data-go="0">${ico('back')}Назад</button>
-      <button class="btn btn-dark btn-lg" data-go="2" data-short="Дальше" ${S.level?'':'disabled'}>Дальше: дополнения ${ico('arrow')}</button></div>`;
+      <button class="btn btn-dark btn-lg" data-go="2" data-short="Дальше" ${S.level?'':'disabled'}>Дальше ${ico('arrow')}</button></div>`;
 }
 
 function compareRows(diffOnly){
@@ -782,8 +829,7 @@ function viewAddons(){
       ${res}
     </section>
     <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
-      ${!S.gender && !S.themes.size ? `<button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше">Продолжить без дополнений ${ico('arrow')}</button>`
-        : `<button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'disabled':''}>Дальше: заказ ${ico('arrow')}</button>`}
+      <button class="btn btn-dark btn-lg" data-go="3" data-short="Дальше" ${tp.invalid?'disabled':''}>Дальше ${ico('arrow')}</button>
     </div>`;
 }
 
