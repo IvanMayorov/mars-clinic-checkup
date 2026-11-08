@@ -551,7 +551,7 @@ const ICON = {
   venus:'<circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/>',
   mars:'<circle cx="10" cy="14" r="5.5"/><path d="M14 10l6.5-6.5M15 3.5h5.5V9"/>'
 };
-const IMG = {female:'img/woman-cutout.png', male:'img/man-cutout.png', couple:'img/couple-cutout.png', icoMale:'img/icon-male.png', icoFemale:'img/icon-female.png'};
+const IMG = {female:'img/woman-cutout.webp', male:'img/man-cutout.webp', couple:'img/couple-cutout.webp', icoMale:'img/icon-male.webp', icoFemale:'img/icon-female.webp'};
 const ico = (n, sw=2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
 const rub = n => n.toLocaleString('ru-RU').replace(/\s/g,' ') + ' ₽';
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
