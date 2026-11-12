@@ -1696,7 +1696,7 @@ function viewPrograms(){
   const cards = LV.map(l => {
     const items = D.programs[l.id], c = countBy(items), sel = S.level === l.id;
     return `<article class="pcard lv-${l.id} ${sel?'sel':''}" data-k="p-${l.id}" data-level="${l.id}" role="radio" aria-checked="${sel}" aria-label="Программа «${l.name}», ${rub(PRICE.base[l.id])}" tabindex="0">
-      <img class="p-ico" src="img/lv-${LV_ICO[l.id]}.png" alt="" aria-hidden="true">
+      <img class="p-ico" src="img/lv-${LV_ICO[l.id]}.webp" alt="" aria-hidden="true">
       <div class="p-top"><h3>${l.name}</h3><p class="desc">${l.desc}</p></div>
       <div class="price">${rub(PRICE.base[l.id])}<small>${items.length} ${plural(items.length,'услуга','услуги','услуг')}</small></div>
       <ul class="hl">${highlights(l.id)}</ul>
@@ -1878,7 +1878,7 @@ function viewAddons(){
   } else if (tp.combo){
     res = `<div class="resolve${pop}">Будет оформлен готовый пакет <b>«${AD[tp.id].name}»</b> за <b class="mono">${rub(PRICE[tp.id][S.level])}</b>. У него свой состав (${D.addons[tp.id][S.level].length} услуг) без повторов. <button class="linkish" data-acomp="${tp.id}">Посмотреть состав</button></div>`;
   }
-  return `<div class="lvbanner"><picture class="lvb-pic"><source media="(max-width:560px)" srcset="img/lv-${LV_ICO[S.level]}.png"><img class="lvb-ico" src="img/lv-${S.level === 'start' ? 'stethoscope-banner' : LV_ICO[S.level]}.png" alt="" aria-hidden="true"></picture><div class="tx"><b>Выбрана программа «${lvName}» · ${rub(PRICE.base[S.level])}</b>
+  return `<div class="lvbanner"><picture class="lvb-pic"><source media="(max-width:560px)" srcset="img/lv-${LV_ICO[S.level]}.webp"><img class="lvb-ico" src="img/lv-${S.level === 'start' ? 'stethoscope-banner' : LV_ICO[S.level]}.webp" alt="" aria-hidden="true"></picture><div class="tx"><b>Выбрана программа «${lvName}» · ${rub(PRICE.base[S.level])}</b>
       <span>Ниже можно добавить к ней дополнения, это необязательно.</span></div>
       <button class="btn" data-edit="1">Сменить программу</button></div>
     <section class="block"><div class="block-h"><h3>Женское и мужское здоровье</h3><span>Необязательно, можно выбрать один модуль</span></div>
