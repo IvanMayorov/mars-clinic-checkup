@@ -247,6 +247,8 @@ body.s1 .cards{column-gap:clamp(16px,2.2vw,32px)}
 body.s1 .pcard{grid-row:span 4;padding:clamp(22px,min(2.6vw,calc(44 * var(--vu))),44px) clamp(20px,2.4vw,40px)}
 body.s1 .pcard .radio{top:calc(clamp(22px,min(2.6vw,calc(44 * var(--vu))),44px) + 4px);right:clamp(20px,2.4vw,40px)}
 body.s1 .price{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:max(16px,calc(36 * var(--vu)))}
+.price .was{flex-basis:100%;order:-1;display:flex;align-items:center;gap:8px;font-size:clamp(14px,calc(13.333px + .185vw),15px);font-weight:500;color:var(--muted);letter-spacing:0}
+.price .was i{font-style:normal;font-weight:700;font-size:13px;color:var(--lv-deep,var(--ink));background:var(--lv-soft,#f1f1f1);border-radius:6px;padding:2px 7px}
 body.s1 .price small{font-size:clamp(14px,calc(13.333px + .185vw),15px);font-weight:500;color:var(--muted);letter-spacing:0}
 body.s1 .hl{margin-top:max(14px,calc(22 * var(--vu)));padding-top:max(12px,calc(18 * var(--vu)));gap:max(4px,calc(6 * var(--vu)));border-top:1px solid rgba(47,52,72,.08);font-size:clamp(14px,calc(13.333px + .185vw),15px);line-height:1.45}
 body.s1 .hl .plus{font-size:13.5px}
@@ -332,6 +334,9 @@ body:not(.s1) .island{min-height:0}
 .total{display:flex;justify-content:space-between;align-items:center;margin-top:max(12px,calc(26 * var(--vu)))}
 .total>span:first-child{color:rgba(255,255,255,.7);font-size:15px}
 .total .roll{font-size:32px}
+.isl-save{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:13.5px;color:rgba(255,255,255,.66);font-variant-numeric:tabular-nums}
+.isl-save s{text-decoration-thickness:1px}
+.isl-save:empty{display:none}
 .isl-note{margin-top:max(10px,calc(22 * var(--vu)));font-size:13.5px;color:rgba(255,255,255,.66);line-height:1.5}
 .isl-sp{flex:1;min-height:max(14px,calc(32 * var(--vu)))}
 .isl-actions{display:grid;grid-template-columns:auto 1fr;gap:clamp(10px,1.3vw,20px);padding-bottom:var(--pad-y)}
@@ -524,6 +529,7 @@ body.lv-extended .lvbanner{--bx:-.1;--by:-.3}
 .mail-blk.gift{background:var(--warn-soft);border:0;border-radius:10px;padding:12px 14px;margin:12px 0}
 .mail-tag{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--orange);color:#fff;font-weight:700;font-size:13px}
 .mail-row{display:flex;justify-content:space-between;gap:12px}
+.mail-codes{font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--muted);margin:2px 0 8px;word-break:break-word}
 .mail-note{color:var(--muted);font-size:14px;margin:12px 0 0}
 .mail pre{white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:12.5px;background:var(--bg);border-radius:10px;padding:12px 14px;margin:8px 0 0}
 .mail details summary{cursor:pointer;color:var(--blue);font-weight:600;margin-top:12px}
@@ -1269,7 +1275,7 @@ h1,h2,h3,h4,h5,h6,.h1,.h2,.eyebrow,.lead,.phead p,.pcard .desc,.counts,.hl li,.w
 
 <script src="site-shell/site-shell.js"></script>
 <script>
-const D = {"programs":{"start":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Ферритин","l"],["Гликированный гемоглобин (HbA1c)","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["Рентгенография ОГК","i"],["УЗИ почек и мочевыводящих путей","i"]],"optimal":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"]],"extended":[["Терапевт расширенный (первичный)","c"],["Терапевт расширенный (повторный)","c"],["Невролог","c"],["Кардиолог","c"],["Стоматолог","c"],["Офтальмолог","c"],["Эндокринолог","c"],["Дерматовенеролог","c"],["Взятие крови из вены","l"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l"],["Глюкоза","l"],["Холестерин общий","l"],["Холестерин ЛПВП","l"],["Холестерин ЛПНП","l"],["Триглицериды","l"],["АЛТ","l"],["АСТ","l"],["Креатинин","l"],["Мочевина","l"],["Щелочная фосфатаза","l"],["Общий билирубин","l"],["Билирубин прямой","l"],["Мочевая кислота","l"],["КЩС-электролиты","l"],["с-пептид","l"],["Инсулин","l"],["Индекс НОМА","l"],["ГГТ","l"],["Липаза","l"],["Альфа-амилаза","l"],["Общий белок","l"],["ТТГ","l"],["Кальцитонин","l"],["Общий анализ мочи","l"],["25-ОН витамин D","l"],["Т4 свободный","l"],["Ферритин","l"],["Антитела к ВИЧ 1/2 + антиген","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Антитела к HBs","l"],["Гликированный гемоглобин (HbA1c)","l"],["Кальций","l"],["Альбумин","l"],["hs-CRP","l"],["Цинк","l"],["Фолиевая кислота","l"],["Витамин В12","l"],["Гомоцистеин","l"],["Общий IgE","l"],["коагулограмма","l"],["ЛЖСС","l"],["Железо","l"],["ЛДГ","l"],["КФК","l"],["Магний в эритроцитах","l"],["Сифилис RPR","l"],["ЭКГ регистрация + расшифровка","i"],["УЗИ органов брюшной полости","i"],["УЗИ почек и мочевыводящих путей","i"],["ЭхоКГ","i"],["Низкодозная КТ органов грудной клетки","i"],["УЗИ щитовидной железы и паращитовидных","i"],["УЗДГ артерий брахицефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["КТ-кальциевый индекс коронарных артерий","i"]]},"addons":{"female":{"start":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"]],"optimal":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]],"extended":[["Консультация акушера-гинеколога","c"],["Жидкостная цитология шейки матки","l"],["ВПЧ высокого онкориска (14 типов + КВМ)","l"],["УЗИ матки и придатков трансвагинальное","i"],["УЗИ молочных желёз","i"],["МРТ молочных желёз с контрастированием","i"]]},"male":{"start":[["Тестостерон","l"],["ПСА общий","l"],["УЗИ органов малого таза (простата)","i"]],"optimal":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"]],"extended":[["Консультация уролога","c"],["Тестостерон","l"],["Тестостерон свободный","l"],["ГСПГ","l"],["ПСА общий","l"],["ПСА свободный","l"],["УЗИ органов малого таза (простата)","i"],["Урофлоумерия","i"]]},"cardio":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"]]},"gastro":{"start":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["Коагулограмма","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Коагулограмма","l"]],"extended":[["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"cardio_gastro":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"]]},"energy":{"start":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамин В12","l"],["Фолиевая кислота","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]},"all3":{"start":[["Консультация кардиолога (расширенная интерпретация)","c"],["ЭхоКГ","i"],["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["hs-CRP","l"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Антитела к HBs","l"],["HBsAg","l"],["Антитела к HCV (IgM + IgG)","l"],["Антитела к HAV IgG","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Т4 свободный","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"optimal":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["УЗДГ артерий брахиоцефального ствола","i"],["УЗДГ вен нижних конечностей","i"],["Гомоцистеин","l"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Коагулограмма","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Витамин В12","l"],["Фолиевая кислота","l"],["Трансферрин","l"],["Железо","l"],["Консультация эндокринолога","c"],["Магний в эритроцитах","l"],["Инсулин","l"],["Индекс HOMA","l"],["С-пептид","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Цинк","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["КФК","l"],["Денситометрия всего тела","i"]],"extended":[["Велоэргометрия","i"],["УЗДГ артерий нижних конечностей","i"],["Холтер","i"],["СМАД","i"],["NT-proBNP","l"],["ApoB","l"],["Lp(a)","l"],["Консультация гастроэнтеролога расширенная","c"],["Эзофагогастродуоденоскопия","i"],["Биопсия слизистой верхних отделов ЖКТ","i"],["Илеоколоноскопия","i"],["Биопсия слизистой нижних отделов ЖКТ","i"],["Тотальная внутривенная анестезия","i"],["Трансферрин","l"],["Свободный Т3","l"],["Кортизол утренний","l"],["DHEA-S","l"],["Лептин","l"],["Адипонектин","l"],["Витамины группы В","l"],["Витамины А, Е, К","l"],["Селен","l"],["Медь","l"],["Omega-3 Index","l"],["Метилмалоновая кислота","l"],["IL-6","l"],["Денситометрия всего тела","i"]]}}};
+const D = {"programs":{"start":[["Терапевт расширенный (первичный)","c","CSTRP3"],["Терапевт расширенный (повторный)","c","CSTRP4"],["Стоматолог","c","CSDNT1"],["Офтальмолог (с расширением зрачка)","c","CSOPH6"],["Взятие крови из вены","l","NRS2"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l","CDL77"],["Глюкоза","l","CDL8"],["Холестерин общий","l","CDL21"],["Холестерин ЛПНП","l","CDL23"],["Холестерин ЛПВП","l","CDL24"],["Триглицериды","l","CDL22"],["АСТ","l","CDL11"],["АЛТ","l","CDL12"],["Креатинин","l","CDL7"],["Мочевина","l","CDL6"],["Щелочная фосфатаза","l","CDL13"],["Общий билирубин","l","CDL4"],["Билирубин прямой","l","CDL5"],["Мочевая кислота","l","CDL9"],["КЩС-электролиты","l","CDL41"],["ГГТ","l","CDL16"],["Липаза","l","CDL19"],["Альфа-амилаза","l","CDL17"],["Общий белок","l","CDL10"],["ТТГ","l","CDL197"],["Общий анализ мочи","l","CDL1"],["25-ОН витамин D","l","CDL157"],["Ферритин","l","CDL31"],["Гликированный гемоглобин (HbA1c)","l","CDL112"],["ЭКГ: регистрация","i","MCRD17"],["ЭКГ: расшифровка","i","MCRD18"],["Рентгенография ОГК","i","XR1"],["УЗИ органов брюшной полости","i","USE32"],["УЗИ почек и мочевыводящих путей","i","USE28"]],"optimal":[["Терапевт расширенный (первичный)","c","CSTRP3"],["Терапевт расширенный (повторный)","c","CSTRP4"],["Невролог","c","CSNEV5"],["Кардиолог","c","CSCRD5"],["Стоматолог","c","CSDNT1"],["Офтальмолог (с расширением зрачка)","c","CSOPH6"],["Взятие крови из вены","l","NRS2"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l","CDL77"],["Глюкоза","l","CDL8"],["Холестерин общий","l","CDL21"],["Холестерин ЛПНП","l","CDL23"],["Холестерин ЛПВП","l","CDL24"],["Триглицериды","l","CDL22"],["АСТ","l","CDL11"],["АЛТ","l","CDL12"],["Креатинин","l","CDL7"],["Мочевина","l","CDL6"],["Щелочная фосфатаза","l","CDL13"],["Общий билирубин","l","CDL4"],["Билирубин прямой","l","CDL5"],["Мочевая кислота","l","CDL9"],["КЩС-электролиты","l","CDL41"],["Липаза","l","CDL19"],["Альфа-амилаза","l","CDL17"],["ГГТ","l","CDL16"],["Общий белок","l","CDL10"],["ТТГ","l","CDL197"],["Кальцитонин","l","CDL179"],["Общий анализ мочи","l","CDL1"],["25-ОН витамин D","l","CDL157"],["Т4 свободный","l","CDL199"],["Ферритин","l","CDL31"],["Антитела к ВИЧ 1/2 + антиген","l","CDL321"],["HBsAg","l","CDL324"],["Антитела к HCV (IgM + IgG)","l","CDL331"],["Антитела к HAV IgG","l","CDL322"],["Антитела к HBs","l","CDL329"],["Гликированный гемоглобин (HbA1c)","l","CDL112"],["Кальций","l","CDL29"],["Альбумин","l","CDL18"],["С-реактивный белок","l","CDL33"],["ЭКГ: регистрация","i","MCRD17"],["ЭКГ: расшифровка","i","MCRD18"],["УЗИ органов брюшной полости","i","USE32"],["УЗИ почек и мочевыводящих путей","i","USE28"],["Низкодозная КТ органов грудной клетки","i","CT15"],["УЗИ щитовидной железы и паращитовидных","i","USE3"],["ЭхоКГ","i","MCRD6"]],"extended":[["Терапевт расширенный (первичный)","c","CSTRP3"],["Терапевт расширенный (повторный)","c","CSTRP4"],["Невролог","c","CSNEV5"],["Кардиолог","c","CSCRD5"],["Стоматолог","c","CSDNT1"],["Офтальмолог (с расширением зрачка)","c","CSOPH6"],["Эндокринолог","c","CSEND5"],["Дерматовенеролог","c","CSDER5"],["Взятие крови из вены","l","NRS2"],["Клинический анализ крови (общий + лейкоформула + СОЭ)","l","CDL77"],["Глюкоза","l","CDL8"],["Холестерин общий","l","CDL21"],["Холестерин ЛПНП","l","CDL23"],["Холестерин ЛПВП","l","CDL24"],["Триглицериды","l","CDL22"],["АСТ","l","CDL11"],["АЛТ","l","CDL12"],["Креатинин","l","CDL7"],["Мочевина","l","CDL6"],["Щелочная фосфатаза","l","CDL13"],["Общий билирубин","l","CDL4"],["Билирубин прямой","l","CDL5"],["Мочевая кислота","l","CDL9"],["КЩС-электролиты","l","CDL41"],["С-пептид","l","CDL243"],["Инсулин","l","CDL241"],["Индекс HOMA","l","CDL2617"],["ГГТ","l","CDL16"],["Липаза","l","CDL19"],["Альфа-амилаза","l","CDL17"],["Общий белок","l","CDL10"],["ТТГ","l","CDL197"],["Кальцитонин","l","CDL179"],["Общий анализ мочи","l","CDL1"],["25-ОН витамин D","l","CDL157"],["Т4 свободный","l","CDL199"],["Ферритин","l","CDL31"],["Антитела к ВИЧ 1/2 + антиген","l","CDL321"],["HBsAg","l","CDL324"],["Антитела к HCV (IgM + IgG)","l","CDL331"],["Антитела к HAV IgG","l","CDL322"],["Антитела к HBs","l","CDL329"],["Гликированный гемоглобин (HbA1c)","l","CDL112"],["Кальций","l","CDL29"],["Альбумин","l","CDL18"],["С-реактивный белок","l","CDL33"],["Цинк","l","CDL476"],["Фолиевая кислота","l","CDL156"],["Витамин В12","l","CDL2502"],["Гомоцистеин","l","CDL120"],["Общий IgE","l","CDL520"],["Коагулограмма","l","CDL2603"],["ЛЖСС","l","CDL2621"],["Железо","l","CDL27"],["ЛДГ","l","CDL14"],["КФК","l","CDL15"],["Магний в эритроцитах","l","CDL2392"],["Сифилис RPR","l","CDL365"],["ЭКГ: регистрация","i","MCRD17"],["ЭКГ: расшифровка","i","MCRD18"],["УЗИ органов брюшной полости","i","USE32"],["УЗИ почек и мочевыводящих путей","i","USE28"],["Низкодозная КТ органов грудной клетки","i","CT15"],["УЗИ щитовидной железы и паращитовидных","i","USE3"],["ЭхоКГ","i","MCRD6"],["УЗДГ артерий брахиоцефального ствола","i","USDG2"],["УЗДГ вен нижних конечностей","i","USDG7"],["КТ-кальциевый индекс коронарных артерий","i","CT32"]]},"addons":{"male":{"start":[["Тестостерон","l","CDL220"],["ПСА общий","l","CDL178"],["УЗИ простаты трансректальное","i","USE5"]],"optimal":[["Консультация уролога","c","CSURL5"],["Тестостерон","l","CDL220"],["Тестостерон свободный","l","CDL221"],["ПСА общий","l","CDL178"],["ПСА свободный","l","CDL117"],["УЗИ простаты трансректальное","i","USE5"]],"extended":[["Консультация уролога","c","CSURL5"],["Тестостерон","l","CDL220"],["Тестостерон свободный","l","CDL221"],["ГСПГ","l","CDL229"],["ПСА общий","l","CDL178"],["ПСА свободный","l","CDL117"],["УЗИ простаты трансректальное","i","USE5"],["Урофлоуметрия","i","MURL6"]]},"female":{"start":[["Консультация акушера-гинеколога","c","CSGYN5"],["Жидкостная цитология шейки матки","l","CDL2591"],["ВПЧ высокого онкориска (14 типов + КВМ)","l","CDL2592"],["УЗИ матки и придатков трансвагинальное","i","USE11"],["УЗИ молочных желёз","i","USE9"]],"optimal":[["Консультация акушера-гинеколога","c","CSGYN5"],["Жидкостная цитология шейки матки","l","CDL2591"],["ВПЧ высокого онкориска (14 типов + КВМ)","l","CDL2592"],["УЗИ матки и придатков трансвагинальное","i","USE11"],["УЗИ молочных желёз","i","USE9"],["МРТ молочных желёз с контрастированием","i","MRI29"]],"extended":[["Консультация акушера-гинеколога","c","CSGYN5"],["Жидкостная цитология шейки матки","l","CDL2591"],["ВПЧ высокого онкориска (14 типов + КВМ)","l","CDL2592"],["УЗИ матки и придатков трансвагинальное","i","USE11"],["УЗИ молочных желёз","i","USE9"],["МРТ молочных желёз с контрастированием","i","MRI29"]]},"cardio":{"start":[["Консультация кардиолога","c","CSCRD5"],["ЭхоКГ","i","MCRD6"],["Велоэргометрия","i","MCRD3"],["УЗДГ артерий нижних конечностей","i","USDG4"],["УЗДГ артерий брахиоцефального ствола","i","USDG2"],["УЗДГ вен нижних конечностей","i","USDG7"],["С-реактивный белок","l","CDL33"],["Гомоцистеин","l","CDL120"],["NT-proBNP","l","CDL90"],["ApoB","l","CDL115"],["Lp(a)","l","CDL113"],["Коагулограмма","l","CDL2603"]],"optimal":[["Велоэргометрия","i","MCRD3"],["УЗДГ артерий нижних конечностей","i","USDG4"],["УЗДГ артерий брахиоцефального ствола","i","USDG2"],["УЗДГ вен нижних конечностей","i","USDG7"],["Гомоцистеин","l","CDL120"],["NT-proBNP","l","CDL90"],["ApoB","l","CDL115"],["Lp(a)","l","CDL113"],["Коагулограмма","l","CDL2603"]],"extended":[["Велоэргометрия","i","MCRD3"],["УЗДГ артерий нижних конечностей","i","USDG4"],["Холтер","i","MCRD4"],["СМАД","i","MCRD10"],["NT-proBNP","l","CDL90"],["ApoB","l","CDL115"],["Lp(a)","l","CDL113"]]},"gastro":{"start":[["Консультация гастроэнтеролога (зав. отделением)","c","CSGST9"],["Эзофагогастродуоденоскопия","i","ENSC23"],["Биопсия слизистой верхних отделов ЖКТ","i","ENSC35"],["Илеоколоноскопия","i","ENSC24"],["Биопсия слизистой нижних отделов ЖКТ","i","ENSC36"],["Тотальная внутривенная анестезия","i","ANST49"],["Витамин В12","l","CDL2502"],["Фолиевая кислота","l","CDL156"],["Трансферрин","l","CDL32"],["Железо","l","CDL27"],["Антитела к HBs","l","CDL329"],["Коагулограмма","l","CDL2603"],["HBsAg","l","CDL324"],["Антитела к HCV (IgM + IgG)","l","CDL331"],["Антитела к HAV IgG","l","CDL322"]],"optimal":[["Консультация гастроэнтеролога (зав. отделением)","c","CSGST9"],["Эзофагогастродуоденоскопия","i","ENSC23"],["Биопсия слизистой верхних отделов ЖКТ","i","ENSC35"],["Илеоколоноскопия","i","ENSC24"],["Биопсия слизистой нижних отделов ЖКТ","i","ENSC36"],["Тотальная внутривенная анестезия","i","ANST49"],["Витамин В12","l","CDL2502"],["Фолиевая кислота","l","CDL156"],["Трансферрин","l","CDL32"],["Железо","l","CDL27"],["Коагулограмма","l","CDL2603"]],"extended":[["Консультация гастроэнтеролога (зав. отделением)","c","CSGST9"],["Эзофагогастродуоденоскопия","i","ENSC23"],["Биопсия слизистой верхних отделов ЖКТ","i","ENSC35"],["Илеоколоноскопия","i","ENSC24"],["Биопсия слизистой нижних отделов ЖКТ","i","ENSC36"],["Тотальная внутривенная анестезия","i","ANST49"],["Трансферрин","l","CDL32"]]}}};
 const LV = [
   {id:'start', name:'Стартовая', desc:'Базовая проверка основных систем организма за один визит.'},
   {id:'optimal', name:'Оптимальная', desc:'Сердце, щитовидная железа, инфекции и низкодозная КТ лёгких.'},
@@ -1277,25 +1283,27 @@ const LV = [
 ];
 const LV_ICO = {start:'stethoscope', optimal:'monitor', extended:'microscope'};
 const LVN = {start:'Стартовой', optimal:'Оптимальной', extended:'Расширенной'};
-// Условные цены для прототипа, ₽
+// Цены из таблиц клиники (doc/*.xlsx), ₽: со скидкой 15% и без неё
 const PRICE = {
-  base:{start:14900, optimal:29900, extended:54900},
-  female:{start:9900, optimal:21900, extended:21900},
-  male:{start:5900, optimal:11900, extended:15900},
-  cardio:{start:24900, optimal:19900, extended:17900},
-  gastro:{start:39900, optimal:34900, extended:31900},
-  cardio_gastro:{start:59900, optimal:50900, extended:45900},
-  energy:{start:27900, optimal:25900, extended:18900},
-  all3:{start:82900, optimal:71900, extended:59900}
+  base:{start:107482.5, optimal:162528.5, extended:246109},
+  male:{start:9571, optimal:24735, extended:37060},
+  female:{start:35147.5, optimal:58973, extended:58973},
+  cardio:{start:84728, optimal:61004.5, extended:54604},
+  gastro:{start:98234.5, optimal:92021, extended:82849.5}
 };
+const FULL = {
+  base:{start:126450, optimal:191210, extended:289540},
+  male:{start:11260, optimal:29100, extended:43600},
+  female:{start:41350, optimal:69380, extended:69380},
+  cardio:{start:99680, optimal:71770, extended:64240},
+  gastro:{start:115570, optimal:108260, extended:97470}
+};
+const DISCOUNT = 15;
 const AD = {
   female:{name:'Женский модуль', icon:'venus', short:'Гинеколог, цитология, ВПЧ, УЗИ малого таза и молочных желёз'},
   male:{name:'Мужской модуль', icon:'mars', short:'Тестостерон, ПСА, УЗИ простаты, уролог'},
   cardio:{name:'Кардио', icon:'heart', short:'Велоэргометрия, УЗДГ сосудов, NT-proBNP, ApoB, Lp(a)'},
   gastro:{name:'Гастро', icon:'apple', short:'Гастро- и колоноскопия под наркозом, гастроэнтеролог'},
-  energy:{name:'Энергия и метаболизм', icon:'zap', short:'Гормоны, витамины, микроэлементы, денситометрия всего тела'},
-  cardio_gastro:{name:'Кардио + Гастро', icon:'heart'},
-  all3:{name:'Кардио + Гастро + Энергия', icon:'zap'}
 };
 const GRP = {c:'Консультации', l:'Анализы', i:'Исследования и процедуры'};
 const ICON = {
@@ -1314,7 +1322,8 @@ const ICON = {
 };
 const IMG = {female:'img/woman-cutout.webp', male:'img/man-cutout.webp', couple:'img/couple-cutout.webp', icoMale:'img/icon-male.webp', icoFemale:'img/icon-female.webp'};
 const ico = (n, sw=2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
-const rub = n => n.toLocaleString('ru-RU').replace(/\s/g,' ') + ' ₽';
+const kop = n => Math.round(n * 100) % 100 ? 2 : 0; // копейки показываем, только если они есть
+const rub = n => n.toLocaleString('ru-RU', {minimumFractionDigits:kop(n), maximumFractionDigits:kop(n)}).replace(/\s/g,' ') + ' ₽';
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 // v4: шага «Для кого: М/Ж» нет — конструктор открывается сразу на программах.
@@ -1325,23 +1334,20 @@ const S = { step:1, level:null, gender:null, themes:new Set(), diffOnly:false, m
 const GIFT_MSG_MAX = 300;
 
 // ---------- domain ----------
-function themePackage(){
-  const t = ['cardio','gastro','energy'].filter(k => S.themes.has(k));
-  const map = {'':null, 'cardio':'cardio', 'gastro':'gastro', 'energy':'energy', 'cardio+gastro':'cardio_gastro', 'cardio+gastro+energy':'all3'};
-  const key = t.join('+');
-  if (key in map) return {id: map[key], combo: t.length > 1};
-  return {invalid:true, picked:t};
-}
+// тематические модули независимы: можно взять Кардио, Гастро или оба, цены складываются
+const THEMES = ['cardio','gastro'];
+const pickedThemes = () => THEMES.filter(k => S.themes.has(k));
 function lines(){
   const out = [];
   if (!S.level) return out;
-  out.push({id:'base', title:'Чекап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], items:D.programs[S.level]});
-  if (S.gender) out.push({id:S.gender, title:AD[S.gender].name, sub:'к ' + LVN[S.level], price:PRICE[S.gender][S.level], items:D.addons[S.gender][S.level]});
-  const tp = themePackage();
-  if (tp.id) out.push({id:tp.id, title:AD[tp.id].name, sub:(tp.combo ? 'Готовый пакет · ' : '') + 'к ' + LVN[S.level], price:PRICE[tp.id][S.level], items:D.addons[tp.id][S.level]});
+  out.push({id:'base', title:'Чекап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], full:FULL.base[S.level], items:D.programs[S.level]});
+  [S.gender, ...pickedThemes()].filter(Boolean).forEach(id => out.push({id, title:AD[id].name, sub:'к ' + LVN[S.level], price:PRICE[id][S.level], full:FULL[id][S.level], items:D.addons[id][S.level]}));
   return out;
 }
-const total = () => lines().reduce((s,l) => s + l.price, 0);
+// суммы считаем в копейках, чтобы не копить ошибку дробей
+const sumRub = arr => arr.reduce((s,v) => s + Math.round(v * 100), 0) / 100;
+const total = () => sumRub(lines().map(l => l.price));
+const totalFull = () => sumRub(lines().map(l => l.full));
 const isGift = () => S.mode === 'gift';
 // снимок заказа, как его увидит сервер: данные подарка только в режиме gift
 function orderPayload(){
@@ -1349,9 +1355,11 @@ function orderPayload(){
   const p = {
     order_no: S.orderNo,
     purchase_mode: S.mode,
-    program: ls[0] ? {level:S.level, name:LV.find(l=>l.id===S.level).name, price:ls[0].price, items:ls[0].items.length} : null,
-    addons: ls.slice(1).map(l => ({id:l.id, name:l.title, level:S.level, price:l.price, items:l.items.length})),
+    program: ls[0] ? {level:S.level, name:LV.find(l=>l.id===S.level).name, price:ls[0].price, price_full:ls[0].full, services:ls[0].items.map(x => x[2])} : null,
+    addons: ls.slice(1).map(l => ({id:l.id, name:l.title, level:S.level, price:l.price, price_full:l.full, services:l.items.map(x => x[2])})),
+    discount_pct: DISCOUNT,
     total: total(),
+    total_full: totalFull(),
     buyer: {name:f.name.trim(), phone:f.phone, email:f.email}
   };
   if (isGift()) p.gift = {recipient_full_name:g.name.trim().replace(/\s+/g,' '), recipient_phone:g.phone, sender_name:g.from.trim() || null, message:g.msg.trim() || null};
@@ -1372,14 +1380,15 @@ function setRoll(el, value){
     el.textContent = '';
     f = document.createElement('number-flow');
     f.locales = 'ru-RU';
-    f.format = { style:'currency', currency:'RUB', maximumFractionDigits:0 };
     const timing = { duration: 900, easing: window.__NF.defaultProps.transformTiming.easing || NF_EASE };
     f.transformTiming = timing; f.spinTiming = timing;
     f.style.setProperty('--number-flow-mask-height', '0.12em');
     el.appendChild(f);
+    f.format = { style:'currency', currency:'RUB', minimumFractionDigits:kop(value), maximumFractionDigits:kop(value) };
     f.animated = false; f.update(value); f.animated = true;
     return;
   }
+  f.format = { style:'currency', currency:'RUB', minimumFractionDigits:kop(value), maximumFractionDigits:kop(value) };
   f.update(value);
 }
 window.addEventListener('nf-ready', () => document.querySelectorAll('.roll').forEach(el => { if (el._val != null) setRoll(el, el._val); }));
@@ -1439,7 +1448,7 @@ function stepperHTML(){
   }).join('');
 }
 const HEAD = {
-  1:['Выберите программу чекапа','Три готовые программы. Дополнения к выбранной можно добавить на следующем шаге. Прототип, цены условные.'],
+  1:['Выберите программу чекапа','Три готовые программы. Дополнения к выбранной можно добавить на следующем шаге. Цены указаны со скидкой 15%.'],
   2:['Хотите дополнить программу?','Показаны дополнения только к выбранной программе: в них нет услуг, которые уже в неё входят.'],
   3:['Оформление заказа','Проверьте состав, укажите, для кого чекап, и оплатите онлайн.'],
   4:['Статус заказа','После оплаты администратор согласует с вами дату визита.']
@@ -1452,7 +1461,7 @@ function renderHead(){
   const h = HEAD[S.step];
   document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
 }
-function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${l.items.length} услуг</small></div><span class="mono">${rub(l.price)}</span></div>`; }
+function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${nU(l.items.length)}</small></div><span class="mono">${rub(l.price)}</span></div>`; }
 // Блок заказа: всё, что появляется и пропадает, остаётся в потоке и раздвигает соседей.
 // Один тайминг на содержимое и высоту блока, поэтому элементы не заезжают друг на друга.
 // способ ввода: от него зависит, показывать ли обводку фокуса
@@ -1462,7 +1471,7 @@ addEventListener('keydown', () => { document.documentElement.dataset.input = 'ke
 function bindOrderLines(){
   stage.querySelectorAll('[data-oline]').forEach(btn => btn.onclick = () => {
     const l = lines()[+btn.dataset.oline];
-    openSheet(l.title, l.sub + ' · ' + l.items.length + ' услуг · ' + rub(l.price), l.items);
+    openSheet(l.title, l.sub + ' · ' + nU(l.items.length) + ' · ' + rub(l.price), l.items);
   });
 }
 const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1537,6 +1546,7 @@ function renderSummary(){
     isl.dataset.ready = 1;
     isl.innerHTML = `<h4><span>Ваш заказ</span><span id="islCount"></span></h4><div class="lines" id="islLines"></div>
       <div class="total"><span>Итого</span><span class="roll" id="islTotal"></span></div>
+      <div class="isl-save" id="islSave"></div>
       <div class="isl-note">Оплата не бронирует время. Дату визита администратор согласует с вами после оплаты.</div>
       <div class="isl-gift" id="islGift"></div>
       <div class="isl-sp"></div><div class="isl-hint" id="islHint"></div><div class="isl-actions" id="asideActions"></div><div class="isl-foot" id="islFoot"></div>`;
@@ -1550,6 +1560,7 @@ function renderSummary(){
   const cnt = document.getElementById('islCount'), cntText = ls.length ? ls.length + ' поз.' : '';
   if (cnt.textContent !== cntText){ cnt.textContent = cntText; if (cnt.offsetParent && motionOK()) cnt.animate([{opacity:0, transform:'translateY(4px)'}, {opacity:1, transform:'none'}], {duration:320, easing:ISL_EASE}); }
   setRoll(document.getElementById('islTotal'), total());
+  document.getElementById('islSave').innerHTML = ls.length ? `<s>${rub(totalFull())}</s><span>−${DISCOUNT}%, экономия ${rub(sumRub([totalFull(), -total()]))}</span>` : '';
   renderGiftSummary();
   const mb =document.getElementById('mbar'), head = document.getElementById('mbarHead');
   const mbShow = S.step >= 2 && S.step <= 3 && ls.length > 0;
@@ -1690,6 +1701,7 @@ function highlights(lvId){
   const add = D.programs[lvId].filter(x => !had.has(x[0])).sort((a,b) => 'cil'.indexOf(a[1]) - 'cil'.indexOf(b[1]));
   return `<li class="plus">Всё из ${LVN[prev]}, плюс:</li>` + add.slice(0,4).map(x => `<li>${esc(x[0])}</li>`).join('') + (add.length > 4 ? `<li class="plus">и ещё ${add.length - 4} услуг</li>` : '');
 }
+const nU = n => n + ' ' + plural(n,'услуга','услуги','услуг');
 const plural = (n, a, b, c) => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? a : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? b : c; };
 function viewPrograms(){
   const maxN = Math.max(...LV.map(x => D.programs[x.id].length));
@@ -1698,7 +1710,7 @@ function viewPrograms(){
     return `<article class="pcard lv-${l.id} ${sel?'sel':''}" data-k="p-${l.id}" data-level="${l.id}" role="radio" aria-checked="${sel}" aria-label="Программа «${l.name}», ${rub(PRICE.base[l.id])}" tabindex="0">
       <img class="p-ico" src="img/lv-${LV_ICO[l.id]}.webp" alt="" aria-hidden="true">
       <div class="p-top"><h3>${l.name}</h3><p class="desc">${l.desc}</p></div>
-      <div class="price">${rub(PRICE.base[l.id])}<small>${items.length} ${plural(items.length,'услуга','услуги','услуг')}</small></div>
+      <div class="price">${rub(PRICE.base[l.id])}<small>${items.length} ${plural(items.length,'услуга','услуги','услуг')}</small><span class="was"><s>${rub(FULL.base[l.id])}</s><i>−${DISCOUNT}%</i></span></div>
       <ul class="hl">${highlights(l.id)}</ul>
       <div class="p-foot"><button class="p-link" data-comp="${l.id}">Что входит ${ico('arrow')}</button>
         <span class="p-pick" aria-hidden="true">${sel ? ico('check',3) + 'Выбрано' : 'Выбрать'}</span></div>
@@ -1848,8 +1860,7 @@ function placeSeg(){
 }
 function addonCard(id, kind){
   const on = kind === 'gender' ? S.gender === id : S.themes.has(id);
-  const items = D.addons[id][S.level], tp = themePackage();
-  const inCombo = kind === 'theme' && on && tp.combo;
+  const items = D.addons[id][S.level];
   if (kind === 'gender') return `<div class="acard photo ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="gender" role="radio" aria-checked="${on}" tabindex="0">
     <span class="ph"><img src="${IMG[id]}" alt=""></span>
     <div class="bd"><span class="radio"></span>
@@ -1859,7 +1870,7 @@ function addonCard(id, kind){
   return `<div class="acard ${on?'on':''}" data-k="a-${id}" data-addon="${id}" data-kind="${kind}" role="switch" aria-checked="${on}" tabindex="0">
     <span class="sw"></span>
     <div><b>${AD[id].name}</b><p>${AD[id].short}</p></div>
-    <div class="foot">${inCombo ? `<span class="ap muted">в составе пакета</span>` : `<span class="ap">+${rub(PRICE[id][S.level])}</span>`}
+    <div class="foot"><span class="ap">+${rub(PRICE[id][S.level])}</span>
       <button class="linkish dotlink" data-acomp="${id}" aria-label="Состав: ${items.length} ${plural(items.length,'услуга','услуги','услуг')}">${items.length} ${plural(items.length,'услуга','услуги','услуг')}</button></div>
   </div>`;
 }
@@ -1867,30 +1878,18 @@ function viewAddons(){
   // пол больше не спрашиваем: оба модуля доступны как необязательные и сами не включаются
   const gIds = ['female','male'];
   const lvName = LV.find(l => l.id === S.level).name;
-  const tp = themePackage();
-  const rk = tp.invalid ? 'bad'+tp.picked : tp.combo ? tp.id+S.level : '';
-  const pop = rk !== S.resKey ? ' pop' : ''; S.resKey = rk;
-  let res = '';
-  if (tp.invalid){
-    const other = tp.picked.includes('cardio') ? 'gastro' : 'cardio';
-    res = `<div class="resolve bad${pop}"><b>Сочетание «${tp.picked.map(k=>AD[k].name).join(' + ')}» пока не продаётся онлайн.</b><br>Его состав и цену клиника ещё не утвердила. Выберите один пакет или добавьте ${AD[other].name}: получится пакет из всех трёх модулей.
-      <div class="acts"><button class="btn btn-dark" data-fix="add:${other}">Добавить ${AD[other].name}</button><button class="btn" data-fix="only:energy">Оставить только «Энергию»</button><button class="btn" data-fix="drop:energy">Убрать «Энергию»</button></div></div>`;
-  } else if (tp.combo){
-    res = `<div class="resolve${pop}">Будет оформлен готовый пакет <b>«${AD[tp.id].name}»</b> за <b class="mono">${rub(PRICE[tp.id][S.level])}</b>. У него свой состав (${D.addons[tp.id][S.level].length} услуг) без повторов. <button class="linkish" data-acomp="${tp.id}">Посмотреть состав</button></div>`;
-  }
+  const any = S.gender || S.themes.size;
   return `<div class="lvbanner"><picture class="lvb-pic"><source media="(max-width:560px)" srcset="img/lv-${LV_ICO[S.level]}.webp"><img class="lvb-ico" src="img/lv-${S.level === 'start' ? 'stethoscope-banner' : LV_ICO[S.level]}.webp" alt="" aria-hidden="true"></picture><div class="tx"><b>Выбрана программа «${lvName}» · ${rub(PRICE.base[S.level])}</b>
       <span>Ниже можно добавить к ней дополнения, это необязательно.</span></div>
       <button class="btn" data-edit="1">Сменить программу</button></div>
     <section class="block"><div class="block-h"><h3>Женское и мужское здоровье</h3><span>Необязательно, можно выбрать один модуль</span></div>
       <div class="acards g2" role="radiogroup" aria-label="Женский или мужской модуль">${gIds.map(id => addonCard(id,'gender')).join('')}</div>
     </section>
-    <section class="block"><div class="block-h"><h3>Тематические пакеты</h3><span>Отметьте направления, готовый пакет подберём сами</span></div>
-      <div class="acards">${['cardio','gastro','energy'].map(id => addonCard(id,'theme')).join('')}</div>
-      ${res}
+    <section class="block"><div class="block-h"><h3>Тематические модули</h3><span>Необязательно, можно выбрать оба</span></div>
+      <div class="acards g2">${THEMES.map(id => addonCard(id,'theme')).join('')}</div>
     </section>
-    ${tp.invalid ? '<p class="nav-hint">Чтобы продолжить, выберите один из вариантов в оранжевом блоке ' + (deskMQ.matches ? 'ниже' : 'выше') + '</p>' : ''}
     <div class="nav"><button class="btn btn-ghost" data-go="1">${ico('back')}Назад</button>
-      <button class="btn btn-dark btn-lg" data-go="3" data-short="${S.gender || tp.id ? 'Дальше' : 'Без дополнений'}" ${tp.invalid?'aria-disabled="true" data-blocked="1"':''}>${S.gender || tp.id ? 'Дальше' : deskMQ.matches ? 'Продолжить без дополнений' : 'Без дополнений'} ${ico('arrow')}</button>
+      <button class="btn btn-dark btn-lg" data-go="3" data-short="${any ? 'Дальше' : 'Без дополнений'}">${any ? 'Дальше' : deskMQ.matches ? 'Продолжить без дополнений' : 'Без дополнений'} ${ico('arrow')}</button>
     </div>`;
 }
 
@@ -1974,8 +1973,10 @@ function receipt(ls, t){
   const bars = Array.from({length:38}, (_,i) => `<i style="width:${[1,2,1,3,1,2][(i*7)%6]}px"></i>`).join('');
   return `<div class="c m">ЧЕКАП</div><div class="c dim">заказ ${S.orderNo}</div><div class="c dim">${dt}</div>
     <div class="dim">--------------------------------</div>
-    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чекап ',''))}</span><span>${l.price.toLocaleString('ru-RU')}</span></div><div class="dim">  ${l.items.length} услуг</div>`).join('')}
+    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чекап ',''))}</span><span>${rub(l.price).replace(' ₽','')}</span></div><div class="dim">  ${nU(l.items.length)}</div>`).join('')}
     <div class="dim">--------------------------------</div>
+    <div class="r dim"><span>Без скидки</span><span>${rub(totalFull())}</span></div>
+    <div class="r dim"><span>Скидка ${DISCOUNT}%</span><span>−${rub(sumRub([totalFull(), -t]))}</span></div>
     <div class="r tot"><span>ИТОГО</span><span>${rub(t)}</span></div>
     <div class="r dim"><span>Оплата</span><span>онлайн</span></div>
     ${isGift() ? '<div class="c m" style="margin-top:8px">★ В ПОДАРОК ★</div>' : ''}
@@ -2020,8 +2021,9 @@ function openMail(){
     ${gift ? `<div class="mail-blk gift"><h5>Получатель подарка</h5><b>${v(p.gift.recipient_full_name)}</b><br>${v(p.gift.recipient_phone)}</div>
     ${p.gift.sender_name || p.gift.message ? `<div class="mail-blk"><h5>Подпись и поздравление</h5>${p.gift.sender_name ? 'От кого: ' + esc(p.gift.sender_name) + '<br>' : ''}${p.gift.message ? '«' + esc(p.gift.message) + '»' : ''}</div>` : ''}` : ''}
     <div class="mail-blk"><h5>Состав заказа</h5>
-      ${ls.map(l => `<div class="mail-row"><span>${esc(l.title)} <span style="color:var(--muted)">· ${esc(l.sub)} · ${l.items.length} услуг</span></span><b class="mono">${rub(l.price)}</b></div>`).join('')}
-      <div class="mail-row" style="margin-top:6px"><b>Итого</b><b class="mono">${rub(p.total)}</b></div>
+      ${ls.map(l => `<div class="mail-row"><span>${esc(l.title)} <span style="color:var(--muted)">· ${esc(l.sub)} · ${nU(l.items.length)}</span></span><b class="mono">${rub(l.price)}</b></div><div class="mail-codes">${l.items.map(x => x[2]).join(', ')}</div>`).join('')}
+      <div class="mail-row" style="margin-top:6px"><span>Без скидки · скидка ${p.discount_pct}%</span><span class="mono">${rub(p.total_full)}</span></div>
+      <div class="mail-row"><b>Итого к оплате</b><b class="mono">${rub(p.total)}</b></div>
       <details><summary>Полный сохранённый состав</summary>${ls.map(l => `<div class="grp"><h5>${esc(l.title)}</h5><ul>${l.items.map(x => `<li>${esc(x[0])}</li>`).join('')}</ul></div>`).join('')}</details>
     </div>
     <div class="mail-blk"><h5>Оплата</h5>Онлайн, платёж подтверждён банком. Реквизиты карты в письмо не попадают.</div>
@@ -2124,7 +2126,7 @@ const bind = {
       c.onclick = e => { if (!e.target.closest('[data-comp]')) pick(); };
       c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } };
     });
-    stage.querySelectorAll('[data-comp]').forEach(b => b.onclick = () => { const l = LV.find(x=>x.id===b.dataset.comp); openSheet('Программа «' + l.name + '»', D.programs[l.id].length + ' услуг · ' + rub(PRICE.base[l.id]), D.programs[l.id]); });
+    stage.querySelectorAll('[data-comp]').forEach(b => b.onclick = () => { const l = LV.find(x=>x.id===b.dataset.comp); openSheet('Программа «' + l.name + '»', nU(D.programs[l.id].length) + ' · ' + rub(PRICE.base[l.id]), D.programs[l.id]); });
     document.getElementById('cmpOpen').onclick = openCompare;
     navBind();
   },
@@ -2140,14 +2142,7 @@ const bind = {
       c.onclick = e => { if (!e.target.closest('[data-acomp]')) flip(); };
       c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
     });
-    stage.querySelectorAll('[data-acomp]').forEach(b => b.onclick = () => { const id = b.dataset.acomp; openSheet(AD[id].name, 'к ' + LVN[S.level] + ' · ' + D.addons[id][S.level].length + ' услуг · ' + rub(PRICE[id][S.level]), D.addons[id][S.level]); });
-    stage.querySelectorAll('[data-fix]').forEach(b => b.onclick = () => {
-      const [act, k] = b.dataset.fix.split(':');
-      if (act === 'add') S.themes.add(k);
-      if (act === 'only') S.themes = new Set([k]);
-      if (act === 'drop') S.themes.delete(k);
-      render(false);
-    });
+    stage.querySelectorAll('[data-acomp]').forEach(b => b.onclick = () => { const id = b.dataset.acomp; openSheet(AD[id].name, 'к ' + LVN[S.level] + ' · ' + nU(D.addons[id][S.level].length) + ' · ' + rub(PRICE[id][S.level]), D.addons[id][S.level]); });
     navBind();
   },
   3(){
