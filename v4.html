@@ -1283,13 +1283,13 @@ const LV = [
 ];
 const LV_ICO = {start:'stethoscope', optimal:'monitor', extended:'microscope'};
 const LVN = {start:'Стартовой', optimal:'Оптимальной', extended:'Расширенной'};
-// Цены из таблиц клиники (doc/*.xlsx), ₽: со скидкой 15% и без неё
+// Цены из таблиц клиники (doc/*.xlsx), ₽: со скидкой 15% (итог пакета округлён до рубля) и без неё
 const PRICE = {
-  base:{start:107482.5, optimal:162528.5, extended:246109},
+  base:{start:107483, optimal:162529, extended:246109},
   male:{start:9571, optimal:24735, extended:37060},
-  female:{start:35147.5, optimal:58973, extended:58973},
-  cardio:{start:84728, optimal:61004.5, extended:54604},
-  gastro:{start:98234.5, optimal:92021, extended:82849.5}
+  female:{start:35148, optimal:58973, extended:58973},
+  cardio:{start:84728, optimal:61005, extended:54604},
+  gastro:{start:98235, optimal:92021, extended:82850}
 };
 const FULL = {
   base:{start:126450, optimal:191210, extended:289540},
