@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Конструктор чекапа · v4</title>
+<title>Конструктор чек-апа · v4</title>
 <link rel="shortcut icon" href="site-shell/favicon/favicon.ico" type="image/x-icon">
 <link rel="icon" type="image/png" sizes="16x16" href="site-shell/favicon/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="site-shell/favicon/favicon-32x32.png">
@@ -29,6 +29,9 @@
   --gut:15px; --container:1502px; --sh-h:167px; --sh-bar:91px; --sh-bottom:0px;   /* внешнее поле страницы */
   --pad:clamp(16px,calc(8px + 1.85vw),40px);   /* внутреннее поле карточек */
   --gap:clamp(12px,calc(8px + .9vw),18px);   /* расстояние между карточками */
+  --program-gap:clamp(16px,1.6vw,24px);
+  --program-pad-x:clamp(20px,2.4vw,40px);
+  --program-pad-y:clamp(20px,2vw,32px);
   /* --vu: «вертикальный пиксель». 1px при высоте окна от 900, плавно до .5px при 600 — на него умножены вертикальные отступы */
   --vu:clamp(.5px,calc(.5px + (100svh - 600px) * .00167),1px);
   --v-page:clamp(12px,min(2.4vw,calc(32 * var(--vu))),32px);   /* верхнее поле страницы */
@@ -244,8 +247,9 @@ body.s1 .phead{grid-template-columns:minmax(0,1fr)}
 body.s1 #phead{text-align:center}
 body.s1 .phead p{max-width:36em;margin-inline:auto}
 body.s1 .cards{column-gap:clamp(16px,2.2vw,32px)}
-body.s1 .pcard{grid-row:span 4;padding:clamp(22px,min(2.6vw,calc(44 * var(--vu))),44px) clamp(20px,2.4vw,40px)}
-body.s1 .pcard .radio{top:calc(clamp(22px,min(2.6vw,calc(44 * var(--vu))),44px) + 4px);right:clamp(20px,2.4vw,40px)}
+body.s1 .cards{column-gap:var(--program-gap)}
+body.s1 .pcard{grid-row:span 4;padding:var(--program-pad-y) var(--program-pad-x)}
+body.s1 .pcard .radio{top:calc(var(--program-pad-y) + 4px);right:var(--program-pad-x)}
 body.s1 .price{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:max(16px,calc(36 * var(--vu)))}
 .price .was{flex-basis:100%;order:-1;display:flex;align-items:center;gap:8px;font-size:clamp(14px,calc(13.333px + .185vw),15px);font-weight:500;color:var(--muted);letter-spacing:0}
 .price .was i{font-style:normal;font-weight:700;font-size:13px;color:var(--lv-deep,var(--ink));background:var(--lv-soft,#f1f1f1);border-radius:6px;padding:2px 7px}
@@ -253,11 +257,9 @@ body.s1 .price small{font-size:clamp(14px,calc(13.333px + .185vw),15px);font-wei
 body.s1 .hl{margin-top:max(14px,calc(22 * var(--vu)));padding-top:max(12px,calc(18 * var(--vu)));gap:max(4px,calc(6 * var(--vu)));border-top:1px solid rgba(47,52,72,.08);font-size:clamp(14px,calc(13.333px + .185vw),15px);line-height:1.45}
 body.s1 .hl .plus{font-size:13.5px}
 body.s1 .p-foot{margin-top:max(16px,calc(24 * var(--vu)))}
-.s1-nav{display:flex;justify-content:center;margin-top:clamp(24px,min(3vw,calc(44 * var(--vu))),44px)}
 .btn-outline{min-height:var(--ctl);min-width:min(100%,320px);padding:0 32px;border:1.5px solid #cfd3dc;border-radius:14px;background:#fff;color:var(--ink);font-size:clamp(16px,calc(15.333px + .185vw),17px);font-weight:700}
 @media (hover:hover){.btn-outline:hover{border-color:var(--navy);color:var(--navy)}}
-@media (max-width:860px){ body.s1 .pcard{grid-row:auto} body.s1 .cards{row-gap:16px} }
-@media (max-width:640px){ .s1-nav .btn-outline{width:100%} }
+@media (max-width:860px){ body.s1 .pcard{grid-row:auto} body.s1 .cards{row-gap:var(--program-gap)} }
 /* иконка программы в правом верхнем углу: заходит за край, карточка её обрезает */
 .pcard{overflow:hidden;isolation:isolate}
 .pcard::before{z-index:2}
@@ -687,6 +689,42 @@ h1,h2,h3,h4,h5,h6,.h1,.h2,.eyebrow,.lead,.phead p,.pcard .desc,.counts,.hl li,.w
 /* v4: нижнее всплывающее меню сайта на телефоне не показываем; панель заказа прижата к низу экрана */
 .ss .b-bottom-menu{display:none!important}
 .mbar{bottom:0}
+body.s1 #phead{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px 40px;text-align:left}
+@media(max-width:860px){body.s1 #phead{grid-template-columns:minmax(0,1fr)}body.s1 #cmpOpen{justify-self:start}}
+@media(max-width:640px){body.s1 #cmpOpen{width:100%}}
+body.s1 #phead h1{font-size:clamp(26px,3vw,42px);line-height:1.15;margin-bottom:12px}
+body.s1 #phead p{margin:0;max-width:48em;font-size:clamp(16px,1.3vw,20px);color:var(--ink)}
+.checkup-contact{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:var(--program-gap);padding:var(--program-pad-y) var(--program-pad-x);background:#f7f8f9;border-radius:var(--r)}
+.checkup-contact h2{font-size:20px;font-weight:600;line-height:1.3}
+.checkup-contact-links{display:flex;align-items:center;flex-wrap:wrap;gap:16px}
+.checkup-contact-links a{display:inline-flex;align-items:center;gap:7px;min-height:44px;color:var(--navy);text-decoration:none;font-size:15px;text-underline-offset:4px}
+.checkup-contact-links > a{padding:8px 12px;border:1px solid rgba(32,63,140,.18);border-radius:9px;transition:transform .3s var(--spring),background .2s,opacity .2s,border-color .2s}
+.checkup-contact-links > a:active{transform:scale(.97)}
+@media(hover:hover){.checkup-contact-links > a:hover{border-color:var(--navy);text-decoration:none}}
+.checkup-contact-links .messenger-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex:none;opacity:.75}
+.checkup-contact-links .whatsapp-icon{font-family:Fontello;font-size:20px;font-weight:400;font-style:normal;line-height:1}
+.checkup-contact-links .whatsapp-icon::before{content:"\f232"}
+.checkup-phone a:hover{text-decoration:underline}
+.checkup-phone{display:flex;flex-direction:column;align-items:flex-start}
+.checkup-phone span{font-size:13px;color:var(--muted)}
+.checkup-phone a{min-height:30px;font-size:18px;font-weight:600;color:var(--ink)}
+.corporate{margin-top:var(--program-gap);padding:var(--program-pad-y) var(--program-pad-x);background:var(--bg);border-radius:var(--r);scroll-margin-top:24px}
+.corporate h2{font-size:20px;font-weight:600;line-height:1.3}
+.corporate-toggle{display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;padding:0;border:0;background:transparent;text-align:left;font:inherit;color:inherit}
+.corporate-toggle svg{flex:none;width:28px;height:28px;color:var(--muted);transition:transform .35s var(--ease)}
+.corporate.open .corporate-toggle svg{transform:rotate(180deg)}
+.corporate-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .4s var(--ease),opacity .3s var(--ease)}
+.corporate.open .corporate-panel{grid-template-rows:1fr;opacity:1}
+.corporate-panel-in{min-height:0;overflow:hidden}
+@media(prefers-reduced-motion:reduce){.corporate-panel,.corporate-toggle svg{transition:none}}
+.corporate-intro{margin:16px 0 24px;max-width:46em;font-size:18px}
+.corporate .form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0}
+.corporate-details{grid-column:1/-1}
+.corporate .fld textarea{min-height:120px}
+.corporate-actions{display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-top:24px}
+.corporate-note{margin:0;color:var(--muted);font-size:14px;max-width:36em}
+@media(max-width:767px){.corporate .form{grid-template-columns:minmax(0,1fr)}.corporate-intro{font-size:16px}}
+@media(max-width:767px){.checkup-contact-links{width:100%}.checkup-phone{flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -951,6 +989,32 @@ h1,h2,h3,h4,h5,h6,.h1,.h2,.eyebrow,.lead,.phead p,.pcard .desc,.counts,.hl li,.w
     <main class="stage" id="stage" aria-live="polite"></main>
     <aside class="aside"><div class="aside-in"><div class="island" id="island"></div><div class="aside-note" id="asideNote"></div></div></aside>
   </div>
+  <section class="corporate open" id="corporate" aria-labelledby="corporateTitle">
+    <h2 id="corporateTitle"><button type="button" class="corporate-toggle" id="corporateToggle" aria-expanded="true" aria-controls="corporatePanel"><span>Для корпоративных клиентов</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10L12 14L16 10"/></svg></button></h2>
+    <div class="corporate-panel" id="corporatePanel"><div class="corporate-panel-in">
+    <p class="corporate-intro">Если вы хотите приобрести чек-апы от имени организации, пожалуйста, заполните форму обратной связи.</p>
+    <form id="corporateForm" aria-labelledby="corporateTitle">
+      <div class="form">
+        <label class="fld" for="corporateName">ФИО
+          <input id="corporateName" name="full_name" autocomplete="name" required minlength="2" maxlength="150" placeholder="Иванов Иван Иванович">
+        </label>
+        <label class="fld" for="corporatePhone">Телефон
+          <input id="corporatePhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="30" placeholder="+7 (900) 000-00-00">
+        </label>
+        <label class="fld" for="corporateEmail">Электронная почта
+          <input id="corporateEmail" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="name@company.ru">
+        </label>
+        <label class="fld corporate-details" for="corporateDetails">Детали заказа
+          <textarea id="corporateDetails" name="details" required maxlength="3000" placeholder="Укажите, сколько чек-апов нужно и какие программы вас заинтересовали"></textarea>
+        </label>
+      </div>
+      <div class="corporate-actions">
+        <button class="btn btn-dark" type="submit">Подготовить заявку</button>
+        <p class="corporate-note" id="corporateNote">В прототипе доступен предпросмотр заявки. Отправка в клинику пока не подключена.</p>
+      </div>
+    </form>
+    </div></div>
+  </section>
 </div>
 <div class="ss" id="siteFooter">
 <footer class="footer">
@@ -1340,7 +1404,7 @@ const pickedThemes = () => THEMES.filter(k => S.themes.has(k));
 function lines(){
   const out = [];
   if (!S.level) return out;
-  out.push({id:'base', title:'Чекап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], full:FULL.base[S.level], items:D.programs[S.level]});
+  out.push({id:'base', title:'Чек-ап «' + LV.find(l=>l.id===S.level).name + '»', sub:'Основная программа', price:PRICE.base[S.level], full:FULL.base[S.level], items:D.programs[S.level]});
   [S.gender, ...pickedThemes()].filter(Boolean).forEach(id => out.push({id, title:AD[id].name, sub:'к ' + LVN[S.level], price:PRICE[id][S.level], full:FULL[id][S.level], items:D.addons[id][S.level]}));
   return out;
 }
@@ -1448,10 +1512,10 @@ function stepperHTML(){
   }).join('');
 }
 const HEAD = {
-  1:['Выберите программу чекапа','Три готовые программы. Дополнения к выбранной можно добавить на следующем шаге. Цены указаны со скидкой 15%.'],
+  1:['Выберите программу чек-апа','Три готовые программы. Дополнения к выбранной можно добавить на следующем шаге. Цены указаны со скидкой 15%.'],
   2:['Хотите дополнить программу?','Показаны дополнения только к выбранной программе: в них нет услуг, которые уже в неё входят.'],
-  3:['Оформление заказа','Проверьте состав, укажите, для кого чекап, и оплатите онлайн.'],
-  4:['Статус заказа','После оплаты администратор согласует с вами дату визита.']
+  3:['Оформление заказа','Проверьте состав, укажите, для кого чек-ап, и оплатите онлайн.'],
+  4:['Статус заказа','После оплаты администратор согласует дату визита.']
 };
 function renderHead(){
   const st = document.getElementById('stepper');
@@ -1459,7 +1523,11 @@ function renderHead(){
   const cur = st.querySelector('.cur');
   if (cur && st.scrollWidth > st.clientWidth) st.scrollLeft = cur.offsetLeft - (st.clientWidth - cur.offsetWidth) / 2;
   const h = HEAD[S.step];
-  document.getElementById('phead').innerHTML = h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
+  document.getElementById('phead').innerHTML = S.step === 1
+    ? `<div><h1>Персональный чек-ап</h1>
+       <p>Обследование в Олимп Клиник МАРС — быстро и комфортно. Лабораторная и лучевая диагностика в одной клинике, которая работает 24/7.</p></div>
+       <button class="btn btn-outline" id="cmpOpen">Сравнить программы</button>`
+    : h ? `<h2>${h[0]}</h2><p>${h[1]}</p>` : '';
 }
 function lineHTML(l){ return `<div class="line" data-lid="${l.id}"><div>${esc(l.title)}<small>${esc(l.sub)} · ${nU(l.items.length)}</small></div><span class="mono">${rub(l.price)}</span></div>`; }
 // Блок заказа: всё, что появляется и пропадает, остаётся в потоке и раздвигает соседей.
@@ -1675,6 +1743,7 @@ function animateStepIn(from, to){
 }
 function render(animate){
   const islFrom = document.getElementById('island').offsetHeight, wasS1 = document.body.classList.contains('s1');
+  syncCorporateDisclosure();
   renderHead();
   document.querySelector('.grid').classList.toggle('solo', S.step <= 1);
   document.body.classList.toggle('intro', S.step === 0);
@@ -1717,7 +1786,16 @@ function viewPrograms(){
     </article>`;
   }).join('');
   return `<div class="cards" role="radiogroup" aria-label="Основная программа">${cards}</div>
-    <div class="s1-nav"><button class="btn btn-outline" id="cmpOpen">Сравнить программы</button></div>`;
+    <section class="checkup-contact" aria-labelledby="checkupContactTitle">
+      <div>
+        <h2 id="checkupContactTitle">Связаться с отделом чек-апов</h2>
+      </div>
+      <div class="checkup-contact-links">
+        <div class="checkup-phone"><span>Позвоните нам</span><a href="tel:+74952555003">+7 495 255-50-03</a></div>
+        <a href="https://wa.me/74952555003" target="_blank" rel="noopener noreferrer"><span class="messenger-icon whatsapp-icon" aria-hidden="true"></span>WhatsApp</a>
+        <a href="https://t.me/+79686363868/" target="_blank" rel="noopener noreferrer"><svg class="messenger-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.795 16.906L9.73 18.915C9.372 19.263 8.773 19.109 8.628 18.631L7.252 14.101"/><path d="M14.104 10.927C14.104 10.927 11.515 13.263 10.187 14.462C9.79 14.82 9.823 15.45 10.253 15.767L15.631 19.74C16.16 20.131 16.916 19.844 17.053 19.2L19.694 6.753C19.822 6.151 19.231 5.648 18.657 5.869L3.142 11.853C2.685 12.029 2.707 12.682 3.174 12.828L7.251 14.1"/></svg>Telegram</a>
+      </div>
+    </section>`;
 }
 
 function compareRows(diffOnly){
@@ -1898,8 +1976,8 @@ function viewOrder(){
   const fld = (key, id, label, input, extra='') => `<label class="fld ${e[key]?'err':''}">${label}${input}${extra}<span class="e" id="${id}-e">${e[key]||''}</span></label>`;
   const clp = (inner, id='') => `<div class="clp ${gift?'open':''}"${id?` id="${id}"`:''} ${gift?'':'inert'}><div class="clp-in">${inner}</div></div>`;
   const giftBlock = clp(`<div class="giftbox" id="giftbox">
-      <h4>Кому дарим чекап?</h4>
-      <p class="gb-lead">Укажите данные человека, которому дарите чекап. Они будут переданы администраторам клиники для оформления подарка и организации обследования.</p>
+      <h4>Кому дарим чек-ап?</h4>
+      <p class="gb-lead">Укажите данные человека, которому дарите чек-ап. Они будут переданы администраторам клиники для оформления подарка и организации обследования.</p>
       <div class="form">
         ${fld('gName','g-name','<span>ФИО получателя <span class="req" aria-hidden="true">*</span></span>',
           `<input id="g-name" autocomplete="off" aria-required="true" maxlength="150" value="${esc(g.name)}" placeholder="Иванова Мария Петровна">`,
@@ -1912,18 +1990,18 @@ function viewOrder(){
           `<textarea id="g-msg" maxlength="${GIFT_MSG_MAX}" rows="3" placeholder="Пара тёплых слов">${esc(g.msg)}</textarea>`,
           `<span class="cnt" id="g-msg-cnt">${g.msg.length} / ${GIFT_MSG_MAX}</span>`)}
       </div>
-      <p class="gb-note">${ico('clock')}<span>Получателю мы сами не звоним и не пишем, чтобы не раскрыть сюрприз. Как и когда с ним связаться, администратор согласует с вами.</span></p>
+      <p class="gb-note">${ico('clock')}<span>После оплаты администратор позвонит получателю подарка по указанному телефону и согласует дату и время обследования.</span></p>
     </div>`, 'giftClp');
   return `<div class="order">${ls.map((l, i) => `<div class="oline${i === 0 ? ' main' : ''}"><div class="ot">${esc(l.title)}</div><small>${esc(l.sub)}</small><span class="mono">${rub(l.price)}</span><button type="button" class="linkish dotlink" data-oline="${i}" aria-label="Состав: ${l.items.length} ${plural(l.items.length,'услуга','услуги','услуг')}">${l.items.length} ${plural(l.items.length,'услуга','услуги','услуг')}</button></div>`).join('')}</div>
     <div class="sum-row"><button class="btn btn-ghost edit-link" data-edit="1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17.539 10.12L13.88 6.46"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.251 21.001H3V17.75C3 17.484 3.105 17.23 3.293 17.042L16.627 3.709C17.018 3.316 17.649 3.316 18.042 3.709L20.294 5.956C20.683 6.349 20.683 6.984 20.294 7.373L6.958 20.706C6.771 20.894 6.516 21.001 6.251 21.001V21.001Z"/></svg>Изменить выбор</button><div class="price"><span class="tl">Итого</span>${rub(total())}</div></div>
-    <h3 class="sec-h" id="modeH">Для кого оформляете чекап?</h3>
+    <h3 class="sec-h" id="modeH">Для кого оформляете чек-ап?</h3>
     <div class="modes" role="radiogroup" aria-labelledby="modeH">
       <button type="button" class="mopt ${gift?'':'on'}" role="radio" aria-checked="${!gift}" data-mode="self" data-k="m-self"><span class="radio" aria-hidden="true"></span><b>Для себя</b><small>Обследование пройдёте вы</small></button>
       <button type="button" class="mopt ${gift?'on':''}" role="radio" aria-checked="${gift}" data-mode="gift" data-k="m-gift"><span class="radio" aria-hidden="true"></span><b>В подарок</b><small>Оплачиваете вы, обследование пройдёт другой человек</small></button>
     </div>
     ${giftBlock}
     <h3 class="sec-h" id="buyerH">${gift ? 'Ваши контакты · покупатель' : 'Ваши контакты'}</h3>
-    ${clp('<p class="sec-sub">На них придут чек и звонок администратора. Контакты получателя для этого не используются.</p>')}
+    ${clp('<p class="sec-sub">Чек об оплате придёт на ваш email. Для согласования визита администратор позвонит получателю подарка.</p>')}
     <form class="form" id="form" novalidate>
       ${fld('name','f-name','Имя',`<input id="f-name" autocomplete="name" value="${esc(f.name)}" placeholder="Анна">`)}
       ${fld('phone','f-phone','Телефон',`<input id="f-phone" type="tel" autocomplete="tel" inputmode="tel" value="${esc(f.phone)}" placeholder="+7 (900) 000-00-00">`)}
@@ -1935,7 +2013,7 @@ function viewOrder(){
       <span class="e" style="color:var(--err);font-size:14px">${e.c||''}</span>
     </div>
     ${clp(`<div class="review" id="giftReview"><span class="rl">Получатель подарка</span><span class="rvs" style="display:contents">${giftReviewHTML()}</span></div>`)}
-    <div class="notice">Оплата не бронирует дату и время. После оплаты администратор позвонит<span class="gift-only" ${gift?'':'hidden'}> вам</span>, чтобы согласовать визит.</div>
+    <div class="notice">Оплата не бронирует дату и время. После оплаты администратор позвонит<span class="gift-only" ${gift?'':'hidden'}> получателю подарка</span>, чтобы согласовать визит.</div>
     <button class="btn btn-dark btn-lg pay-btn" id="payBtn"><span id="payLbl">Оплатить ${rub(total())}</span><span class="pay-ic">${ico('arrow')}</span></button>
     <div class="nav"><button class="btn btn-ghost" data-go="2">${ico('back')}Назад</button></div>`;
 }
@@ -1945,10 +2023,10 @@ function viewResult(){
   const tabs = [['paid','Оплачен'],['wait','Проверяем'],['fail','Не прошла']];
   let body;
   if (S.pay === 'paid') body = `<span class="status ok"><svg class="draw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>Оплачено</span>
-      ${isGift() ? `<h2 class="h2" style="margin-top:14px">Подарочный чекап оплачен. Заказ <span style="white-space:nowrap">№${S.orderNo}</span></h2>
+      ${isGift() ? `<h2 class="h2" style="margin-top:14px">Подарочный чек-ап оплачен. Заказ <span style="white-space:nowrap">№${S.orderNo}</span></h2>
       <p class="lead">Спасибо! Данные заказа и получателя подарка переданы администраторам клиники.</p>
-      <ol class="steps-after"><li><b>1</b><span>Администратор позвонит вам в течение рабочего дня и обсудит, как и когда пригласить получателя на обследование.</span></li>
-        <li><b>2</b><span>Получателю мы сами не звоним и не пишем, пока вы не договоритесь с администратором.</span></li>
+      <ol class="steps-after"><li><b>1</b><span>Администратор позвонит получателю подарка в течение рабочего дня и согласует дату и время обследования.</span></li>
+        <li><b>2</b><span>Получателю пришлём памятку о подготовке к обследованию.</span></li>
         <li><b>3</b><span>Чек об оплате придёт на ${esc(S.form.email || 'вашу почту')}.</span></li></ol>` : `<h2 class="h2" style="margin-top:14px">Заказ <span style="white-space:nowrap">№${S.orderNo}</span> оплачен</h2>
       <p class="lead">Спасибо! Информация о заказе передана администраторам клиники.</p>
       <ol class="steps-after"><li><b>1</b><span>Администратор позвонит в течение рабочего дня и согласует дату и время обследования.</span></li>
@@ -1963,7 +2041,7 @@ function viewResult(){
       <p class="lead">Выбранная программа сохранена, вы можете повторить попытку. Деньги не списаны.</p>
       <div class="nav" style="justify-content:flex-start"><button class="btn btn-dark btn-lg" data-go="3">Повторить оплату ${ico('arrow')}</button><button class="btn" data-go="1">Изменить выбор</button></div>`;
   return `<div class="demo">Демо статуса:<div class="seg" id="paySeg" role="tablist">${tabs.map(([k,n]) => `<button role="tab" aria-selected="${S.pay===k}" data-pay="${k}">${n}</button>`).join('')}<div class="seg-ink" aria-hidden="true">${tabs.map(([,n])=>`<span>${n}</span>`).join('')}</div></div></div>
-    <div class="res"><div>${body}</div>${S.pay==='paid' ? `<div><div class="printer"><div class="housing" id="housing"><b>ЧЕКАП</b><span><i></i><em id="pStatus" style="font-style:normal">Печать…</em></span></div>
+    <div class="res"><div>${body}</div>${S.pay==='paid' ? `<div><div class="printer"><div class="housing" id="housing"><b>ЧЕК-АП</b><span><i></i><em id="pStatus" style="font-style:normal">Печать…</em></span></div>
       <div class="feed" id="feed"><div class="paper" id="paper">${receipt(ls,t)}</div></div></div>
       <button class="btn btn-ghost reprint" id="reprint">Напечатать ещё раз</button></div>` : ''}</div>`;
 }
@@ -1971,9 +2049,9 @@ function receipt(ls, t){
   const d = new Date(), pad = n => String(n).padStart(2,'0');
   const dt = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   const bars = Array.from({length:38}, (_,i) => `<i style="width:${[1,2,1,3,1,2][(i*7)%6]}px"></i>`).join('');
-  return `<div class="c m">ЧЕКАП</div><div class="c dim">заказ ${S.orderNo}</div><div class="c dim">${dt}</div>
+  return `<div class="c m">ЧЕК-АП</div><div class="c dim">заказ ${S.orderNo}</div><div class="c dim">${dt}</div>
     <div class="dim">--------------------------------</div>
-    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чекап ',''))}</span><span>${rub(l.price).replace(' ₽','')}</span></div><div class="dim">  ${nU(l.items.length)}</div>`).join('')}
+    ${ls.map(l => `<div class="r"><span>${esc(l.title.replace('Чек-ап ',''))}</span><span>${rub(l.price).replace(' ₽','')}</span></div><div class="dim">  ${nU(l.items.length)}</div>`).join('')}
     <div class="dim">--------------------------------</div>
     <div class="r dim"><span>Без скидки</span><span>${rub(totalFull())}</span></div>
     <div class="r dim"><span>Скидка ${DISCOUNT}%</span><span>−${rub(sumRub([totalFull(), -t]))}</span></div>
@@ -2012,13 +2090,13 @@ function openMail(){
   const p = orderPayload(), ls = lines(), gift = p.purchase_mode === 'gift';
   const d = S.paidAt || new Date(), pad = n => String(n).padStart(2,'0');
   const dt = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  const subj = (gift ? 'Оплачен чекап В ПОДАРОК' : 'Оплачен чекап') + ` — заказ №${p.order_no} — ${rub(p.total)}`;
+  const subj = (gift ? 'Оплачен чек-ап В ПОДАРОК' : 'Оплачен чек-ап') + ` — заказ №${p.order_no} — ${rub(p.total)}`;
   const v = x => x ? esc(x) : '<span style="color:var(--faint)">не указано</span>';
   const html = `<div class="mail">
     <div class="mail-subj"><span>Тема письма</span><b>${esc(subj)}</b></div>
     <div class="mail-blk"><h5>Заказ</h5>№${esc(p.order_no)} · оплачен ${dt}${gift ? ' · <span class="mail-tag">Покупка в подарок</span>' : ''}</div>
     <div class="mail-blk"><h5>Покупатель</h5>${v(p.buyer.name)}<br>${v(p.buyer.phone)}<br>${v(p.buyer.email)}</div>
-    ${gift ? `<div class="mail-blk gift"><h5>Получатель подарка</h5><b>${v(p.gift.recipient_full_name)}</b><br>${v(p.gift.recipient_phone)}</div>
+    ${gift ? `<div class="mail-blk gift"><h5>Получатель подарка</h5><b>${v(p.gift.recipient_full_name)}</b><br>${v(p.gift.recipient_phone)}<p>Позвонить получателю подарка для согласования даты и времени обследования. Чек об оплате направить покупателю.</p></div>
     ${p.gift.sender_name || p.gift.message ? `<div class="mail-blk"><h5>Подпись и поздравление</h5>${p.gift.sender_name ? 'От кого: ' + esc(p.gift.sender_name) + '<br>' : ''}${p.gift.message ? '«' + esc(p.gift.message) + '»' : ''}</div>` : ''}` : ''}
     <div class="mail-blk"><h5>Состав заказа</h5>
       ${ls.map(l => `<div class="mail-row"><span>${esc(l.title)} <span style="color:var(--muted)">· ${esc(l.sub)} · ${nU(l.items.length)}</span></span><b class="mono">${rub(l.price)}</b></div><div class="mail-codes">${l.items.map(x => x[2]).join(', ')}</div>`).join('')}
@@ -2180,6 +2258,51 @@ const _dock = dockActions;
 dockActions = function(){ _dock(); navBind(); };
 addEventListener('resize', placeSeg);
 document.fonts && document.fonts.ready.then(placeSeg);
+// Корпоративная форма живёт вне этапов покупки и сохраняет ввод при переключении шагов.
+let corporateStep = null;
+function setCorporateOpen(open){
+  const section = document.getElementById('corporate');
+  const toggle = document.getElementById('corporateToggle');
+  const panel = document.getElementById('corporatePanel');
+  if (!open && panel.contains(document.activeElement)) toggle.focus({preventScroll:true});
+  section.classList.toggle('open', open);
+  toggle.setAttribute('aria-expanded', String(open));
+  panel.inert = !open;
+  panel.setAttribute('aria-hidden', String(!open));
+}
+function syncCorporateDisclosure(){
+  if (corporateStep === S.step) return;
+  corporateStep = S.step;
+  setCorporateOpen(S.step === 1);
+}
+document.getElementById('corporateToggle').addEventListener('click', () => {
+  setCorporateOpen(document.getElementById('corporateToggle').getAttribute('aria-expanded') !== 'true');
+});
+function previewCorporateRequest(event){
+  event.preventDefault();
+  const form = event.currentTarget;
+  for (const key of ['full_name', 'email', 'details']){
+    const field = form.elements[key];
+    field.setCustomValidity(field.value.trim() ? '' : 'Заполните это поле');
+  }
+  const phone = form.elements.phone;
+  const digits = phone.value.replace(/\D/g, '');
+  phone.setCustomValidity(digits.length >= 10 && digits.length <= 15 ? '' : 'Укажите корректный телефон: от 10 до 15 цифр');
+  if (!form.reportValidity()) return;
+  const fields = [
+    ['ФИО', form.elements.full_name.value.trim()],
+    ['Телефон', phone.value.trim()],
+    ['Электронная почта', form.elements.email.value.trim()],
+    ['Детали заказа', form.elements.details.value.trim()]
+  ];
+  if (fields.some(([, value]) => !value)) return;
+  openSheet('Корпоративная заявка', 'Предпросмотр · заявка ещё не отправлена',
+    `<div class="mail">${fields.map(([label, value]) => `<div class="mail-blk"><h5>${label}</h5><p style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(value)}</p></div>`).join('')}<p class="mail-note">Отправка в клинику пока не подключена.</p></div>`);
+}
+document.getElementById('corporateForm').addEventListener('submit', previewCorporateRequest);
+document.getElementById('corporateForm').addEventListener('input', event => {
+  if (event.target.setCustomValidity) event.target.setCustomValidity('');
+});
 render(true);
 </script>
 <script type="module">
