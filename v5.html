@@ -729,6 +729,15 @@ body.s1 #phead p{margin:0;max-width:48em;font-size:clamp(16px,1.3vw,20px);color:
 .corporate-note{margin:0;color:var(--muted);font-size:14px;max-width:36em}
 @media(max-width:767px){.corporate .form{grid-template-columns:minmax(0,1fr)}.corporate-intro{font-size:16px}}
 @media(max-width:767px){.checkup-contact-links{width:100%}.checkup-phone{flex-basis:100%}}
+
+/* шапка: логотип МАРС из брендбука + Олимп Здоровье */
+.ss .b-header .header__top .links-wrapper{column-gap:40px}
+.ss .b-header .header__top .logo-link{flex:none;width:auto;min-width:0;margin-right:0}
+.ss .b-header .header__top .logo-link .mars-brand-logo{display:block;width:auto;height:40px;min-width:0;max-width:none}
+.ss .b-header .header__top .add-link{margin-right:0}
+@media (max-width:639px){.ss .b-header .header__top .links-wrapper{column-gap:24px}.ss .b-header .header__top .logo-link .mars-brand-logo{height:32px}.ss .b-header .header__top .add-link{width:120px;height:20px}}
+@media (max-width:480px){.ss .b-header .header__top .links-wrapper{column-gap:16px}.ss .b-header .header__top .logo-link{width:auto}.ss .b-header .header__top .logo-link .mars-brand-logo{height:28px}.ss .b-header .header__top .add-link{width:104px;height:18px}}
+
 </style>
 </head>
 <body>
@@ -737,7 +746,7 @@ body.s1 #phead p{margin:0;max-width:48em;font-size:clamp(16px,1.3vw,20px);color:
     <div class="header__top">
         <div class="links-wrapper">
             <a href="https://mars-clinic.ru/" class="logo-link">
-                <img src="logo/mars-logo.svg" alt="Олимп Клиник МАРС" class="logo-image" width="150" height="35" style="width:150px;height:auto">
+                <img src="logo/mars-logo-ru.svg" alt="Олимп Клиник МАРС" class="logo-image mars-brand-logo" width="164" height="40">
             </a>
             <a href="https://olimp-medgroup.ru/" rel="noopener noreferrer" target="_blank" aria-label="Олимп Здоровье" class="add-link">
                 <img src="site-shell/img/2mhej9vym1pmah7jskfilnypiqxm07xu.svg" alt="Олимп Здоровье" class="logo-image">
